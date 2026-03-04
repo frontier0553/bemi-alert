@@ -1,0 +1,367 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header (same as dashboard) */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--txt);
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+}
+
+.navLink {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--txt2);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navLink:hover {
+  background: var(--bg-card2);
+  color: var(--txt);
+}
+
+.navActive {
+  background: var(--bg-card2);
+  color: var(--txt) !important;
+}
+
+/* Main */
+.main {
+  flex: 1;
+  padding: 32px 24px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Page header */
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  color: var(--txt2);
+  font-size: 14px;
+}
+
+.saveBtn {
+  padding: 8px 24px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.saveBtn:hover {
+  opacity: 0.85;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.saveBtnSuccess {
+  background: var(--pump-dim) !important;
+}
+
+/* Section */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--txt2);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Flow chart */
+.docCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.flowChart {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.flowStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 120px;
+  padding: 16px 12px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.flowIcon {
+  font-size: 24px;
+}
+
+.flowLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--txt);
+}
+
+.flowDesc {
+  font-size: 11px;
+  color: var(--txt2);
+  line-height: 1.4;
+}
+
+.flowArrow {
+  color: var(--txt3);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Formula */
+.formulaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .formulaGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formulaCard {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 20px;
+  background: var(--bg-card);
+}
+
+.pumpFormula {
+  border-color: var(--pump-border);
+  background: var(--pump-bg);
+}
+
+.dumpFormula {
+  border-color: var(--dump-border);
+  background: var(--dump-bg);
+}
+
+.formulaTitle {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.formula {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--txt);
+}
+
+.pumpText {
+  color: var(--pump);
+  font-weight: 700;
+}
+
+.dumpText {
+  color: var(--dump);
+  font-weight: 700;
+}
+
+.docNote {
+  font-size: 12px;
+  color: var(--txt2);
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* Settings grid */
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settingCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.15s;
+}
+
+.settingCard:hover {
+  border-color: var(--border2);
+}
+
+.settingHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.settingLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--txt);
+}
+
+.settingKey {
+  font-size: 10px;
+  font-family: monospace;
+  color: var(--txt3);
+  background: var(--bg-card2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.settingDesc {
+  font-size: 12px;
+  color: var(--txt2);
+  line-height: 1.5;
+}
+
+.settingInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card2);
+  color: var(--txt);
+  font-size: 15px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.unit {
+  font-size: 13px;
+  color: var(--txt2);
+  white-space: nowrap;
+}
+
+.settingRange {
+  font-size: 11px;
+  color: var(--txt3);
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--txt2);
+}
+
+.savedToast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--pump-dim);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  animation: fadeIn 0.2s ease;
+  z-index: 999;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

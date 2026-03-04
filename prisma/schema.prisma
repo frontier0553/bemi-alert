@@ -1,0 +1,28 @@
+generator client {
+ provider = "prisma-client-js"
+}
+
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+
+enum EventType {
+ PUMP
+ DUMP
+}
+
+model Event {
+ id String @id @default(cuid())
+ symbol String
+ type EventType
+ changePct Float
+ volumeMult Float
+ price Float
+ detectedAt DateTime @default(now())
+}
+
+model Settings {
+ key   String @id
+ value String
+}

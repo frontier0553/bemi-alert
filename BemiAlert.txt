@@ -1,0 +1,36 @@
+압축 안에 들어있는 것
+
+Next.js 웹 프로젝트 기본 구조
+
+Prisma DB 스키마
+
+Binance 데이터 가져오는 코드
+
+Pump/Dump 감지 로직 기본
+
+Worker(시장 스캔 루프)
+
+Telegram 알림 기본 코드
+
+기본 웹 페이지
+
+
+
+npm install
+cp .env.example .env
+npm run prisma:gen
+npm run db:push
+npm run dev
+
+npm run worker
+
+
+이 ZIP은 “프로젝트 뼈대(MVP skeleton)” 입니다.
+
+다음 단계는 보통 이렇게 갑니다:
+
+1️⃣ Pump / Dump 대시보드 UI
+2️⃣ 이벤트 리스트 API 연결
+3️⃣ Watchlist 기능
+4️⃣ 텔레그램 알림
+5️⃣ 급등 알고리즘 튜닝
