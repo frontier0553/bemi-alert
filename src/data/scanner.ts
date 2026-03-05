@@ -30,7 +30,10 @@ async function getSettings() {
 export async function runScanOnce() {
   const settings = await getSettings();
   const tickers = await fetchTickers();
-  const top = tickers.slice(0, settings.topN);
+  const sorted = tickers.sort((a: any, b: any) =>
+    parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume)
+  );
+  const top = sorted.slice(0, settings.topN);
 
   // 평균 거래량 계산 (거래량 배수 기준선)
   const volumes = top.map((t: any) => parseFloat(t.quoteVolume));
