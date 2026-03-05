@@ -30,7 +30,7 @@ export function RawEventRow({ ev }: { ev: Event }) {
       {/* Volume */}
       <div className="flex flex-col w-36 shrink-0">
         <span className="text-sm font-semibold text-ink-primary">x{fmt(ev.volumeMult, 1)}</span>
-        <span className="text-[11px] text-ink-secondary">{volAboveAvg(ev.volumeMult)}</span>
+        <span className="text-xs text-ink-secondary">{volAboveAvg(ev.volumeMult)}</span>
       </div>
 
       {/* Price */}
@@ -78,7 +78,7 @@ export function GroupedRow({ g }: { g: GroupedSymbol }) {
       {/* Volume */}
       <div className="flex flex-col w-36 shrink-0">
         <span className="text-sm font-semibold text-ink-primary">x{fmt(g.latest.volumeMult, 1)}</span>
-        <span className="text-[11px] text-ink-secondary">{volAboveAvg(g.latest.volumeMult)}</span>
+        <span className="text-xs text-ink-secondary">{volAboveAvg(g.latest.volumeMult)}</span>
       </div>
 
       {/* Price */}

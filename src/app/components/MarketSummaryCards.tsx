@@ -25,7 +25,7 @@ function StatCard({ label, value, sub, accent, pulse }: StatCardProps) {
 
   return (
     <div className={`bg-surface-card rounded-2xl p-4 border ${borderBg[accent]} flex flex-col gap-1 transition-colors hover:border-edge-medium`}>
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-ink-secondary">
+      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink-secondary">
         {pulse && (
           <span className="w-1.5 h-1.5 rounded-full bg-signal animate-blink inline-block shrink-0" />
         )}
@@ -34,7 +34,7 @@ function StatCard({ label, value, sub, accent, pulse }: StatCardProps) {
       <div className={`text-[28px] font-bold leading-none tracking-tight mt-1 ${valueColor[accent]}`}>
         {value}
       </div>
-      <div className="text-xs text-ink-secondary mt-0.5">{sub}</div>
+      <div className="text-[13px] text-ink-secondary mt-0.5">{sub}</div>
     </div>
   );
 }

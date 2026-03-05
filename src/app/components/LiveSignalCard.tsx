@@ -41,16 +41,16 @@ export function LiveSignalCard({ ev }: { ev: Event }) {
       {/* Stats block */}
       <div className="grid grid-cols-2 gap-3 p-3.5 bg-surface-elevated rounded-xl border border-edge-subtle">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-ghost">
+          <span className="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
             거래량 급증
           </span>
           <span className="text-base font-bold text-ink-primary">
             x{fmt(ev.volumeMult, 1)}
           </span>
-          <span className="text-[11px] text-ink-secondary">{volAboveAvg(ev.volumeMult)}</span>
+          <span className="text-xs text-ink-secondary">{volAboveAvg(ev.volumeMult)}</span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-ghost">
+          <span className="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
             현재가
           </span>
           <span className="text-base font-bold text-ink-primary">{formatPrice(ev.price)}</span>
@@ -60,7 +60,7 @@ export function LiveSignalCard({ ev }: { ev: Event }) {
       {/* Strength bar */}
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-ghost">
+          <span className="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
             신호 강도
           </span>
           <span className={`text-[15px] tracking-wider ${starColor}`}>
