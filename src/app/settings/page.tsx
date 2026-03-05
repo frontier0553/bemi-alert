@@ -66,24 +66,39 @@ export default function SettingsPage() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [adminKey, setAdminKey] = useState('');
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
+    const stored = localStorage.getItem('bemi_admin_key') ?? '';
+    setAdminKey(stored);
     fetch('/api/settings')
       .then(r => r.json())
-      .then(data => {
-        setValues(data);
-        setLoading(false);
-      });
+      .then(data => { setValues(data); setLoading(false); });
   }, []);
 
+  function handleAdminKeyChange(v: string) {
+    setAdminKey(v);
+    localStorage.setItem('bemi_admin_key', v);
+  }
+
   async function handleSave() {
-    await fetch('/api/settings', {
+    setSaveError('');
+    const res = await fetch('/api/settings', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-secret': adminKey,
+      },
       body: JSON.stringify(values),
     });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    if (res.ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } else {
+      const err = await res.json();
+      setSaveError(err.error ?? '저장 실패');
+    }
   }
 
   return (
@@ -175,6 +190,17 @@ export default function SettingsPage() {
         {/* 파라미터 설정 */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>파라미터 설정</h2>
+          <div className={styles.adminKeyRow}>
+            <label className={styles.adminKeyLabel}>🔑 Admin Key</label>
+            <input
+              type="password"
+              className={styles.adminKeyInput}
+              placeholder="Vercel 환경변수 ADMIN_SECRET 값 입력"
+              value={adminKey}
+              onChange={e => handleAdminKeyChange(e.target.value)}
+            />
+            {saveError && <span className={styles.saveError}>{saveError}</span>}
+          </div>
           {loading ? (
             <div className={styles.loading}>로딩 중...</div>
           ) : (
