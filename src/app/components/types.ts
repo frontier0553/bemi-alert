@@ -8,6 +8,9 @@ export interface Event {
   volumeMult: number;
   price: number;
   detectedAt: string;
+  // STEP 1 fields (present on Signal-backed events)
+  changeWindow?: '3m' | '5m';
+  volRatio?: number;
 }
 
 export interface Stats {

@@ -1,29 +1,52 @@
 generator client {
- provider      = "prisma-client-js"
- binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
- provider = "postgresql"
- url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
+// ── Legacy (pre-STEP1) ───────────────────────────────────────
 enum EventType {
- PUMP
- DUMP
+  PUMP
+  DUMP
 }
 
 model Event {
- id String @id @default(cuid())
- symbol String
- type EventType
- changePct Float
- volumeMult Float
- price Float
- detectedAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  symbol     String
+  type       EventType
+  changePct  Float
+  volumeMult Float
+  price      Float
+  detectedAt DateTime  @default(now())
+}
+
+// ── STEP 1: Short-window pump detection ─────────────────────
+model Signal {
+  id           String   @id @default(cuid())
+  symbol       String
+  type         String   @default("PUMP")
+  changeWindow String
+  changePct    Float
+  volRatio     Float
+  detectedAt   DateTime @default(now())
+  metaJson     String?
+
+  @@index([detectedAt])
+  @@index([symbol, detectedAt])
+}
+
+model Cooldown {
+  symbol      String   @id
+  type        String   @default("PUMP")
+  lastSentAt  DateTime
+  lastMaxMove Float
 }
 
 model Settings {
- key   String @id
- value String
+  key   String @id
+  value String
 }

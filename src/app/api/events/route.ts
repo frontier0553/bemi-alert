@@ -3,45 +3,55 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const type = searchParams.get('type') as 'PUMP' | 'DUMP' | null;
+  const type   = searchParams.get('type');
   const symbol = searchParams.get('symbol');
-  const limit = Math.min(parseInt(searchParams.get('limit') ?? '100'), 500);
+  const limit  = Math.min(parseInt(searchParams.get('limit') ?? '100'), 500);
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const [events, todayEvents] = await Promise.all([
-    prisma.event.findMany({
-      where: {
-        ...(type ? { type } : {}),
-        ...(symbol ? { symbol: { contains: symbol.toUpperCase() } } : {}),
-      },
+  const where = {
+    ...(type && type !== 'ALL' ? { type } : {}),
+    ...(symbol ? { symbol: { contains: symbol.toUpperCase() } } : {}),
+  };
+
+  const [signals, todaySignals] = await Promise.all([
+    prisma.signal.findMany({
+      where,
       orderBy: { detectedAt: 'desc' },
       take: limit,
     }),
-    prisma.event.findMany({
+    prisma.signal.findMany({
       where: { detectedAt: { gte: todayStart } },
     }),
   ]);
 
-  const pumps = todayEvents.filter(e => e.type === 'PUMP');
-  const dumps = todayEvents.filter(e => e.type === 'DUMP');
+  const todayPumps = todaySignals.filter(s => s.type === 'PUMP');
 
-  const topPump = pumps.length > 0
-    ? pumps.reduce((a, b) => a.changePct > b.changePct ? a : b)
+  const topPump = todayPumps.length > 0
+    ? todayPumps.reduce((a, b) => a.changePct > b.changePct ? a : b)
     : null;
-  const topDump = dumps.length > 0
-    ? dumps.reduce((a, b) => a.changePct < b.changePct ? a : b)
-    : null;
+
+  const toEvent = (s: (typeof signals)[number]) => ({
+    id:           s.id,
+    symbol:       s.symbol,
+    type:         s.type as 'PUMP' | 'DUMP',
+    changePct:    s.changePct,
+    volumeMult:   s.volRatio,
+    price:        s.metaJson ? (JSON.parse(s.metaJson) as { closeNow?: number }).closeNow ?? 0 : 0,
+    detectedAt:   s.detectedAt.toISOString(),
+    changeWindow: s.changeWindow,
+    volRatio:     s.volRatio,
+  });
 
   return NextResponse.json({
-    events,
+    events: signals.map(toEvent),
     stats: {
-      todayTotal: todayEvents.length,
-      todayPumps: pumps.length,
-      todayDumps: dumps.length,
-      topPump,
-      topDump,
+      todayTotal: todaySignals.length,
+      todayPumps: todayPumps.length,
+      todayDumps: 0,
+      topPump:    topPump ? toEvent(topPump) : null,
+      topDump:    null,
     },
   });
 }
