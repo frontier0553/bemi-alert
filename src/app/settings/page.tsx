@@ -185,6 +185,9 @@ export default function SettingsPage() {
           <div className={styles.docNote}>
             * 거래량배수 = 해당 코인의 24h 거래량 ÷ 감시 대상 코인 전체의 평균 24h 거래량
           </div>
+          <div className={styles.docNote}>
+            * 가격변화율 기준점 = <strong>현재 시점에서 정확히 24시간 전</strong> (고정된 자정 기준 아님 — 롤링 윈도우)
+          </div>
         </section>
 
         {/* 파라미터 설정 */}
