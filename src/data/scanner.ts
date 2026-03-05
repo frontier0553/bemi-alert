@@ -72,7 +72,7 @@ async function processSymbol(
 
   await updateCooldown(symbol, result.maxMove);
 
-  const alertMsg = formatAlert(symbol, result);
+  const alertMsg = formatAlert(symbol, result, new Date());
   await sendTelegramAlert(alertMsg);
 
   return alertMsg;

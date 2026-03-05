@@ -117,9 +117,18 @@ export function applyFakePumpFilters(
 }
 
 /**
- * Format the push-ready alert string.
- * "🚨 PUMP ETHUSDT +4.2% (5m) | Vol x3.6"
+ * Format the Telegram alert message (HTML parse_mode).
  */
-export function formatAlert(symbol: string, result: PumpResult): string {
-  return `🚨 PUMP ${symbol} +${result.changePct.toFixed(1)}% (${result.changeWindow}) | Vol x${result.volRatio.toFixed(1)}`;
+export function formatAlert(symbol: string, result: PumpResult, detectedAt: Date = new Date()): string {
+  return `
+🚨 <b>BEMI ALERT</b>
+
+💰 <b>Symbol</b>: ${symbol}
+📈 <b>Move</b>: +${result.changePct.toFixed(1)}% (${result.changeWindow})
+📊 <b>Volume</b>: x${result.volRatio.toFixed(1)}
+
+⏱ <b>Time</b>: ${detectedAt.toUTCString()}
+
+#pump #crypto
+`.trim();
 }

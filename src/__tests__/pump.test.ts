@@ -137,13 +137,20 @@ describe('formatAlert', () => {
   });
 
   it('formats the canonical example correctly', () => {
-    expect(formatAlert('ETHUSDT', makeResult(4.2, '5m', 3.6)))
-      .toBe('🚨 PUMP ETHUSDT +4.2% (5m) | Vol x3.6');
+    const msg = formatAlert('ETHUSDT', makeResult(4.2, '5m', 3.6));
+    expect(msg).toContain('ETHUSDT');
+    expect(msg).toContain('+4.2%');
+    expect(msg).toContain('5m');
+    expect(msg).toContain('x3.6');
+    expect(msg).toContain('BEMI ALERT');
   });
 
   it('formats 3m window correctly', () => {
-    expect(formatAlert('BTCUSDT', makeResult(3.1, '3m', 5.0)))
-      .toBe('🚨 PUMP BTCUSDT +3.1% (3m) | Vol x5.0');
+    const msg = formatAlert('BTCUSDT', makeResult(3.1, '3m', 5.0));
+    expect(msg).toContain('BTCUSDT');
+    expect(msg).toContain('+3.1%');
+    expect(msg).toContain('3m');
+    expect(msg).toContain('x5.0');
   });
 });
 
