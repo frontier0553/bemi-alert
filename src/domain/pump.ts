@@ -27,6 +27,11 @@ export interface PumpResult {
   metrics:      PumpMetrics;
 }
 
+export interface Ticker24h {
+  symbol:      string;
+  quoteVolume: number;  // 24h quote asset volume (USDT)
+}
+
 // ── Defaults ─────────────────────────────────────────────────
 
 export const DEFAULT_THRESHOLDS: PumpThresholds = {
@@ -85,6 +90,30 @@ export function evaluatePump(
   const maxMove    = Math.max(r3, r5);
 
   return { maxMove, changeWindow, changePct, volRatio, metrics };
+}
+
+const MIN_QUOTE_VOLUME = 5_000_000;   // 24h 거래대금 최소 5백만 USDT
+const MIN_GREEN_CANDLES = 2;           // 최근 3 캔들 중 최소 2개 양봉
+
+/**
+ * Fake pump filter — returns true when the signal passes both checks:
+ *   1. Liquidity: 24h quoteVolume >= 5,000,000 USDT
+ *   2. Candle confirmation: at least 2 of the last 3 candles are green (close > open)
+ */
+export function applyFakePumpFilters(
+  _metrics: PumpMetrics,
+  ticker24h: Ticker24h,
+  klines: Kline[],
+): boolean {
+  // Filter 1 — liquidity guard
+  if (ticker24h.quoteVolume < MIN_QUOTE_VOLUME) return false;
+
+  // Filter 2 — candle confirmation (last 3 candles)
+  const last3 = klines.slice(-3);
+  const greenCount = last3.filter(k => k.close > k.open).length;
+  if (greenCount < MIN_GREEN_CANDLES) return false;
+
+  return true;
 }
 
 /**

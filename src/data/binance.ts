@@ -2,6 +2,7 @@ const BASE_URL = process.env.BINANCE_BASE_URL ?? 'https://api.binance.com';
 
 export interface Kline {
   openTime: number;
+  open:     number;
   close:    number;
   volume:   number;
 }
@@ -23,6 +24,7 @@ export async function fetchKlines(symbol: string, limit = 60): Promise<Kline[]> 
   // Binance kline row: [openTime, open, high, low, close, volume, ...]
   return (data as any[][]).map(row => ({
     openTime: row[0] as number,
+    open:     parseFloat(row[1]),
     close:    parseFloat(row[4]),
     volume:   parseFloat(row[5]),
   }));

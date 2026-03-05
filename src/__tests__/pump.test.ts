@@ -13,7 +13,7 @@ import { shouldSend, type CooldownState } from '../data/cooldown';
 // ── Helpers ──────────────────────────────────────────────────
 
 function makeKlines(n: number, close = 100, volume = 1000): Kline[] {
-  return Array.from({ length: n }, (_, i) => ({ openTime: i * 60_000, close, volume }));
+  return Array.from({ length: n }, (_, i) => ({ openTime: i * 60_000, open: close, close, volume }));
 }
 
 const baseMetrics: PumpMetrics = {

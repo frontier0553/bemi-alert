@@ -1,6 +1,14 @@
 import { fetchTickers, fetchKlines } from './binance';
-import { computeMetrics, evaluatePump, formatAlert, DEFAULT_THRESHOLDS } from '../domain/pump';
+import {
+  computeMetrics,
+  evaluatePump,
+  applyFakePumpFilters,
+  formatAlert,
+  DEFAULT_THRESHOLDS,
+  type Ticker24h,
+} from '../domain/pump';
 import { checkCooldown, updateCooldown } from './cooldown';
+import { sendTelegramAlert } from './telegram';
 import { prisma } from '../lib/prisma';
 
 const SCAN_TOP_N_DEFAULT = 200;
@@ -15,12 +23,16 @@ async function getTopN(): Promise<number> {
 
 // ── Per-symbol processing ────────────────────────────────────
 
-async function processSymbol(symbol: string): Promise<string | null> {
+async function processSymbol(
+  symbol: string,
+  ticker: Ticker24h,
+  rank: number,
+  scanTime: number,
+): Promise<string | null> {
   let klines;
   try {
     klines = await fetchKlines(symbol, 60);
   } catch (err: any) {
-    // If rate-limited, re-throw to stop the entire scan; otherwise skip symbol
     if (err.message?.includes('rate limited')) throw err;
     return null;
   }
@@ -30,6 +42,10 @@ async function processSymbol(symbol: string): Promise<string | null> {
 
   const result = evaluatePump(metrics, DEFAULT_THRESHOLDS);
   if (!result) return null;
+
+  // Fake pump filter — liquidity + candle confirmation
+  const passes = applyFakePumpFilters(metrics, ticker, klines);
+  if (!passes) return null;
 
   const allowed = await checkCooldown(symbol, result.maxMove);
   if (!allowed) return null;
@@ -42,32 +58,42 @@ async function processSymbol(symbol: string): Promise<string | null> {
       changePct:    result.changePct,
       volRatio:     result.volRatio,
       metaJson:     JSON.stringify({
+        r3:         metrics.r3,
+        r5:         metrics.r5,
+        volRatio:   metrics.volRatio,
+        baseVol:    metrics.volAvg60m,
+        nowVol:     metrics.vol1mNow,
         closeNow:   metrics.closeNow,
-        close3mAgo: metrics.close3mAgo,
-        close5mAgo: metrics.close5mAgo,
-        vol1mNow:   metrics.vol1mNow,
-        volAvg60m:  metrics.volAvg60m,
+        topRank:    rank,
+        scanTime,
       }),
     },
   });
 
   await updateCooldown(symbol, result.maxMove);
 
-  return formatAlert(symbol, result);
+  const alertMsg = formatAlert(symbol, result);
+  await sendTelegramAlert(alertMsg);
+
+  return alertMsg;
 }
 
 // ── Batch runner with concurrency cap ────────────────────────
 
-async function runBatches(symbols: string[]): Promise<string[]> {
+async function runBatches(
+  entries: Array<{ symbol: string; ticker: Ticker24h; rank: number }>,
+  scanTime: number,
+): Promise<string[]> {
   const alerts: string[] = [];
-  for (let i = 0; i < symbols.length; i += BATCH_SIZE) {
-    const batch   = symbols.slice(i, i + BATCH_SIZE);
-    const settled = await Promise.allSettled(batch.map(s => processSymbol(s)));
+  for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+    const batch   = entries.slice(i, i + BATCH_SIZE);
+    const settled = await Promise.allSettled(
+      batch.map(e => processSymbol(e.symbol, e.ticker, e.rank, scanTime)),
+    );
     for (const r of settled) {
       if (r.status === 'fulfilled' && r.value) {
         alerts.push(r.value);
       } else if (r.status === 'rejected') {
-        // Re-throw rate limit errors; log others
         if ((r.reason as Error)?.message?.includes('rate limited')) throw r.reason;
         console.error('[scanner] symbol error:', r.reason);
       }
@@ -79,17 +105,23 @@ async function runBatches(symbols: string[]): Promise<string[]> {
 // ── Main entry point ─────────────────────────────────────────
 
 export async function runScanOnce(): Promise<void> {
-  const topN    = await getTopN();
-  const tickers = await fetchTickers();
+  const scanTime = Date.now();
+  const topN     = await getTopN();
+  const tickers  = await fetchTickers();
 
-  const symbols = tickers
+  const sorted = tickers
     .sort((a: any, b: any) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-    .slice(0, topN)
-    .map((t: any) => t.symbol as string);
+    .slice(0, topN);
 
-  const alerts = await runBatches(symbols);
+  const entries = sorted.map((t: any, i: number) => ({
+    symbol: t.symbol as string,
+    ticker: { symbol: t.symbol as string, quoteVolume: parseFloat(t.quoteVolume) } as Ticker24h,
+    rank:   i + 1,
+  }));
+
+  const alerts = await runBatches(entries, scanTime);
 
   console.log(
-    `[scan] ${new Date().toLocaleTimeString('ko-KR')} — ${symbols.length}개 스캔, ${alerts.length}개 감지`,
+    `[scan] ${new Date().toLocaleTimeString('ko-KR')} — ${entries.length}개 스캔, ${alerts.length}개 감지`,
   );
 }
