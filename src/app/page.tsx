@@ -202,13 +202,13 @@ export default function Home() {
             </div>
 
             {/* 컬럼 헤더 */}
-            <div className="flex items-center gap-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
-              <span className="w-5 shrink-0" />
-              <span className="w-14 shrink-0">심볼</span>
-              <span className="shrink-0 w-12">방향</span>
-              <span className="flex-1">거래규모</span>
-              <span className="group relative shrink-0 w-10 text-right cursor-help">
-                스코어
+            <div className="grid grid-cols-[16px_56px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+              <span />
+              <span>심볼</span>
+              <span>방향</span>
+              <span className="text-right">거래규모</span>
+              <span className="group relative text-right cursor-help">
+                압력지수
                 <span className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0e1117] p-3 text-left text-[11px] font-normal normal-case tracking-normal text-zinc-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
                   <span className="block font-semibold text-zinc-100 mb-1.5">고래 압력 지수 (-100 ~ +100)</span>
                   <span className="block text-zinc-400 leading-relaxed">
@@ -221,7 +221,7 @@ export default function Home() {
                   </span>
                 </span>
               </span>
-              <span className="shrink-0 w-14 text-right">시각</span>
+              <span className="text-right">시각</span>
             </div>
             <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
               {whalesLoading ? (
@@ -300,12 +300,14 @@ function ScannerRow({ ev }: { ev: Event }) {
 
 /* ── Whale Row ──────────────────────────────────────── */
 function WhaleRow({ w }: { w: WhaleEventRow }) {
-  const isBuy  = w.direction === 'BUY';
-  const isMix  = w.direction === 'MIXED';
+  const isBuy    = w.direction === 'BUY';
+  const isMix    = w.direction === 'MIXED';
   const absScore = Math.abs(w.score);
   const heat =
     absScore >= 40 ? (isBuy ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]' : 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.7)]')
     : 'bg-amber-400';
+  const scoreColor = w.score > 0 ? 'text-emerald-300' : w.score < 0 ? 'text-red-300' : 'text-zinc-400';
+  const barColor   = w.score > 0 ? 'bg-emerald-400' : w.score < 0 ? 'bg-red-400' : 'bg-amber-400';
 
   function fmtUsd(v: number) {
     if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
@@ -313,27 +315,30 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
   }
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03] transition-colors">
-      <span className={`shrink-0 h-2 w-2 rounded-full ${heat}`} />
-      <span className="w-14 shrink-0 font-semibold text-sm">
+    <div className="grid grid-cols-[16px_56px_72px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+      <span className={`h-2 w-2 rounded-full ${heat}`} />
+      <span className="font-semibold text-sm text-zinc-100 truncate">
         {w.symbol.replace(QUOTE_RE, '')}
       </span>
-      <span className={`shrink-0 rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
+      <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${
         isBuy ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
         : isMix ? 'border-amber-500/25 bg-amber-500/10 text-amber-300'
         : 'border-red-500/25 bg-red-500/10 text-red-300'
       }`}>
         {w.direction}
       </span>
-      <span className="flex-1 text-sm font-semibold text-zinc-300 tabular-nums">
+      <span className="text-sm font-semibold text-zinc-200 tabular-nums text-right">
         {fmtUsd(w.tradeSize)}
       </span>
-      <span className={`shrink-0 text-sm font-bold tabular-nums ${
-        w.score > 0 ? 'text-emerald-300' : w.score < 0 ? 'text-red-300' : 'text-zinc-400'
-      }`}>
-        {w.score > 0 ? '+' : ''}{w.score}
-      </span>
-      <span className="shrink-0 text-xs text-zinc-600 w-14 text-right">{timeAgo(w.detectedAt)}</span>
+      <div className="flex flex-col items-end gap-1">
+        <span className={`text-sm font-bold tabular-nums leading-none ${scoreColor}`}>
+          {w.score > 0 ? '+' : ''}{w.score}
+        </span>
+        <div className="h-0.5 w-full rounded-full bg-white/5">
+          <div className={`h-0.5 rounded-full ${barColor}`} style={{ width: `${absScore}%` }} />
+        </div>
+      </div>
+      <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
     </div>
   );
 }
