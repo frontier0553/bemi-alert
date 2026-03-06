@@ -6,5 +6,6 @@ export async function POST() {
   await supabase.auth.signOut();
   return NextResponse.redirect(
     new URL('/', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bemi-alert.vercel.app'),
+    { status: 303 },
   );
 }
