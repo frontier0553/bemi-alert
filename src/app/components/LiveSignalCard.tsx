@@ -1,5 +1,5 @@
 import type { Event } from './types';
-import { fmt, timeAgo, signalStrength, volAboveAvg, formatPrice } from './utils';
+import { fmt, timeAgo, signalStrength, volAboveAvg, formatPrice, baseCoin } from './utils';
 
 export function LiveSignalCard({ ev }: { ev: Event }) {
   const isPump = ev.type === 'PUMP';
@@ -31,7 +31,7 @@ export function LiveSignalCard({ ev }: { ev: Event }) {
       {/* Symbol + Change % */}
       <div>
         <div className="text-[22px] font-extrabold tracking-tight text-ink-primary leading-none mb-1">
-          {ev.symbol}
+          {baseCoin(ev.symbol)}
         </div>
         <div className={`text-[38px] font-extrabold tracking-tighter leading-tight ${changeColor}`}>
           {ev.changePct > 0 ? '+' : ''}{fmt(ev.changePct)}%

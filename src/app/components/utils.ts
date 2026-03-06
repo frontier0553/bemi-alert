@@ -1,5 +1,11 @@
 import type { Event, GroupedSymbol } from './types';
 
+const QUOTE_RE = /(USDT|USDC|BUSD|FDUSD|TUSD|DAI|BTC|ETH|BNB|XRP|TRX|TRY|EUR|GBP|AUD|BRL|RUB|UAH|PLN|RON|ZAR)$/;
+
+export function baseCoin(symbol: string): string {
+  return symbol.replace(QUOTE_RE, '');
+}
+
 export function fmt(v: number, digits = 2): string {
   return v.toFixed(digits);
 }

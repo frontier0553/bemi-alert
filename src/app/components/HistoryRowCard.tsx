@@ -1,5 +1,5 @@
 import type { Event, GroupedSymbol } from './types';
-import { fmt, timeAgo, volAboveAvg, formatPrice } from './utils';
+import { fmt, timeAgo, volAboveAvg, formatPrice, baseCoin } from './utils';
 
 /* ── Raw event row ─────────────────────────────────────────── */
 export function RawEventRow({ ev }: { ev: Event }) {
@@ -19,7 +19,7 @@ export function RawEventRow({ ev }: { ev: Event }) {
         <span className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold border ${badgeCls}`}>
           {isPump ? '▲ PUMP' : '▼ DUMP'}
         </span>
-        <span className="font-bold text-[15px] text-ink-primary truncate">{ev.symbol}</span>
+        <span className="font-bold text-[15px] text-ink-primary truncate">{baseCoin(ev.symbol)}</span>
       </div>
 
       {/* Change % */}
@@ -67,7 +67,7 @@ export function GroupedRow({ g }: { g: GroupedSymbol }) {
         <span className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold border ${badgeCls}`}>
           {badgeLabel}
         </span>
-        <span className="font-bold text-[15px] text-ink-primary truncate">{g.symbol}</span>
+        <span className="font-bold text-[15px] text-ink-primary truncate">{baseCoin(g.symbol)}</span>
       </div>
 
       {/* Strongest change */}
