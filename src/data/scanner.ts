@@ -110,6 +110,7 @@ export async function runScanOnce(): Promise<void> {
   const tickers  = await fetchTickers();
 
   const sorted = tickers
+    .filter((t: any) => (t.symbol as string).endsWith('USDT'))
     .sort((a: any, b: any) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
     .slice(0, topN);
 
