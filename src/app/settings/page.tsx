@@ -2,70 +2,62 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import styles from './page.module.css';
+import { CandlestickChart, Settings2, Save } from 'lucide-react';
 
 interface SettingConfig {
-  key: string;
-  label: string;
+  key:         string;
+  label:       string;
   description: string;
-  unit: string;
-  min: number;
-  max: number;
-  step: number;
+  unit:        string;
+  min:         number;
+  max:         number;
+  step:        number;
 }
 
 const SETTINGS: SettingConfig[] = [
   {
-    key: 'SCAN_TOP_N',
-    label: '감시 코인 수',
-    description: '바이낸스 24h 거래량 기준 상위 N개 코인을 스캔합니다. 높을수록 더 많은 코인을 감시하지만 처리 시간이 늘어납니다.',
-    unit: '개',
-    min: 10,
-    max: 500,
-    step: 10,
+    key:         'SCAN_TOP_N',
+    label:       '감시 코인 수',
+    description: '바이낸스 24h 거래량 기준 상위 N개 코인을 스캔합니다.',
+    unit: '개', min: 10, max: 500, step: 10,
   },
   {
-    key: 'SCAN_PUMP_PCT',
-    label: 'PUMP 기준',
-    description: '24시간 대비 가격 변화율이 이 값 이상이면 PUMP로 판정합니다. 낮을수록 더 많은 이벤트가 감지됩니다.',
-    unit: '%',
-    min: 1,
-    max: 50,
-    step: 0.5,
+    key:         'SCAN_PUMP_PCT',
+    label:       'PUMP 기준',
+    description: '가격 변화율이 이 값 이상이면 PUMP로 판정합니다.',
+    unit: '%', min: 1, max: 50, step: 0.5,
   },
   {
-    key: 'SCAN_DUMP_PCT',
-    label: 'DUMP 기준',
-    description: '24시간 대비 가격 변화율이 이 값 이하(-값)이면 DUMP로 판정합니다. 낮을수록 더 많은 이벤트가 감지됩니다.',
-    unit: '%',
-    min: 1,
-    max: 50,
-    step: 0.5,
+    key:         'SCAN_DUMP_PCT',
+    label:       'DUMP 기준',
+    description: '가격 변화율이 이 값 이하(−값)이면 DUMP로 판정합니다.',
+    unit: '%', min: 1, max: 50, step: 0.5,
   },
   {
-    key: 'SCAN_VOLUME_MULT',
-    label: '거래량 배수 기준',
-    description: '해당 코인의 거래량이 감시 대상 코인들의 평균 거래량의 N배 이상일 때만 이벤트로 인정합니다. 높을수록 이상 거래량만 필터링됩니다.',
-    unit: '배',
-    min: 0.5,
-    max: 20,
-    step: 0.5,
+    key:         'SCAN_VOLUME_MULT',
+    label:       '거래량 배수 기준',
+    description: '거래량이 평균의 N배 이상일 때만 이벤트로 인정합니다.',
+    unit: '배', min: 0.5, max: 20, step: 0.5,
   },
   {
-    key: 'SCAN_COOLDOWN_MINUTES',
-    label: '중복 감지 쿨타임',
-    description: '같은 코인이 같은 방향(PUMP/DUMP)으로 다시 감지되기까지 최소 대기 시간입니다. 중복 이벤트를 방지합니다.',
-    unit: '분',
-    min: 1,
-    max: 1440,
-    step: 1,
+    key:         'SCAN_COOLDOWN_MINUTES',
+    label:       '중복 감지 쿨타임',
+    description: '같은 코인이 재감지되기까지 최소 대기 시간입니다.',
+    unit: '분', min: 1, max: 1440, step: 1,
   },
 ];
 
+const FLOW_STEPS = [
+  { icon: '🔄', label: '주기적 스캔',   desc: '60초마다 바이낸스 API 호출' },
+  { icon: '📊', label: '데이터 수집',   desc: '상위 N개 코인 가격·거래량' },
+  { icon: '🧮', label: '조건 판별',     desc: '변화율 & 거래량 배수 계산' },
+  { icon: '💾', label: '이벤트 저장',   desc: '조건 만족 & 쿨타임 통과 시 DB 기록' },
+];
+
 export default function SettingsPage() {
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
-  const [saved, setSaved] = useState(false);
+  const [values, setValues]     = useState<Record<string, string>>({});
+  const [loading, setLoading]   = useState(true);
+  const [saved, setSaved]       = useState(false);
   const [adminKey, setAdminKey] = useState('');
   const [saveError, setSaveError] = useState('');
 
@@ -86,10 +78,7 @@ export default function SettingsPage() {
     setSaveError('');
     const res = await fetch('/api/settings', {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-secret': adminKey,
-      },
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': adminKey },
       body: JSON.stringify(values),
     });
     if (res.ok) {
@@ -102,120 +91,131 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <Link href="/" className={styles.logo}>
-          <span>⚡</span>
-          <span>Bemi Alert</span>
-        </Link>
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.navLink}>대시보드</Link>
-          <Link href="/settings" className={`${styles.navLink} ${styles.navActive}`}>설정</Link>
-        </nav>
+    <div className="min-h-screen bg-[#06080d] text-zinc-100">
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.05),transparent_25%)]" />
+
+      {/* Header */}
+      <header className="relative z-50 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
+              <CandlestickChart className="h-4 w-4 text-cyan-300" />
+            </div>
+            <span className="text-base font-bold tracking-tight">Bemi Alert</span>
+          </div>
+          <nav className="flex items-center gap-1">
+            <Link
+              href="/"
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              대시보드
+            </Link>
+            <Link
+              href="/settings"
+              className="rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-3 py-1.5 text-sm text-cyan-300"
+            >
+              설정
+            </Link>
+          </nav>
+        </div>
       </header>
 
-      <main className={styles.main}>
-        <div className={styles.pageHeader}>
-          <div className={styles.titleGroup}>
-            <h1 className={styles.title}>설정 & 문서</h1>
-            <p className={styles.subtitle}>스캔 파라미터를 조정하고 각 설정의 의미를 확인하세요.</p>
+      <main className="relative mx-auto max-w-[1400px] px-5 py-6 flex flex-col gap-6">
+
+        {/* 페이지 제목 */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Settings2 className="h-5 w-5 text-zinc-400" />
+            <h1 className="text-lg font-bold">설정</h1>
           </div>
           <button
-            className={`${styles.saveBtn} ${saved ? styles.saveBtnSuccess : ''}`}
             onClick={handleSave}
             disabled={loading}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+              saved
+                ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                : 'border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10'
+            }`}
           >
+            <Save className="h-4 w-4" />
             {saved ? '✓ 저장 완료' : '설정 저장'}
           </button>
         </div>
 
         {/* 작동 방식 */}
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>작동 방식</h2>
-          <div className={styles.docCard}>
-            <div className={styles.flowChart}>
-              <div className={styles.flowStep}>
-                <div className={styles.flowIcon}>🔄</div>
-                <div className={styles.flowLabel}>주기적 스캔</div>
-                <div className={styles.flowDesc}>60초마다 바이낸스 API 호출</div>
-              </div>
-              <div className={styles.flowArrow}>→</div>
-              <div className={styles.flowStep}>
-                <div className={styles.flowIcon}>📊</div>
-                <div className={styles.flowLabel}>데이터 수집</div>
-                <div className={styles.flowDesc}>상위 N개 코인의 24h 가격·거래량</div>
-              </div>
-              <div className={styles.flowArrow}>→</div>
-              <div className={styles.flowStep}>
-                <div className={styles.flowIcon}>🧮</div>
-                <div className={styles.flowLabel}>조건 판별</div>
-                <div className={styles.flowDesc}>가격 변화율 & 거래량 배수 계산</div>
-              </div>
-              <div className={styles.flowArrow}>→</div>
-              <div className={styles.flowStep}>
-                <div className={styles.flowIcon}>💾</div>
-                <div className={styles.flowLabel}>이벤트 저장</div>
-                <div className={styles.flowDesc}>조건 만족 & 쿨타임 지나면 DB 기록</div>
-              </div>
-            </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <h2 className="mb-4 text-sm font-semibold text-zinc-300">작동 방식</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            {FLOW_STEPS.map((step, i) => (
+              <>
+                <div key={step.label} className="flex flex-col items-center gap-1.5 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-center min-w-[120px]">
+                  <span className="text-xl">{step.icon}</span>
+                  <span className="text-xs font-semibold text-zinc-200">{step.label}</span>
+                  <span className="text-[11px] text-zinc-500 leading-relaxed">{step.desc}</span>
+                </div>
+                {i < FLOW_STEPS.length - 1 && (
+                  <span key={`arrow-${i}`} className="text-zinc-700 text-lg">→</span>
+                )}
+              </>
+            ))}
           </div>
-        </section>
+        </div>
 
         {/* 판별 공식 */}
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>판별 공식</h2>
-          <div className={styles.formulaGrid}>
-            <div className={`${styles.formulaCard} ${styles.pumpFormula}`}>
-              <div className={styles.formulaTitle}>▲ PUMP 감지 조건</div>
-              <div className={styles.formula}>
-                가격변화율 ≥ <span className={styles.pumpText}>+PUMP기준%</span>
-                <br />AND<br />
-                거래량배수 ≥ <span className={styles.pumpText}>거래량배수기준</span>
-              </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 p-5">
+            <div className="mb-3 text-sm font-semibold text-emerald-300">▲ PUMP 감지 조건</div>
+            <div className="text-sm leading-loose text-zinc-300">
+              3분 수익률 ≥ <span className="font-bold text-emerald-300">+3%</span>
+              <span className="text-zinc-600 mx-2">또는</span>
+              5분 수익률 ≥ <span className="font-bold text-emerald-300">+4%</span>
+              <br />
+              <span className="text-zinc-600">AND</span> 거래량 배수 ≥ <span className="font-bold text-emerald-300">3x</span>
             </div>
-            <div className={`${styles.formulaCard} ${styles.dumpFormula}`}>
-              <div className={styles.formulaTitle}>▼ DUMP 감지 조건</div>
-              <div className={styles.formula}>
-                가격변화율 ≤ <span className={styles.dumpText}>−DUMP기준%</span>
-                <br />AND<br />
-                거래량배수 ≥ <span className={styles.dumpText}>거래량배수기준</span>
-              </div>
+            <div className="mt-3 rounded-xl bg-black/20 px-3 py-2 text-xs text-zinc-500">
+              유동성 $5M 이상 + 최근 3캔들 중 2개 이상 양봉 (가짜 펌프 필터)
             </div>
           </div>
-          <div className={styles.docNote}>
-            * 거래량배수 = 해당 코인의 24h 거래량 ÷ 감시 대상 코인 전체의 평균 24h 거래량
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div className="mb-3 text-sm font-semibold text-zinc-300">⏱ 쿨다운 로직</div>
+            <div className="space-y-1.5 text-xs text-zinc-400">
+              <div className="flex items-start gap-2"><span className="text-zinc-600">•</span> 같은 코인 <span className="text-zinc-200 font-semibold">10분</span> 내 중복 차단</div>
+              <div className="flex items-start gap-2"><span className="text-zinc-600">•</span> 추가 <span className="text-zinc-200 font-semibold">+2%</span> 이상 상승 시 업그레이드 허용</div>
+              <div className="flex items-start gap-2"><span className="text-zinc-600">•</span> USDT 페어만 스캔 (상위 200개)</div>
+              <div className="flex items-start gap-2"><span className="text-zinc-600">•</span> 가격 변동 기준점: <span className="text-zinc-200 font-semibold">현재 시점 24h 롤링</span></div>
+            </div>
           </div>
-          <div className={styles.docNote}>
-            * 가격변화율 기준점 = <strong>현재 시점에서 정확히 24시간 전</strong> (고정된 자정 기준 아님 — 롤링 윈도우)
-          </div>
-        </section>
+        </div>
 
-        {/* 파라미터 설정 */}
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>파라미터 설정</h2>
-          <div className={styles.adminKeyRow}>
-            <label className={styles.adminKeyLabel}>🔑 Admin Key</label>
+        {/* Admin Key + 파라미터 */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <h2 className="mb-4 text-sm font-semibold text-zinc-300">파라미터 설정</h2>
+
+          {/* Admin Key */}
+          <div className="mb-5 flex flex-wrap items-center gap-3">
+            <label className="text-xs font-semibold text-zinc-400 w-20 shrink-0">🔑 Admin Key</label>
             <input
               type="password"
-              className={styles.adminKeyInput}
+              className="flex-1 min-w-[220px] rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-200 outline-none focus:border-cyan-400/40 placeholder:text-zinc-600"
               placeholder="Vercel 환경변수 ADMIN_SECRET 값 입력"
               value={adminKey}
               onChange={e => handleAdminKeyChange(e.target.value)}
             />
-            {saveError && <span className={styles.saveError}>{saveError}</span>}
+            {saveError && <span className="text-sm text-red-400">{saveError}</span>}
           </div>
+
           {loading ? (
-            <div className={styles.loading}>로딩 중...</div>
+            <div className="py-8 text-center text-sm text-zinc-600">로딩 중...</div>
           ) : (
-            <div className={styles.settingsGrid}>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {SETTINGS.map(s => (
-                <div key={s.key} className={styles.settingCard}>
-                  <div className={styles.settingHeader}>
-                    <span className={styles.settingLabel}>{s.label}</span>
-                    <span className={styles.settingKey}>{s.key}</span>
+                <div key={s.key} className="rounded-xl border border-white/10 bg-black/20 p-4">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <span className="text-sm font-semibold text-zinc-200">{s.label}</span>
+                    <span className="text-[10px] text-zinc-600 font-mono">{s.key}</span>
                   </div>
-                  <p className={styles.settingDesc}>{s.description}</p>
-                  <div className={styles.settingInput}>
+                  <p className="text-xs text-zinc-500 mb-3 leading-relaxed">{s.description}</p>
+                  <div className="flex items-center gap-2">
                     <input
                       type="number"
                       min={s.min}
@@ -223,19 +223,25 @@ export default function SettingsPage() {
                       step={s.step}
                       value={values[s.key] ?? ''}
                       onChange={e => setValues(v => ({ ...v, [s.key]: e.target.value }))}
-                      className={styles.input}
+                      className="w-24 rounded-xl border border-white/10 bg-black/30 px-3 py-1.5 text-sm text-zinc-100 outline-none focus:border-cyan-400/40 tabular-nums"
                     />
-                    <span className={styles.unit}>{s.unit}</span>
+                    <span className="text-sm text-zinc-500">{s.unit}</span>
+                    <span className="text-xs text-zinc-700 ml-auto">{s.min}~{s.max}</span>
                   </div>
-                  <div className={styles.settingRange}>범위: {s.min} ~ {s.max} {s.unit}</div>
                 </div>
               ))}
             </div>
           )}
-        </section>
+        </div>
+
       </main>
 
-      {saved && <div className={styles.savedToast}>✓ 설정이 저장되었습니다</div>}
+      {/* Toast */}
+      {saved && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-300 shadow-lg backdrop-blur">
+          ✓ 설정이 저장되었습니다
+        </div>
+      )}
     </div>
   );
 }

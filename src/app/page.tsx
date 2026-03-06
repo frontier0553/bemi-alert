@@ -172,8 +172,17 @@ export default function Home() {
               </div>
             </div>
 
+            {/* 컬럼 헤더 */}
+            <div className="flex items-center gap-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+              <span className="w-6 shrink-0" />
+              <span className="w-16 shrink-0">심볼</span>
+              <span className="flex-1">강도</span>
+              <span className="shrink-0 w-14 text-right">변동폭</span>
+              <span className="shrink-0 w-14 text-right">거래량</span>
+              <span className="shrink-0 w-14 text-right">시각</span>
+            </div>
             {/* 목록 */}
-            <div className="divide-y divide-white/[0.04] max-h-[420px] overflow-y-auto">
+            <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
               {loading ? (
                 <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
               ) : scannerEvents.length === 0 ? (
@@ -192,7 +201,16 @@ export default function Home() {
               <span className="text-xs text-zinc-600">상위 30 코인</span>
             </div>
 
-            <div className="divide-y divide-white/[0.04] max-h-[420px] overflow-y-auto">
+            {/* 컬럼 헤더 */}
+            <div className="flex items-center gap-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+              <span className="w-5 shrink-0" />
+              <span className="w-14 shrink-0">심볼</span>
+              <span className="shrink-0 w-12">방향</span>
+              <span className="flex-1">거래규모</span>
+              <span className="shrink-0 w-10 text-right">스코어</span>
+              <span className="shrink-0 w-14 text-right">시각</span>
+            </div>
+            <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
               {whalesLoading ? (
                 <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
               ) : whales.length === 0 ? (
