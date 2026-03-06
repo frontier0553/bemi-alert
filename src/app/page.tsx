@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp } from 'lucide-react';
+import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import { MarketSummaryCards } from './components/MarketSummaryCards';
 import { FiltersBar }         from './components/FiltersBar';
 import { HistoryTable }       from './components/HistoryTable';
@@ -30,6 +32,7 @@ export default function Home() {
   const [futuresLoading, setFuturesLoading] = useState(true);
   const [adminKey, setAdminKey]           = useState('');
   const [visitStats, setVisitStats]       = useState<{ today: number; total: number } | null>(null);
+  const [user, setUser]                   = useState<User | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -87,7 +90,7 @@ export default function Home() {
     return () => clearInterval(t);
   }, [lastUpdated]);
 
-  // 방문 기록 + 관리자 통계
+  // 방문 기록 + 관리자 통계 + 로그인 상태
   useEffect(() => {
     fetch('/api/visit', { method: 'POST' }).catch(() => {});
     const key = localStorage.getItem('bemi_admin_key') ?? '';
@@ -98,6 +101,13 @@ export default function Home() {
         .then(d => d && setVisitStats({ today: d.today, total: d.total }))
         .catch(() => {});
     }
+    // 로그인 상태 확인
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   const now        = Date.now();
@@ -164,6 +174,30 @@ export default function Home() {
               <Bell className="h-3.5 w-3.5" />
               텔레그램 알림
             </a>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:block max-w-[120px] truncate text-xs text-zinc-500">
+                  {user.email}
+                </span>
+                <form action="/api/auth/signout" method="POST">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    로그아웃
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                로그인
+              </Link>
+            )}
           </div>
         </div>
       </header>

@@ -8,6 +8,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ── Users ─────────────────────────────────────────────────────
+model User {
+  id        String   @id           // Supabase auth UUID
+  email     String   @unique
+  tier      String   @default("FREE")  // "FREE" | "PAID"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ── Visitor Tracking ─────────────────────────────────────────
 model DailyVisit {
   date  String @id   // "YYYY-MM-DD"
