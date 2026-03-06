@@ -58,8 +58,8 @@ export function detectWhaleActivity(
   const score = Math.max(-100, Math.min(100, raw));
 
   const type: WhaleResult['type'] =
-    buys.length  >= ACCUMULATION_N ? 'ACCUMULATION' :
-    sells.length >= DUMP_N         ? 'DUMP' :
+    buys.length  >= ACCUMULATION_N && buys.length  > sells.length ? 'ACCUMULATION' :
+    sells.length >= DUMP_N         && sells.length > buys.length  ? 'DUMP' :
     'NEUTRAL';
 
   const direction: WhaleResult['direction'] =

@@ -9,6 +9,7 @@ const SCAN_TOP_N       = 30;   // Top 30 symbols by 24h volume
 const BATCH_SIZE       = 5;    // Concurrent aggTrades requests
 const SAVE_THRESHOLD   = 5;    // |score| ≥ 5 → save to DB
 const ALERT_THRESHOLD  = 40;   // |score| ≥ 40 → telegram alert
+const COOLDOWN_MINUTES = 10;   // 같은 코인 재감지 최소 대기 시간
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get('x-cron-secret');
@@ -39,20 +40,27 @@ export async function POST(req: NextRequest) {
     }
 
     // Save + alert significant events
+    const cooldownCutoff = new Date(Date.now() - COOLDOWN_MINUTES * 60 * 1000);
     let saved = 0;
     for (const w of results) {
       if (Math.abs(w.score) < SAVE_THRESHOLD) continue;
 
+      // 쿨다운: 같은 코인이 최근 COOLDOWN_MINUTES 내에 이미 저장됐으면 스킵
+      const recent = await prisma.whaleEvent.findFirst({
+        where: { symbol: w.symbol, detectedAt: { gte: cooldownCutoff } },
+      });
+      if (recent) continue;
+
       await prisma.whaleEvent.create({
         data: {
-          symbol:    w.symbol,
-          direction: w.direction,
-          tradeSize: w.topTradeSize,
-          price:     w.topTradePrice,
-          score:     w.score,
-          whaleBuys: w.whaleBuys,
+          symbol:     w.symbol,
+          direction:  w.direction,
+          tradeSize:  w.topTradeSize,
+          price:      w.topTradePrice,
+          score:      w.score,
+          whaleBuys:  w.whaleBuys,
           whaleSells: w.whaleSells,
-          type:      w.type,
+          type:       w.type,
         },
       });
       saved++;
