@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CandlestickChart, Settings2, Save } from 'lucide-react';
 
@@ -55,30 +56,30 @@ const FLOW_STEPS = [
 ];
 
 export default function SettingsPage() {
-  const [values, setValues]     = useState<Record<string, string>>({});
-  const [loading, setLoading]   = useState(true);
-  const [saved, setSaved]       = useState(false);
-  const [adminKey, setAdminKey] = useState('');
+  const router = useRouter();
+  const [values, setValues]   = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saved, setSaved]     = useState(false);
   const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
-    const stored = localStorage.getItem('bemi_admin_key') ?? '';
-    setAdminKey(stored);
-    fetch('/api/settings')
+    // 관리자 체크
+    fetch('/api/admin/me')
       .then(r => r.json())
-      .then(data => { setValues(data); setLoading(false); });
-  }, []);
-
-  function handleAdminKeyChange(v: string) {
-    setAdminKey(v);
-    localStorage.setItem('bemi_admin_key', v);
-  }
+      .then(({ isAdmin }) => {
+        if (!isAdmin) { router.replace('/'); return; }
+        fetch('/api/settings')
+          .then(r => r.json())
+          .then(data => { setValues(data); setLoading(false); });
+      })
+      .catch(() => router.replace('/'));
+  }, [router]);
 
   async function handleSave() {
     setSaveError('');
     const res = await fetch('/api/settings', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'x-admin-secret': adminKey },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(values),
     });
     if (res.ok) {
@@ -109,6 +110,12 @@ export default function SettingsPage() {
               className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
             >
               대시보드
+            </Link>
+            <Link
+              href="/admin"
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              관리자
             </Link>
             <Link
               href="/settings"
@@ -187,23 +194,10 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Admin Key + 파라미터 */}
+        {/* 파라미터 */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
           <h2 className="mb-4 text-sm font-semibold text-zinc-300">파라미터 설정</h2>
-
-          {/* Admin Key */}
-          <div className="mb-5 flex flex-wrap items-center gap-3">
-            <label className="text-xs font-semibold text-zinc-400 w-20 shrink-0">🔑 Admin Key</label>
-            <input
-              type="password"
-              className="flex-1 min-w-[220px] rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-200 outline-none focus:border-cyan-400/40 placeholder:text-zinc-600"
-              placeholder="Vercel 환경변수 ADMIN_SECRET 값 입력"
-              value={adminKey}
-              onChange={e => handleAdminKeyChange(e.target.value)}
-            />
-            {saveError && <span className="text-sm text-red-400">{saveError}</span>}
-          </div>
-
+          {saveError && <p className="mb-3 text-sm text-red-400">{saveError}</p>}
           {loading ? (
             <div className="py-8 text-center text-sm text-zinc-600">로딩 중...</div>
           ) : (

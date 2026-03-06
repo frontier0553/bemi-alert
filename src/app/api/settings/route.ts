@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 const DEFAULTS: Record<string, string> = {
   SCAN_TOP_N: '200',
@@ -18,10 +19,12 @@ const BOUNDS: Record<string, [number, number]> = {
   SCAN_COOLDOWN_MINUTES: [1,   1440],
 };
 
-function checkAdminAuth(req: NextRequest): boolean {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) return false; // ADMIN_SECRET 미설정 시 모든 쓰기 차단
-  return req.headers.get('x-admin-secret') === secret;
+async function isAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return false;
+  const adminEmails = (process.env.ADMIN_EMAIL ?? '').split(',').map(e => e.trim()).filter(Boolean);
+  return adminEmails.includes(user.email);
 }
 
 export async function GET() {
@@ -32,7 +35,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!checkAdminAuth(req)) {
+  if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

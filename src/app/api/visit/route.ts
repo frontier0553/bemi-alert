@@ -1,8 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+}
+
+async function isAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return false;
+  const adminEmails = (process.env.ADMIN_EMAIL ?? '').split(',').map(e => e.trim()).filter(Boolean);
+  return adminEmails.includes(user.email);
 }
 
 /** POST /api/visit — 방문 1회 기록 */
@@ -17,9 +26,8 @@ export async function POST() {
 }
 
 /** GET /api/visit — 방문 통계 (admin only) */
-export async function GET(req: NextRequest) {
-  const secret = req.headers.get('x-admin-secret');
-  if (process.env.ADMIN_SECRET && secret !== process.env.ADMIN_SECRET) {
+export async function GET() {
+  if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

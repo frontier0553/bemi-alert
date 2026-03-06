@@ -30,7 +30,7 @@ export default function Home() {
   const [whalesLoading, setWhalesLoading] = useState(true);
   const [futures, setFutures]             = useState<FuturesAlertRow[]>([]);
   const [futuresLoading, setFuturesLoading] = useState(true);
-  const [adminKey, setAdminKey]           = useState('');
+  const [isAdmin, setIsAdmin]             = useState(false);
   const [visitStats, setVisitStats]       = useState<{ today: number; total: number } | null>(null);
   const [user, setUser]                   = useState<User | null>(null);
 
@@ -90,17 +90,21 @@ export default function Home() {
     return () => clearInterval(t);
   }, [lastUpdated]);
 
-  // 방문 기록 + 관리자 통계 + 로그인 상태
+  // 방문 기록 + 관리자 체크 + 로그인 상태
   useEffect(() => {
     fetch('/api/visit', { method: 'POST' }).catch(() => {});
-    const key = localStorage.getItem('bemi_admin_key') ?? '';
-    setAdminKey(key);
-    if (key) {
-      fetch('/api/visit', { headers: { 'x-admin-secret': key } })
-        .then(r => r.ok ? r.json() : null)
-        .then(d => d && setVisitStats({ today: d.today, total: d.total }))
-        .catch(() => {});
-    }
+    fetch('/api/admin/me')
+      .then(r => r.json())
+      .then(({ isAdmin: admin }) => {
+        setIsAdmin(admin);
+        if (admin) {
+          fetch('/api/visit')
+            .then(r => r.ok ? r.json() : null)
+            .then(d => d && setVisitStats({ today: d.today, total: d.total }))
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
     // 로그인 상태 확인
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -165,6 +169,14 @@ export default function Home() {
               <Settings2 className="h-3.5 w-3.5" />
               설정
             </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-1.5 text-sm text-amber-300 hover:bg-amber-400/15 transition-colors"
+              >
+                관리자
+              </Link>
+            )}
             <a
               href="https://t.me/bemialert_bot"
               target="_blank"
