@@ -207,7 +207,20 @@ export default function Home() {
               <span className="w-14 shrink-0">심볼</span>
               <span className="shrink-0 w-12">방향</span>
               <span className="flex-1">거래규모</span>
-              <span className="shrink-0 w-10 text-right">스코어</span>
+              <span className="group relative shrink-0 w-10 text-right cursor-help">
+                스코어
+                <span className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0e1117] p-3 text-left text-[11px] font-normal normal-case tracking-normal text-zinc-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
+                  <span className="block font-semibold text-zinc-100 mb-1.5">고래 압력 지수 (-100 ~ +100)</span>
+                  <span className="block text-zinc-400 leading-relaxed">
+                    (매수건 × 2) − (매도건 × 2) + 거래량 스파이크
+                  </span>
+                  <span className="mt-2 block space-y-1">
+                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />+40 이상: 강한 매집</span>
+                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />−40 이하: 강한 매도</span>
+                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" />그 외: 중립</span>
+                  </span>
+                </span>
+              </span>
               <span className="shrink-0 w-14 text-right">시각</span>
             </div>
             <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
