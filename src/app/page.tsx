@@ -77,11 +77,17 @@ export default function Home() {
   }, [lastUpdated]);
 
   const now        = Date.now();
-  const allRecent  = events.slice(0, 50);
   const liveEvents = events.filter(ev => now - new Date(ev.detectedAt).getTime() < LIVE_WINDOW_MS);
   const grouped    = groupBySymbol(events);
 
-  const scannerEvents = allRecent.filter(ev =>
+  // 심볼별 최신 1개만 — scanner 중복 제거
+  const uniqueBySymbol = Array.from(
+    events.reduce((map, ev) => {
+      if (!map.has(ev.symbol)) map.set(ev.symbol, ev);
+      return map;
+    }, new Map<string, Event>()).values()
+  );
+  const scannerEvents = uniqueBySymbol.filter(ev =>
     scannerFilter === 'ALL' ? true : ev.type === scannerFilter,
   );
 
@@ -313,8 +319,9 @@ export default function Home() {
 /* ── Scanner List Item ─────────────────────────────── */
 function ScannerItem({ ev }: { ev: Event }) {
   const isPump  = ev.type === 'PUMP';
-  const stars   = signalStrength(ev.volumeMult, ev.changePct);
-  const score   = Math.round((stars / 5) * 100);
+  const volMult = ev.volRatio ?? ev.volumeMult ?? 1;
+  // 바: volRatio 기준 — 3x=40%, 5x=60%, 10x=80%, 20x=100%
+  const score   = Math.min(100, Math.round((volMult / 20) * 100));
 
   return (
     <div className={`px-4 py-3 transition-colors hover:bg-white/5 cursor-pointer`}>
