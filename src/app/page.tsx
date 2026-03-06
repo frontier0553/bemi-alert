@@ -245,7 +245,10 @@ export default function Home() {
             {/* 헤더 + 탭 */}
             <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2.5">
-                <span className="text-sm font-semibold">📡 실시간 신호</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">📡 실시간 PUMP / DUMP</span>
+                  <span className="text-[10px] text-zinc-600">단기 급등·급락 감지 (최근 1시간)</span>
+                </div>
                 {liveEvents.length > 0 && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-red-400/30 bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-300">
                     <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />

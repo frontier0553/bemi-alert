@@ -49,10 +49,38 @@ const SETTINGS: SettingConfig[] = [
 ];
 
 const FLOW_STEPS = [
-  { icon: '🔄', label: '주기적 스캔',   desc: '60초마다 바이낸스 API 호출' },
-  { icon: '📊', label: '데이터 수집',   desc: '상위 N개 코인 가격·거래량' },
-  { icon: '🧮', label: '조건 판별',     desc: '변화율 & 거래량 배수 계산' },
-  { icon: '💾', label: '이벤트 저장',   desc: '조건 만족 & 쿨타임 통과 시 DB 기록' },
+  {
+    icon: '🔄',
+    label: '주기적 스캔',
+    desc: 'Vercel Cron → /api/scan',
+    details: ['60초마다 자동 실행', '바이낸스 현물 전체 티커 조회', 'USDT 페어만 필터링'],
+    color: 'border-cyan-500/20 bg-cyan-500/5',
+    labelColor: 'text-cyan-300',
+  },
+  {
+    icon: '📊',
+    label: '데이터 수집',
+    desc: '캔들 + 거래량 병렬 수집',
+    details: ['거래량 상위 N개 코인 선별', '1분봉 60개 캔들 수집', '배치 20개씩 병렬 요청'],
+    color: 'border-blue-500/20 bg-blue-500/5',
+    labelColor: 'text-blue-300',
+  },
+  {
+    icon: '🧮',
+    label: '조건 판별',
+    desc: '수익률 + 거래량 배수',
+    details: ['3분·5분 가격 변화율 계산', '현재 1분 거래량 / 60분 평균', '가짜 펌프 필터 (유동성·캔들)'],
+    color: 'border-violet-500/20 bg-violet-500/5',
+    labelColor: 'text-violet-300',
+  },
+  {
+    icon: '💾',
+    label: '이벤트 저장',
+    desc: 'DB 기록 + 텔레그램 발송',
+    details: ['쿨다운 중복 차단 (10분)', 'Signal DB 저장', '구독자 개인 필터 적용 후 발송'],
+    color: 'border-emerald-500/20 bg-emerald-500/5',
+    labelColor: 'text-emerald-300',
+  },
 ];
 
 export default function SettingsPage() {
@@ -152,18 +180,30 @@ export default function SettingsPage() {
         {/* 작동 방식 */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
           <h2 className="mb-4 text-sm font-semibold text-zinc-300">작동 방식</h2>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {FLOW_STEPS.map((step, i) => (
-              <>
-                <div key={step.label} className="flex flex-col items-center gap-1.5 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-center min-w-[120px]">
-                  <span className="text-xl">{step.icon}</span>
-                  <span className="text-xs font-semibold text-zinc-200">{step.label}</span>
-                  <span className="text-[11px] text-zinc-500 leading-relaxed">{step.desc}</span>
+              <div key={step.label} className="relative">
+                {/* 단계 번호 */}
+                <div className={`rounded-xl border p-4 h-full ${step.color}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">{step.icon}</span>
+                    <span className={`text-xs font-bold ${step.labelColor}`}>{step.label}</span>
+                  </div>
+                  <p className="text-[10px] text-zinc-500 mb-2.5 leading-relaxed">{step.desc}</p>
+                  <ul className="space-y-1">
+                    {step.details.map(d => (
+                      <li key={d} className="flex items-start gap-1.5 text-[10px] text-zinc-400 leading-relaxed">
+                        <span className="mt-0.5 text-zinc-600 shrink-0">·</span>
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+                {/* 화살표 (마지막 제외) */}
                 {i < FLOW_STEPS.length - 1 && (
-                  <span key={`arrow-${i}`} className="text-zinc-700 text-lg">→</span>
+                  <span className="hidden sm:flex absolute -right-2 top-1/2 -translate-y-1/2 z-10 text-zinc-700 text-base">→</span>
                 )}
-              </>
+              </div>
             ))}
           </div>
         </div>
