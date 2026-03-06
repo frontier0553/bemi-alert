@@ -6,6 +6,8 @@ import { Bell, CandlestickChart, Filter, Flame, Search, Settings2, TriangleAlert
 import { MarketSummaryCards } from './components/MarketSummaryCards';
 import { FiltersBar }         from './components/FiltersBar';
 import { HistoryTable }       from './components/HistoryTable';
+import { WhalePanel }         from './components/WhalePanel';
+import type { WhaleEventRow } from './components/WhalePanel';
 import { groupBySymbol, baseCoin, fmt, timeAgo, signalStrength } from './components/utils';
 import type { FilterType, Event, Stats } from './components/types';
 
@@ -46,6 +48,8 @@ export default function Home() {
   const [loading, setLoading]         = useState(true);
   const [countdown, setCountdown]     = useState(30);
   const [scannerFilter, setScannerFilter] = useState<FilterType>('ALL');
+  const [whales, setWhales]           = useState<WhaleEventRow[]>([]);
+  const [whalesLoading, setWhalesLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
@@ -65,11 +69,29 @@ export default function Home() {
     }
   }, [filter, search]);
 
+  const fetchWhales = useCallback(async () => {
+    try {
+      const res  = await fetch('/api/whales');
+      const data = await res.json();
+      setWhales(data.whales ?? []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setWhalesLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [fetchData]);
+
+  useEffect(() => {
+    fetchWhales();
+    const interval = setInterval(fetchWhales, 60000);
+    return () => clearInterval(interval);
+  }, [fetchWhales]);
 
   useEffect(() => {
     const t = setInterval(() => setCountdown(c => (c > 0 ? c - 1 : 0)), 1000);
@@ -311,6 +333,10 @@ export default function Home() {
           </aside>
 
         </div>
+
+        {/* ── Whale Flow ── */}
+        <WhalePanel whales={whales} loading={whalesLoading} />
+
       </main>
     </div>
   );
