@@ -159,9 +159,9 @@ export default function SettingsPage() {
 
         {/* 페이지 제목 */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Settings2 className="h-5 w-5 text-zinc-400" />
-            <h1 className="text-lg font-bold">설정</h1>
+          <div className="flex items-center gap-3">
+            <Settings2 className="h-6 w-6 text-zinc-400" />
+            <h1 className="text-2xl font-bold">설정</h1>
           </div>
           <button
             onClick={handleSave}
