@@ -8,6 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ── Visitor Tracking ─────────────────────────────────────────
+model DailyVisit {
+  date  String @id   // "YYYY-MM-DD"
+  count Int    @default(0)
+}
+
 // ── Legacy (pre-STEP1) ───────────────────────────────────────
 enum EventType {
   PUMP

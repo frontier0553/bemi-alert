@@ -28,6 +28,8 @@ export default function Home() {
   const [whalesLoading, setWhalesLoading] = useState(true);
   const [futures, setFutures]             = useState<FuturesAlertRow[]>([]);
   const [futuresLoading, setFuturesLoading] = useState(true);
+  const [adminKey, setAdminKey]           = useState('');
+  const [visitStats, setVisitStats]       = useState<{ today: number; total: number } | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -85,6 +87,19 @@ export default function Home() {
     return () => clearInterval(t);
   }, [lastUpdated]);
 
+  // 방문 기록 + 관리자 통계
+  useEffect(() => {
+    fetch('/api/visit', { method: 'POST' }).catch(() => {});
+    const key = localStorage.getItem('bemi_admin_key') ?? '';
+    setAdminKey(key);
+    if (key) {
+      fetch('/api/visit', { headers: { 'x-admin-secret': key } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => d && setVisitStats({ today: d.today, total: d.total }))
+        .catch(() => {});
+    }
+  }, []);
+
   const now        = Date.now();
   const liveEvents = events.filter(ev => now - new Date(ev.detectedAt).getTime() < LIVE_WINDOW_MS);
   const grouped    = groupBySymbol(events);
@@ -114,6 +129,13 @@ export default function Home() {
             {lastUpdated && (
               <span className="hidden sm:block text-xs text-zinc-600 tabular-nums">
                 {lastUpdated.toLocaleTimeString('ko-KR')} · {countdown}s
+              </span>
+            )}
+            {visitStats && (
+              <span className="hidden sm:flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/5 px-2.5 py-1 text-[11px] tabular-nums text-zinc-500">
+                👁 오늘 <span className="text-zinc-300 font-semibold">{visitStats.today.toLocaleString()}</span>
+                <span className="text-zinc-700">·</span>
+                누적 <span className="text-zinc-300 font-semibold">{visitStats.total.toLocaleString()}</span>
               </span>
             )}
           </div>
