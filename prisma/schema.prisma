@@ -10,11 +10,24 @@ datasource db {
 
 // ── Users ─────────────────────────────────────────────────────
 model User {
-  id        String   @id           // Supabase auth UUID
-  email     String   @unique
-  tier      String   @default("FREE")  // "FREE" | "PAID"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String        @id           // Supabase auth UUID
+  email       String        @unique
+  tier        String        @default("FREE")  // "FREE" | "PAID"
+  linkCode    String?       // 6자리 텔레그램 연동 코드
+  linkCodeExp DateTime?     // 연동 코드 만료 시각
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  settings    UserSettings?
+}
+
+// ── User Notification Settings ────────────────────────────────
+model UserSettings {
+  userId     String   @id
+  user       User     @relation(fields: [userId], references: [id])
+  coinFilter String?  // JSON 배열 ex) ["BTC","ETH"], null=전체
+  pumpPct    Float?   // null=글로벌 기본값 사용
+  dumpPct    Float?   // null=글로벌 기본값 사용
+  updatedAt  DateTime @updatedAt
 }
 
 // ── Visitor Tracking ─────────────────────────────────────────
@@ -73,6 +86,7 @@ model Subscriber {
   username  String?
   firstName String?
   isActive  Boolean  @default(true)
+  userId    String?  // 연동된 User ID (optional)
   joinedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -50,6 +50,32 @@ export async function POST(req: NextRequest) {
       data:  { isActive: false },
     });
     await sendTelegramMessage(chatId, STOPPED);
+  } else if (text.startsWith('/link ')) {
+    const code = text.slice(6).trim();
+    const user = await prisma.user.findFirst({
+      where: {
+        linkCode: code,
+        linkCodeExp: { gt: new Date() },
+      },
+    });
+    if (!user) {
+      await sendTelegramMessage(chatId, '❌ 유효하지 않거나 만료된 코드입니다.\n\n설정 페이지에서 새 코드를 발급받으세요.');
+    } else {
+      // 코드 클리어 + Subscriber에 userId 연결
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { linkCode: null, linkCodeExp: null },
+      });
+      await prisma.subscriber.upsert({
+        where:  { chatId },
+        update: { isActive: true, username, firstName, userId: user.id },
+        create: { chatId, username, firstName, isActive: true, userId: user.id },
+      });
+      await sendTelegramMessage(
+        chatId,
+        `✅ <b>${user.email}</b> 계정과 연동되었습니다!\n\n이제 개인 설정에 맞춘 알림을 받습니다.`,
+      );
+    }
   }
 
   return NextResponse.json({ ok: true });

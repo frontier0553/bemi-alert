@@ -53,7 +53,11 @@ export async function POST(req: NextRequest) {
       });
       savedFunding++;
 
-      await sendTelegramAlertToSubscribers(formatFundingAlert(signal));
+      await sendTelegramAlertToSubscribers(formatFundingAlert(signal), {
+        symbol:    signal.symbol,
+        changePct: signal.fundingRate * 100,
+        alertType: 'FUTURES',
+      });
     }
 
     // ── 2) OI 급변 감지 ─────────────────────────────────────
@@ -89,7 +93,11 @@ export async function POST(req: NextRequest) {
         });
         savedOi++;
 
-        await sendTelegramAlertToSubscribers(formatOiAlert(signal));
+        await sendTelegramAlertToSubscribers(formatOiAlert(signal), {
+          symbol:    signal.symbol,
+          changePct: signal.oiChangePct,
+          alertType: 'FUTURES',
+        });
       }
     }
 

@@ -162,19 +162,30 @@ export default function Home() {
               <RefreshCw className="h-3.5 w-3.5" />
               새로고침
             </button>
-            <Link
-              href="/settings"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
-              <Settings2 className="h-3.5 w-3.5" />
-              설정
-            </Link>
             {isAdmin && (
+              <>
+                <Link
+                  href="/settings"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                >
+                  <Settings2 className="h-3.5 w-3.5" />
+                  설정
+                </Link>
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-1.5 text-sm text-amber-300 hover:bg-amber-400/15 transition-colors"
+                >
+                  관리자
+                </Link>
+              </>
+            )}
+            {user && !isAdmin && (
               <Link
-                href="/admin"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-1.5 text-sm text-amber-300 hover:bg-amber-400/15 transition-colors"
+                href="/user/settings"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
               >
-                관리자
+                <Settings2 className="h-3.5 w-3.5" />
+                내 설정
               </Link>
             )}
             <a
