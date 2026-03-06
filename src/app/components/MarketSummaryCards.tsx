@@ -67,13 +67,13 @@ export function MarketSummaryCards({
         accent="dump"
       />
       <StatCard
-        label="🏆 최강 급등"
+        label="🏆 최대 급등"
         value={stats.topPump ? `+${fmt(stats.topPump.changePct)}%` : '없음'}
         sub={stats.topPump?.symbol ?? '—'}
         accent="pump"
       />
       <StatCard
-        label="💀 최강 급락"
+        label="💀 최대 급락"
         value={stats.topDump ? `${fmt(stats.topDump.changePct)}%` : '없음'}
         sub={stats.topDump?.symbol ?? '—'}
         accent="dump"
