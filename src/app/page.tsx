@@ -12,7 +12,8 @@ import type { WhaleEventRow } from './components/WhalePanel';
 import { groupBySymbol, baseCoin, fmt, timeAgo } from './components/utils';
 import type { FilterType, Event, Stats } from './components/types';
 
-const LIVE_WINDOW_MS = 5 * 60 * 1000;
+const LIVE_WINDOW_MS    = 5 * 60 * 1000;
+const SCANNER_WINDOW_MS = 60 * 60 * 1000; // 실시간 신호: 최근 1시간
 
 const QUOTE_RE = /(USDT|USDC|BUSD|FDUSD|TUSD)$/;
 
@@ -118,8 +119,11 @@ export default function Home() {
   const liveEvents = events.filter(ev => now - new Date(ev.detectedAt).getTime() < LIVE_WINDOW_MS);
   const grouped    = groupBySymbol(events);
 
+  const recentEvents = events.filter(ev =>
+    now - new Date(ev.detectedAt).getTime() < SCANNER_WINDOW_MS,
+  );
   const uniqueBySymbol = Array.from(
-    events.reduce((map, ev) => {
+    recentEvents.reduce((map, ev) => {
       if (!map.has(ev.symbol)) map.set(ev.symbol, ev);
       return map;
     }, new Map<string, Event>()).values(),
@@ -281,7 +285,7 @@ export default function Home() {
               {loading ? (
                 <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
               ) : scannerEvents.length === 0 ? (
-                <div className="py-10 text-center text-sm text-zinc-600">감지된 신호 없음</div>
+                <div className="py-10 text-center text-sm text-zinc-600">최근 1시간 내 감지 없음</div>
               ) : (
                 scannerEvents.map(ev => <ScannerRow key={ev.id} ev={ev} />)
               )}
