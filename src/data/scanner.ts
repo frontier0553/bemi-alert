@@ -8,7 +8,7 @@ import {
   type Ticker24h,
 } from '../domain/pump';
 import { checkCooldown, updateCooldown } from './cooldown';
-import { sendTelegramAlert } from './telegram';
+import { sendTelegramAlertToSubscribers } from './telegram';
 import { prisma } from '../lib/prisma';
 
 const SCAN_TOP_N_DEFAULT = 200;
@@ -73,7 +73,7 @@ async function processSymbol(
   await updateCooldown(symbol, result.maxMove);
 
   const alertMsg = formatAlert(symbol, result, new Date());
-  await sendTelegramAlert(alertMsg);
+  await sendTelegramAlertToSubscribers(alertMsg);
 
   return alertMsg;
 }

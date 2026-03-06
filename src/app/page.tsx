@@ -79,6 +79,14 @@ export default function Home() {
           >
             설정
           </Link>
+          <a
+            href="https://t.me/bemialert_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-[#29b6f6] border border-[#29b6f6]/30 hover:bg-[#29b6f6]/10 transition-colors"
+          >
+            📣 알림 구독
+          </a>
         </nav>
 
         <div className="flex items-center gap-3">

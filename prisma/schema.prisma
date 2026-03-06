@@ -50,3 +50,14 @@ model Settings {
   key   String @id
   value String
 }
+
+// ── Telegram Subscribers ─────────────────────────────────────
+model Subscriber {
+  id        String   @id @default(cuid())
+  chatId    String   @unique
+  username  String?
+  firstName String?
+  isActive  Boolean  @default(true)
+  joinedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
