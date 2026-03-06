@@ -62,6 +62,21 @@ model Subscriber {
   updatedAt DateTime @updatedAt
 }
 
+// ── Futures Signals (Funding Rate / OI) ──────────────────────
+model FuturesAlert {
+  id          String   @id @default(cuid())
+  symbol      String
+  alertType   String   // "FUNDING" | "OI_SURGE" | "OI_DROP"
+  value       Float    // funding rate (%) or OI change (%)
+  markPrice   Float?   // funding 감지 시 mark price
+  note        String?  // 부가 설명
+
+  detectedAt  DateTime @default(now())
+
+  @@index([detectedAt])
+  @@index([symbol, detectedAt])
+}
+
 // ── Whale Flow Detection ─────────────────────────────────────
 model WhaleEvent {
   id         String   @id @default(cuid())

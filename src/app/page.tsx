@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Bell, CandlestickChart, RefreshCw, Settings2, Waves } from 'lucide-react';
+import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp } from 'lucide-react';
 import { MarketSummaryCards } from './components/MarketSummaryCards';
 import { FiltersBar }         from './components/FiltersBar';
 import { HistoryTable }       from './components/HistoryTable';
@@ -26,6 +26,8 @@ export default function Home() {
   const [scannerFilter, setScannerFilter] = useState<FilterType>('ALL');
   const [whales, setWhales]               = useState<WhaleEventRow[]>([]);
   const [whalesLoading, setWhalesLoading] = useState(true);
+  const [futures, setFutures]             = useState<FuturesAlertRow[]>([]);
+  const [futuresLoading, setFuturesLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
@@ -62,6 +64,21 @@ export default function Home() {
     const t = setInterval(fetchWhales, 60000);
     return () => clearInterval(t);
   }, [fetchWhales]);
+
+  const fetchFutures = useCallback(async () => {
+    try {
+      const res  = await fetch('/api/futures-alerts');
+      const data = await res.json();
+      setFutures(data.alerts ?? []);
+    } catch (e) { console.error(e); }
+    finally { setFuturesLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    fetchFutures();
+    const t = setInterval(fetchFutures, 60000);
+    return () => clearInterval(t);
+  }, [fetchFutures]);
 
   useEffect(() => {
     const t = setInterval(() => setCountdown(c => c > 0 ? c - 1 : 0), 1000);
@@ -234,6 +251,32 @@ export default function Home() {
           </div>
         </div>
 
+        {/* ── 선물 신호 (펀딩비 + OI) ── */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
+          <div className="flex items-center gap-2.5 border-b border-white/5 px-4 py-3">
+            <TrendingUp className="h-4 w-4 text-violet-400" />
+            <span className="text-sm font-semibold">선물 신호</span>
+            <span className="text-xs text-zinc-600">펀딩비 극단 · OI 급변</span>
+          </div>
+          {/* 컬럼 헤더 */}
+          <div className="grid grid-cols-[88px_56px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+            <span>유형</span>
+            <span>심볼</span>
+            <span>내용</span>
+            <span className="text-right">수치</span>
+            <span className="text-right">시각</span>
+          </div>
+          <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto">
+            {futuresLoading ? (
+              <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
+            ) : futures.length === 0 ? (
+              <div className="py-10 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
+            ) : (
+              futures.map(f => <FuturesRow key={f.id} f={f} />)
+            )}
+          </div>
+        </div>
+
         {/* ── Full-width: 감지 내역 ── */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
@@ -338,6 +381,57 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
         </div>
       </div>
       <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
+    </div>
+  );
+}
+
+/* ── Futures Alert Row ───────────────────────────────── */
+interface FuturesAlertRow {
+  id:         string;
+  symbol:     string;
+  alertType:  string;   // "FUNDING" | "OI_SURGE" | "OI_DROP"
+  value:      number;
+  markPrice?: number | null;
+  note?:      string | null;
+  detectedAt: string;
+}
+
+function FuturesRow({ f }: { f: FuturesAlertRow }) {
+  const isFunding = f.alertType === 'FUNDING';
+  const isOiSurge = f.alertType === 'OI_SURGE';
+  const isOiDrop  = f.alertType === 'OI_DROP';
+
+  const badgeStyle = isFunding
+    ? 'border-violet-500/25 bg-violet-500/10 text-violet-300'
+    : isOiSurge
+    ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+    : 'border-red-500/25 bg-red-500/10 text-red-300';
+
+  const badgeLabel = isFunding ? '💸 펀딩비' : isOiSurge ? '📈 OI 급증' : '📉 OI 급감';
+
+  const desc = isFunding
+    ? (f.note === 'LONG_EXTREME' ? '롱 과열' : '숏 과열')
+    : f.note ?? '';
+
+  const valueStr = isFunding
+    ? `${f.value > 0 ? '+' : ''}${f.value.toFixed(4)}%`
+    : `${f.value > 0 ? '+' : ''}${f.value.toFixed(2)}%`;
+
+  const valueColor = f.value > 0 ? 'text-emerald-300' : 'text-red-300';
+
+  return (
+    <div className="grid grid-cols-[88px_56px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+      <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeStyle}`}>
+        {badgeLabel}
+      </span>
+      <span className="font-bold text-sm text-zinc-100 truncate">
+        {f.symbol.replace(QUOTE_RE, '')}
+      </span>
+      <span className="text-xs text-zinc-400 truncate">{desc}</span>
+      <span className={`text-sm font-bold tabular-nums text-right ${valueColor}`}>
+        {valueStr}
+      </span>
+      <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
     </div>
   );
 }
