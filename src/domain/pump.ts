@@ -116,7 +116,7 @@ export function applyFakePumpFilters(
   return true;
 }
 
-const QUOTE_RE = /(USDT|USDC|BUSD|BTC|ETH|BNB)$/;
+const QUOTE_RE = /(USDT|USDC|BUSD|FDUSD|TUSD|DAI|BTC|ETH|BNB|XRP|TRX|TRY|EUR|GBP|AUD|BRL|RUB|UAH|PLN|RON|ZAR)$/;
 
 /**
  * Format the Telegram alert message (HTML parse_mode).
