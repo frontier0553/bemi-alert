@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma';
 
 const SCAN_TOP_N       = 30;   // Top 30 symbols by 24h volume
 const BATCH_SIZE       = 5;    // Concurrent aggTrades requests
-const SAVE_THRESHOLD   = 20;   // |score| ≥ 20 → save to DB
+const SAVE_THRESHOLD   = 5;    // |score| ≥ 5 → save to DB
 const ALERT_THRESHOLD  = 40;   // |score| ≥ 40 → telegram alert
 
 export async function POST(req: NextRequest) {

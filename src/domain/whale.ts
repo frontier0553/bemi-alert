@@ -5,7 +5,7 @@ const WHALE_USD_MIN     = 100_000;    // $100K absolute minimum
 const WHALE_AVG_MULT    = 20;         // OR 20× average trade size
 const ACCUMULATION_N    = 5;          // 5+ whale buys in window
 const DUMP_N            = 5;          // 5+ whale sells in window
-const FAKE_WHALE_PCT    = 0.001;      // must be ≥ 0.1% of 24h volume
+const MIN_LIQUIDITY     = 1_000_000;  // 24h volume 최소 $1M (유동성 없는 코인 제외)
 
 export interface WhaleResult {
   symbol:       string;
@@ -26,15 +26,15 @@ export function detectWhaleActivity(
   quoteVolume24h: number,       // 24h volume in USDT
 ): WhaleResult | null {
   if (trades.length === 0) return null;
+  // 유동성 없는 코인 제외 (fake whale filter)
+  if (quoteVolume24h < MIN_LIQUIDITY) return null;
 
   const totalQty  = trades.reduce((s, t) => s + t.quoteQty, 0);
   const avgSize   = totalQty / trades.length;
-  const minSize   = quoteVolume24h * FAKE_WHALE_PCT;  // fake-whale filter
 
-  // Whale trade: ≥$100K OR ≥20× avg, AND ≥ 0.1% of 24h volume
+  // Whale trade: ≥$100K 절대값 OR 평균 거래의 20배 이상
   const isWhale = (t: AggTrade) =>
-    t.quoteQty >= minSize &&
-    (t.quoteQty >= WHALE_USD_MIN || t.quoteQty >= avgSize * WHALE_AVG_MULT);
+    t.quoteQty >= WHALE_USD_MIN || t.quoteQty >= avgSize * WHALE_AVG_MULT;
 
   const whaleTrades = trades.filter(isWhale);
   if (whaleTrades.length === 0) return null;
