@@ -116,19 +116,34 @@ export function applyFakePumpFilters(
   return true;
 }
 
+const QUOTE_RE = /(USDT|USDC|BUSD|BTC|ETH|BNB)$/;
+
 /**
  * Format the Telegram alert message (HTML parse_mode).
+ * type: 'PUMP' → 🔵, 'DUMP' → 🔴
  */
-export function formatAlert(symbol: string, result: PumpResult, detectedAt: Date = new Date()): string {
-  return `
-🚨 <b>BEMI ALERT</b>
+export function formatAlert(
+  symbol: string,
+  result: PumpResult,
+  detectedAt: Date = new Date(),
+  type: 'PUMP' | 'DUMP' = 'PUMP',
+): string {
+  const baseCoin  = symbol.replace(QUOTE_RE, '');
+  const isPump    = type === 'PUMP';
+  const dot       = isPump ? '🔵' : '🔴';
+  const arrow     = isPump ? '📈' : '📉';
+  const moveSign  = isPump ? '+' : '';
+  const tag       = isPump ? '#pump' : '#dump';
 
-💰 <b>Symbol</b>: ${symbol}
-📈 <b>Move</b>: +${result.changePct.toFixed(1)}% (${result.changeWindow})
+  return `
+${dot} <b>BEMI ALERT</b>
+
+💰 <b>Symbol</b>: ${baseCoin}
+${arrow} <b>Move</b>: ${moveSign}${result.changePct.toFixed(1)}% (${result.changeWindow})
 📊 <b>Volume</b>: x${result.volRatio.toFixed(1)}
 
 ⏱ <b>Time</b>: ${detectedAt.toUTCString()}
 
-#pump #crypto
+${tag} #crypto
 `.trim();
 }

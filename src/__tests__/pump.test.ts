@@ -138,16 +138,18 @@ describe('formatAlert', () => {
 
   it('formats the canonical example correctly', () => {
     const msg = formatAlert('ETHUSDT', makeResult(4.2, '5m', 3.6));
-    expect(msg).toContain('ETHUSDT');
+    expect(msg).toContain('ETH');       // USDT 제거됨
+    expect(msg).not.toContain('ETHUSDT');
     expect(msg).toContain('+4.2%');
     expect(msg).toContain('5m');
     expect(msg).toContain('x3.6');
     expect(msg).toContain('BEMI ALERT');
+    expect(msg).toContain('🔵');        // PUMP = 파란색
   });
 
   it('formats 3m window correctly', () => {
     const msg = formatAlert('BTCUSDT', makeResult(3.1, '3m', 5.0));
-    expect(msg).toContain('BTCUSDT');
+    expect(msg).toContain('BTC');       // USDT 제거됨
     expect(msg).toContain('+3.1%');
     expect(msg).toContain('3m');
     expect(msg).toContain('x5.0');
