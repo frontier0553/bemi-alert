@@ -276,7 +276,7 @@ export default function Home() {
             </div>
 
             {/* 컬럼 헤더 */}
-            <div className="grid grid-cols-[80px_1fr_68px_56px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+            <div className="grid grid-cols-[80px_1fr_68px_56px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               <span>유형</span>
               <span>심볼</span>
               <span className="text-right">변동폭</span>
@@ -304,7 +304,7 @@ export default function Home() {
             </div>
 
             {/* 컬럼 헤더 */}
-            <div className="grid grid-cols-[16px_56px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+            <div className="grid grid-cols-[16px_56px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               <span />
               <span>심볼</span>
               <span>방향</span>
@@ -345,7 +345,7 @@ export default function Home() {
             <span className="text-xs text-zinc-600">펀딩비 극단 · OI 급변</span>
           </div>
           {/* 컬럼 헤더 */}
-          <div className="grid grid-cols-[88px_56px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+          <div className="grid grid-cols-[88px_56px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
             <span>유형</span>
             <span>심볼</span>
             <span>내용</span>
