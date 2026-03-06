@@ -194,7 +194,7 @@ export default function Home() {
           </div>
 
           {/* ── Right: Whale Flow ── */}
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
             <div className="flex items-center gap-2.5 border-b border-white/5 px-4 py-3">
               <Waves className="h-4 w-4 text-cyan-300" />
               <span className="text-sm font-semibold">Whale Flow</span>
