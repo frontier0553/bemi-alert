@@ -6,19 +6,19 @@ const config: Config = {
     extend: {
       colors: {
         surface: {
-          base:     '#08080f',
-          card:     '#0f0f1e',
-          elevated: '#16162a',
-          hover:    '#1c1c35',
+          base:     '#06080d',
+          card:     '#0d0f14',
+          elevated: '#13161c',
+          hover:    '#191d25',
         },
         edge: {
-          subtle: '#222240',
-          medium: '#2d2d55',
+          subtle: '#1e2128',
+          medium: '#272c36',
         },
         ink: {
-          primary:   '#e0e0f0',
-          secondary: '#7878a0',
-          ghost:     '#4a4a70',
+          primary:   '#e4e4e7',
+          secondary: '#71717a',
+          ghost:     '#52525b',
         },
         pump:   '#00e676',
         dump:   '#ff4757',
