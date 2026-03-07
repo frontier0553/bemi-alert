@@ -30,12 +30,15 @@ model UserSettings {
   updatedAt  DateTime @updatedAt
 }
 
-// ── Stripe Billing ────────────────────────────────────────────
-model StripeCustomer {
-  id               String   @id @default(cuid())
-  userId           String   @unique
-  stripeCustomerId String   @unique
-  createdAt        DateTime @default(now())
+// ── PortOne Billing ───────────────────────────────────────────
+model PortOneSubscription {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  billingKey String    // 포트원 빌링키 (카드 등록 시 발급)
+  pgProvider String?   // "TOSSPAYMENTS" | "KCP" 등
+  startedAt  DateTime  @default(now())
+  expiresAt  DateTime  // 현재 구독 만료일
+  canceledAt DateTime? // 해지 처리 시각
 }
 
 // ── Visitor Tracking ─────────────────────────────────────────

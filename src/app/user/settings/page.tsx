@@ -131,18 +131,12 @@ export default function UserSettingsPage() {
             )}
           </div>
           {data.tier === 'PRO' ? (
-            <a
-              href="/api/billing"
-              onClick={async e => {
-                e.preventDefault();
-                const res = await fetch('/api/billing');
-                const d = await res.json();
-                if (d.portalUrl) window.location.href = d.portalUrl;
-              }}
+            <Link
+              href="/pricing"
               className="shrink-0 text-xs text-zinc-400 hover:text-zinc-200 underline"
             >
-              구독 관리
-            </a>
+              구독 관리 / 해지
+            </Link>
           ) : (
             <Link
               href="/pricing"

@@ -1,37 +1,39 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CandlestickChart, Check, X, Zap } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import * as PortOne from '@portone/browser-sdk/v2';
+
+const STORE_ID    = process.env.NEXT_PUBLIC_PORTONE_STORE_ID    ?? '';
+const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? '';
 
 const FREE_FEATURES = [
   { label: '실시간 PUMP/DUMP 대시보드', ok: true },
-  { label: '텔레그램 알림 수신', ok: true },
-  { label: '관심 코인 필터', ok: true },
-  { label: '알림 이력 7일', ok: true },
-  { label: '개인 임계값 설정', ok: false },
-  { label: '알림 이력 30일', ok: false },
+  { label: '텔레그램 알림 수신',        ok: true },
+  { label: '관심 코인 필터',            ok: true },
+  { label: '알림 이력 7일',             ok: true },
+  { label: '개인 임계값 설정',          ok: false },
+  { label: '알림 이력 30일',            ok: false },
 ];
 
 const PRO_FEATURES = [
-  { label: '실시간 PUMP/DUMP 대시보드', ok: true },
-  { label: '텔레그램 알림 수신', ok: true },
-  { label: '관심 코인 필터', ok: true },
-  { label: '알림 이력 30일', ok: true },
+  { label: '실시간 PUMP/DUMP 대시보드',     ok: true },
+  { label: '텔레그램 알림 수신',            ok: true },
+  { label: '관심 코인 필터',                ok: true },
+  { label: '알림 이력 30일',                ok: true },
   { label: '개인 임계값 설정 (PUMP/DUMP%)', ok: true },
-  { label: 'PRO 뱃지', ok: true },
+  { label: 'PRO 뱃지',                      ok: true },
 ];
 
 export default function PricingPage() {
   const [user, setUser]       = useState<User | null>(null);
   const [tier, setTier]       = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const searchParams          = useSearchParams();
-  const success               = searchParams.get('success') === '1';
-  const cancelled             = searchParams.get('cancel')  === '1';
+  const [error, setError]     = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -46,16 +48,61 @@ export default function PricingPage() {
   async function handleUpgrade() {
     if (!user) { window.location.href = '/login'; return; }
     setLoading(true);
-    const res  = await fetch('/api/checkout', { method: 'POST' });
-    const data = await res.json();
-    if (data.url) window.location.href = data.url;
-    else setLoading(false);
+    setError(null);
+
+    const paymentId = `bemi-pro-${user.id}-${Date.now()}`;
+
+    try {
+      // 포트원 V2: 빌링키 발급 (카드 등록 팝업)
+      const result = await PortOne.requestIssueBillingKey({
+        storeId:          STORE_ID,
+        channelKey:       CHANNEL_KEY,
+        billingKeyMethod: 'CARD',
+        issueId:          `issue-${user.id}-${Date.now()}`,
+        issueName:        'Bemi Alert PRO 구독 카드 등록',
+        customer: {
+          customerId: user.id,
+          email:      user.email ?? undefined,
+        },
+      });
+
+      if (!result || result.code !== undefined) {
+        setError((result as { message?: string })?.message ?? '카드 등록이 취소되었습니다');
+        setLoading(false);
+        return;
+      }
+
+      // 서버에서 즉시 결제 실행
+      const confirmRes = await fetch('/api/portone/confirm', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          billingKey: (result as { billingKey?: string }).billingKey,
+          paymentId,
+        }),
+      });
+
+      if (!confirmRes.ok) {
+        const d = await confirmRes.json();
+        setError(d.error ?? '결제 처리 중 오류가 발생했습니다');
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      setTier('PRO');
+    } catch (err) {
+      console.error(err);
+      setError('결제 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
+
+    setLoading(false);
   }
 
-  async function handleManage() {
-    const res  = await fetch('/api/billing');
-    const data = await res.json();
-    if (data.portalUrl) window.location.href = data.portalUrl;
+  async function handleCancel() {
+    if (!confirm('구독을 해지하시겠습니까? 즉시 FREE로 전환됩니다.')) return;
+    const res = await fetch('/api/portone/cancel', { method: 'POST' });
+    if (res.ok) { setTier('FREE'); alert('구독이 해지되었습니다.'); }
   }
 
   return (
@@ -77,19 +124,18 @@ export default function PricingPage() {
 
       <main className="relative mx-auto max-w-[900px] px-5 py-12 flex flex-col gap-10">
 
-        {/* 성공/취소 배너 */}
         {success && (
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-4 text-sm text-emerald-300 text-center">
             🎉 PRO 구독이 활성화됐습니다! 모든 기능을 이용하실 수 있습니다.
           </div>
         )}
-        {cancelled && (
-          <div className="rounded-xl border border-zinc-700 bg-zinc-800/30 px-5 py-4 text-sm text-zinc-400 text-center">
-            결제가 취소됐습니다. 언제든지 다시 시작할 수 있습니다.
+
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-sm text-red-300 text-center">
+            {error}
           </div>
         )}
 
-        {/* 타이틀 */}
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-2">플랜 선택</h1>
           <p className="text-zinc-500 text-sm">지금 바로 시작하고, 필요할 때 업그레이드하세요.</p>
@@ -102,7 +148,7 @@ export default function PricingPage() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 flex flex-col gap-5">
             <div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-zinc-300">FREE</span>
-              <div className="mt-3 text-3xl font-bold">$0</div>
+              <div className="mt-3 text-3xl font-bold">₩0</div>
               <div className="text-xs text-zinc-500 mt-1">영원히 무료</div>
             </div>
             <ul className="flex flex-col gap-2.5">
@@ -116,11 +162,11 @@ export default function PricingPage() {
               ))}
             </ul>
             <div className="mt-auto pt-2">
-              {tier === 'FREE' || !tier ? (
+              {(tier === 'FREE' || !tier) && (
                 <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-center text-zinc-500">
                   현재 플랜
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
 
@@ -131,8 +177,8 @@ export default function PricingPage() {
             </div>
             <div>
               <span className="rounded-full bg-cyan-400/15 border border-cyan-400/25 px-3 py-1 text-xs font-semibold text-cyan-300">PRO</span>
-              <div className="mt-3 text-3xl font-bold">$9<span className="text-base font-normal text-zinc-400">/mo</span></div>
-              <div className="text-xs text-zinc-500 mt-1">언제든지 취소 가능</div>
+              <div className="mt-3 text-3xl font-bold">₩9,900<span className="text-base font-normal text-zinc-400">/월</span></div>
+              <div className="text-xs text-zinc-500 mt-1">언제든지 해지 가능</div>
             </div>
             <ul className="flex flex-col gap-2.5">
               {PRO_FEATURES.map(f => (
@@ -142,14 +188,19 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-auto pt-2">
+            <div className="mt-auto pt-2 flex flex-col gap-2">
               {tier === 'PRO' ? (
-                <button
-                  onClick={handleManage}
-                  className="w-full rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-2.5 text-sm font-semibold text-cyan-300 hover:bg-cyan-400/15 transition-colors"
-                >
-                  구독 관리
-                </button>
+                <>
+                  <div className="rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-2.5 text-sm font-semibold text-cyan-300 text-center">
+                    ✓ 현재 구독 중
+                  </div>
+                  <button
+                    onClick={handleCancel}
+                    className="text-xs text-zinc-600 hover:text-zinc-400 text-center"
+                  >
+                    구독 해지
+                  </button>
+                </>
               ) : (
                 <button
                   onClick={handleUpgrade}
@@ -157,7 +208,7 @@ export default function PricingPage() {
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-bold text-black hover:bg-cyan-300 transition-colors disabled:opacity-50"
                 >
                   <Zap className="h-4 w-4" />
-                  {loading ? '처리 중...' : 'PRO 시작하기'}
+                  {loading ? '처리 중...' : 'PRO 시작하기 (₩9,900/월)'}
                 </button>
               )}
             </div>
@@ -169,12 +220,12 @@ export default function PricingPage() {
           <h2 className="text-sm font-semibold text-zinc-300 mb-4">자주 묻는 질문</h2>
           <div className="space-y-4 text-sm">
             <div>
-              <div className="font-medium text-zinc-200 mb-1">언제든지 취소할 수 있나요?</div>
-              <div className="text-zinc-500">네, 구독 관리 페이지에서 언제든지 취소할 수 있으며 남은 기간은 유지됩니다.</div>
+              <div className="font-medium text-zinc-200 mb-1">언제든지 해지할 수 있나요?</div>
+              <div className="text-zinc-500">네, 해지 버튼을 누르면 즉시 FREE로 전환됩니다.</div>
             </div>
             <div>
               <div className="font-medium text-zinc-200 mb-1">결제는 어떻게 이루어지나요?</div>
-              <div className="text-zinc-500">Stripe를 통해 안전하게 처리됩니다. 카드 정보는 Stripe에서만 보관됩니다.</div>
+              <div className="text-zinc-500">토스페이먼츠를 통해 안전하게 처리됩니다. 카드 등록 후 매월 자동 결제됩니다.</div>
             </div>
             <div>
               <div className="font-medium text-zinc-200 mb-1">FREE 플랜에서도 텔레그램 알림을 받을 수 있나요?</div>
