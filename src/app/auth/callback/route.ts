@@ -20,5 +20,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/`);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? origin;
+  return NextResponse.redirect(`${siteUrl}/`);
 }

@@ -613,9 +613,10 @@ function LandingPage({ stats }: { stats: Stats | null }) {
   const supabase = createClient();
 
   async function handleLogin() {
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${location.origin}/` },
+      options: { redirectTo: `${origin}/auth/callback` },
     });
   }
 
