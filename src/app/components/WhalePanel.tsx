@@ -1,6 +1,7 @@
 'use client';
 
-import { Waves } from 'lucide-react';
+import { useState } from 'react';
+import { Waves, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 
 export interface WhaleEventRow {
   id:         string;
@@ -61,6 +62,16 @@ function HeatDot({ score }: { score: number }) {
   return <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />;
 }
 
+type SortKey = 'symbol' | 'direction' | 'tradeSize' | 'score' | 'detectedAt';
+type SortDir = 'asc' | 'desc';
+
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (col !== sortKey) return <ChevronsUpDown className="inline h-3 w-3 ml-0.5 opacity-30" />;
+  return sortDir === 'asc'
+    ? <ChevronUp className="inline h-3 w-3 ml-0.5 text-cyan-300" />
+    : <ChevronDown className="inline h-3 w-3 ml-0.5 text-cyan-300" />;
+}
+
 export function WhalePanel({
   whales,
   loading,
@@ -68,6 +79,28 @@ export function WhalePanel({
   whales: WhaleEventRow[];
   loading: boolean;
 }) {
+  const [sortKey, setSortKey] = useState<SortKey>('detectedAt');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'symbol' || key === 'direction' ? 'asc' : 'desc');
+    }
+  }
+
+  const sorted = [...whales].sort((a, b) => {
+    let cmp = 0;
+    if (sortKey === 'symbol')    cmp = a.symbol.localeCompare(b.symbol);
+    if (sortKey === 'direction') cmp = a.direction.localeCompare(b.direction);
+    if (sortKey === 'tradeSize') cmp = a.tradeSize - b.tradeSize;
+    if (sortKey === 'score')     cmp = a.score - b.score;
+    if (sortKey === 'detectedAt') cmp = new Date(a.detectedAt).getTime() - new Date(b.detectedAt).getTime();
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
   return (
     <div className="rounded-[28px] border border-white/10 bg-white/5 overflow-hidden">
       {/* Header */}
@@ -96,13 +129,27 @@ export function WhalePanel({
 
       {/* Column headers */}
       <div className="grid grid-cols-[100px_80px_100px_100px_110px_130px_80px] gap-x-2 border-b border-white/5 bg-black/20 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-        <span>심볼</span>
-        <span>방향</span>
-        <span>거래규모</span>
-        <span>가격</span>
-        <span>시각</span>
-        <span>Score</span>
-        <span>타입</span>
+        {([
+          ['symbol',    '심볼'],
+          ['direction', '방향'],
+          ['tradeSize', '거래규모'],
+          [null,        '가격'],
+          [null,        '시각'],
+          ['score',     '압력지수'],
+          [null,        '타입'],
+        ] as [SortKey | null, string][]).map(([key, label]) =>
+          key ? (
+            <button
+              key={key}
+              onClick={() => handleSort(key)}
+              className="flex items-center gap-0.5 hover:text-zinc-300 transition-colors cursor-pointer text-left"
+            >
+              {label}<SortIcon col={key} sortKey={sortKey} sortDir={sortDir} />
+            </button>
+          ) : (
+            <span key={label}>{label}</span>
+          )
+        )}
       </div>
 
       {/* Rows */}
@@ -115,7 +162,7 @@ export function WhalePanel({
             <div className="mt-1 text-xs text-zinc-600">cron-job.org에서 /api/whale-scan 등록 필요</div>
           </div>
         ) : (
-          whales.map(w => {
+          sorted.map(w => {
             const isPump = w.direction === 'BUY';
             const isMix  = w.direction === 'MIXED';
             return (
