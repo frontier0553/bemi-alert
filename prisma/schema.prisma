@@ -68,10 +68,12 @@ model Signal {
 }
 
 model Cooldown {
-  symbol      String   @id
-  type        String   @default("PUMP")
+  symbol      String
+  type        String   @default("PUMP")   // "PUMP" | "DUMP"
   lastSentAt  DateTime
   lastMaxMove Float
+
+  @@id([symbol, type])
 }
 
 model Settings {

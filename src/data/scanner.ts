@@ -2,7 +2,9 @@ import { fetchTickers, fetchKlines } from './binance';
 import {
   computeMetrics,
   evaluatePump,
+  evaluateDump,
   applyFakePumpFilters,
+  applyFakeDumpFilters,
   formatAlert,
   DEFAULT_THRESHOLDS,
   type Ticker24h,
@@ -12,7 +14,7 @@ import { sendTelegramAlertToSubscribers } from './telegram';
 import { prisma } from '../lib/prisma';
 
 const SCAN_TOP_N_DEFAULT = 200;
-const BATCH_SIZE         = 20;  // max concurrent kline requests
+const BATCH_SIZE         = 20;
 
 // ── Settings ─────────────────────────────────────────────────
 
@@ -28,58 +30,79 @@ async function processSymbol(
   ticker: Ticker24h,
   rank: number,
   scanTime: number,
-): Promise<string | null> {
+): Promise<string[]> {
   let klines;
   try {
     klines = await fetchKlines(symbol, 60);
   } catch (err: any) {
     if (err.message?.includes('rate limited')) throw err;
-    return null;
+    return [];
   }
 
   const metrics = computeMetrics(klines);
-  if (!metrics) return null;
+  if (!metrics) return [];
 
-  const result = evaluatePump(metrics, DEFAULT_THRESHOLDS);
-  if (!result) return null;
+  const alerts: string[] = [];
 
-  // Fake pump filter — liquidity + candle confirmation
-  const passes = applyFakePumpFilters(metrics, ticker, klines);
-  if (!passes) return null;
+  // ── PUMP 감지 ──────────────────────────────────────────
+  const pumpResult = evaluatePump(metrics, DEFAULT_THRESHOLDS);
+  if (pumpResult && applyFakePumpFilters(metrics, ticker, klines)) {
+    const allowed = await checkCooldown(symbol, pumpResult.maxMove, 'PUMP');
+    if (allowed) {
+      await prisma.signal.create({
+        data: {
+          symbol,
+          type:         'PUMP',
+          changeWindow: pumpResult.changeWindow,
+          changePct:    pumpResult.changePct,
+          volRatio:     pumpResult.volRatio,
+          metaJson:     JSON.stringify({
+            r3: metrics.r3, r5: metrics.r5, volRatio: metrics.volRatio,
+            baseVol: metrics.volAvg60m, nowVol: metrics.vol1mNow,
+            closeNow: metrics.closeNow, topRank: rank, scanTime,
+          }),
+        },
+      });
+      await updateCooldown(symbol, pumpResult.maxMove, 'PUMP');
 
-  const allowed = await checkCooldown(symbol, result.maxMove);
-  if (!allowed) return null;
+      const msg = formatAlert(symbol, pumpResult, new Date(), 'PUMP');
+      await sendTelegramAlertToSubscribers(msg, {
+        symbol, changePct: pumpResult.changePct, alertType: 'PUMP',
+      });
+      alerts.push(msg);
+    }
+  }
 
-  await prisma.signal.create({
-    data: {
-      symbol,
-      type:         'PUMP',
-      changeWindow: result.changeWindow,
-      changePct:    result.changePct,
-      volRatio:     result.volRatio,
-      metaJson:     JSON.stringify({
-        r3:         metrics.r3,
-        r5:         metrics.r5,
-        volRatio:   metrics.volRatio,
-        baseVol:    metrics.volAvg60m,
-        nowVol:     metrics.vol1mNow,
-        closeNow:   metrics.closeNow,
-        topRank:    rank,
-        scanTime,
-      }),
-    },
-  });
+  // ── DUMP 감지 ──────────────────────────────────────────
+  const dumpResult = evaluateDump(metrics, DEFAULT_THRESHOLDS);
+  if (dumpResult && applyFakeDumpFilters(metrics, ticker, klines)) {
+    const allowed = await checkCooldown(symbol, dumpResult.maxMove, 'DUMP');
+    if (allowed) {
+      await prisma.signal.create({
+        data: {
+          symbol,
+          type:         'DUMP',
+          changeWindow: dumpResult.changeWindow,
+          changePct:    dumpResult.changePct,
+          volRatio:     dumpResult.volRatio,
+          metaJson:     JSON.stringify({
+            r3: metrics.r3, r5: metrics.r5, volRatio: metrics.volRatio,
+            baseVol: metrics.volAvg60m, nowVol: metrics.vol1mNow,
+            closeNow: metrics.closeNow, topRank: rank, scanTime,
+          }),
+        },
+      });
+      await updateCooldown(symbol, dumpResult.maxMove, 'DUMP');
 
-  await updateCooldown(symbol, result.maxMove);
+      const msg = formatAlert(symbol, dumpResult, new Date(), 'DUMP');
+      await sendTelegramAlertToSubscribers(msg, {
+        symbol, changePct: dumpResult.changePct, alertType: 'DUMP',
+      });
+      alerts.push(msg);
+    }
+  }
 
-  const alertMsg = formatAlert(symbol, result, new Date());
-  await sendTelegramAlertToSubscribers(alertMsg, {
-    symbol,
-    changePct: result.changePct,
-    alertType: 'PUMP',
-  });
-
-  return alertMsg;
+  return alerts;
 }
 
 // ── Batch runner with concurrency cap ────────────────────────
@@ -95,9 +118,9 @@ async function runBatches(
       batch.map(e => processSymbol(e.symbol, e.ticker, e.rank, scanTime)),
     );
     for (const r of settled) {
-      if (r.status === 'fulfilled' && r.value) {
-        alerts.push(r.value);
-      } else if (r.status === 'rejected') {
+      if (r.status === 'fulfilled') {
+        alerts.push(...r.value);
+      } else {
         if ((r.reason as Error)?.message?.includes('rate limited')) throw r.reason;
         console.error('[scanner] symbol error:', r.reason);
       }
@@ -127,6 +150,6 @@ export async function runScanOnce(): Promise<void> {
   const alerts = await runBatches(entries, scanTime);
 
   console.log(
-    `[scan] ${new Date().toLocaleTimeString('ko-KR')} — ${entries.length}개 스캔, ${alerts.length}개 감지`,
+    `[scan] ${new Date().toLocaleTimeString('ko-KR')} — ${entries.length}개 스캔, PUMP/DUMP ${alerts.length}개 감지`,
   );
 }

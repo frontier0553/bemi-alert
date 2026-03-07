@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut, HelpCircle, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut, HelpCircle, ShieldCheck, ChevronDown, History } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { MarketSummaryCards } from './components/MarketSummaryCards';
@@ -241,6 +241,10 @@ export default function Home() {
                           <Settings2 className="h-3.5 w-3.5 text-zinc-500" /> 내 설정
                         </Link>
                       )}
+                      <Link href="/user/alerts" onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
+                        <History className="h-3.5 w-3.5 text-zinc-500" /> 알림 이력
+                      </Link>
                       <Link href="/help" onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
                         <HelpCircle className="h-3.5 w-3.5 text-zinc-500" /> 도움말

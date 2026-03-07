@@ -92,8 +92,30 @@ export function evaluatePump(
   return { maxMove, changeWindow, changePct, volRatio, metrics };
 }
 
+/**
+ * Evaluate whether metrics cross the dump threshold.
+ * Rules:
+ *   (r3 <= -r3Min OR r5 <= -r5Min) AND volRatio >= volRatioMin
+ */
+export function evaluateDump(
+  metrics: PumpMetrics,
+  thresholds: PumpThresholds = DEFAULT_THRESHOLDS,
+): PumpResult | null {
+  const { r3, r5, volRatio } = metrics;
+
+  const priceTrigger = r3 <= -thresholds.r3Min || r5 <= -thresholds.r5Min;
+  if (!priceTrigger || volRatio < thresholds.volRatioMin) return null;
+
+  const changeWindow: '3m' | '5m' = r3 <= -thresholds.r3Min ? '3m' : '5m';
+  const changePct  = changeWindow === '3m' ? r3 : r5;
+  const maxMove    = Math.abs(Math.min(r3, r5));
+
+  return { maxMove, changeWindow, changePct, volRatio, metrics };
+}
+
 const MIN_QUOTE_VOLUME = 5_000_000;   // 24h 거래대금 최소 5백만 USDT
 const MIN_GREEN_CANDLES = 2;           // 최근 3 캔들 중 최소 2개 양봉
+const MIN_RED_CANDLES   = 2;           // 최근 3 캔들 중 최소 2개 음봉
 
 /**
  * Fake pump filter — returns true when the signal passes both checks:
@@ -113,6 +135,21 @@ export function applyFakePumpFilters(
   const greenCount = last3.filter(k => k.close > k.open).length;
   if (greenCount < MIN_GREEN_CANDLES) return false;
 
+  return true;
+}
+
+/**
+ * Fake dump filter — liquidity + at least 2 of last 3 candles are red (close < open)
+ */
+export function applyFakeDumpFilters(
+  _metrics: PumpMetrics,
+  ticker24h: Ticker24h,
+  klines: Kline[],
+): boolean {
+  if (ticker24h.quoteVolume < MIN_QUOTE_VOLUME) return false;
+  const last3 = klines.slice(-3);
+  const redCount = last3.filter(k => k.close < k.open).length;
+  if (redCount < MIN_RED_CANDLES) return false;
   return true;
 }
 

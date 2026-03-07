@@ -32,15 +32,15 @@ export function shouldSend(
 
 // ── DB-aware wrappers ────────────────────────────────────────
 
-export async function checkCooldown(symbol: string, newMaxMove: number): Promise<boolean> {
-  const cd = await prisma.cooldown.findUnique({ where: { symbol } });
+export async function checkCooldown(symbol: string, newMaxMove: number, type: 'PUMP' | 'DUMP' = 'PUMP'): Promise<boolean> {
+  const cd = await prisma.cooldown.findUnique({ where: { symbol_type: { symbol, type } } });
   return shouldSend(cd, newMaxMove);
 }
 
-export async function updateCooldown(symbol: string, maxMove: number): Promise<void> {
+export async function updateCooldown(symbol: string, maxMove: number, type: 'PUMP' | 'DUMP' = 'PUMP'): Promise<void> {
   await prisma.cooldown.upsert({
-    where:  { symbol },
+    where:  { symbol_type: { symbol, type } },
     update: { lastSentAt: new Date(), lastMaxMove: maxMove },
-    create: { symbol, type: 'PUMP', lastSentAt: new Date(), lastMaxMove: maxMove },
+    create: { symbol, type, lastSentAt: new Date(), lastMaxMove: maxMove },
   });
 }
