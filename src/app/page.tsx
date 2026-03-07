@@ -236,22 +236,21 @@ export default function Home() {
                     </div>
                     {/* 메뉴 */}
                     <div className="py-1">
-                      {isAdmin ? (
+                      <Link href="/user/settings" onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
+                        <Settings2 className="h-3.5 w-3.5 text-zinc-500" /> 내 설정
+                      </Link>
+                      {isAdmin && (
                         <>
                           <Link href="/settings" onClick={() => setMenuOpen(false)}
                             className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
-                            <Settings2 className="h-3.5 w-3.5 text-zinc-500" /> 설정
+                            <Settings2 className="h-3.5 w-3.5 text-zinc-500" /> 글로벌 설정
                           </Link>
                           <Link href="/admin" onClick={() => setMenuOpen(false)}
                             className="flex items-center gap-2.5 px-4 py-2 text-sm text-amber-300 hover:bg-white/5 transition-colors">
                             <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> 관리자
                           </Link>
                         </>
-                      ) : (
-                        <Link href="/user/settings" onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
-                          <Settings2 className="h-3.5 w-3.5 text-zinc-500" /> 내 설정
-                        </Link>
                       )}
                       <Link href="/user/alerts" onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
