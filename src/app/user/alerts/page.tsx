@@ -114,6 +114,8 @@ export default function UserAlertsPage() {
   const router = useRouter();
   const [timeline, setTimeline] = useState<AlertItem[]>([]);
   const [coinFilter, setCoinFilter] = useState<string[] | null>(null);
+  const [tier, setTier]         = useState<string>('FREE');
+  const [days, setDays]         = useState<number>(7);
   const [loading, setLoading]   = useState(true);
   const [kind, setKind]         = useState<KindFilter>('ALL');
 
@@ -127,6 +129,8 @@ export default function UserAlertsPage() {
         if (!d) return;
         setTimeline(d.timeline);
         setCoinFilter(d.coinFilter);
+        setTier(d.tier ?? 'FREE');
+        setDays(d.days ?? 7);
       })
       .finally(() => setLoading(false));
   }, [router]);
@@ -155,11 +159,19 @@ export default function UserAlertsPage() {
         {/* 타이틀 */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Bell className="h-5 w-5 text-cyan-300" /> 내 알림 이력
-            </h1>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Bell className="h-5 w-5 text-cyan-300" /> 내 알림 이력
+              </h1>
+              {tier === 'PRO' && (
+                <span className="rounded-full bg-cyan-400/15 border border-cyan-400/25 px-2.5 py-0.5 text-[11px] font-bold text-cyan-300">PRO</span>
+              )}
+            </div>
             <p className="text-xs text-zinc-500 mt-1">
-              최근 7일 · {coinFilter ? `코인 필터: ${coinFilter.join(', ')}` : '전체 코인'}
+              최근 {days}일 · {coinFilter ? `코인 필터: ${coinFilter.join(', ')}` : '전체 코인'}
+              {tier !== 'PRO' && (
+                <a href="/pricing" className="ml-2 text-cyan-600 hover:text-cyan-400">PRO로 30일 연장 →</a>
+              )}
             </p>
           </div>
           {/* 종류 필터 */}

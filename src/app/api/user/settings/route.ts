@@ -13,11 +13,14 @@ export async function GET() {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const [userSettings, globalRows, subscriber] = await Promise.all([
+  const [userRecord, userSettings, globalRows, subscriber] = await Promise.all([
+    prisma.user.findUnique({ where: { id: user.id } }),
     prisma.userSettings.findUnique({ where: { userId: user.id } }),
     prisma.settings.findMany(),
     prisma.subscriber.findFirst({ where: { userId: user.id } }),
   ]);
+
+  const tier = userRecord?.tier ?? 'FREE';
 
   const globalDefaults: Record<string, string> = {
     SCAN_TOP_N: '200', SCAN_PUMP_PCT: '5', SCAN_DUMP_PCT: '5',
@@ -27,6 +30,7 @@ export async function GET() {
   for (const row of globalRows) globalParams[row.key] = row.value;
 
   return NextResponse.json({
+    tier,
     coinFilter: userSettings?.coinFilter ?? null,
     pumpPct:    userSettings?.pumpPct    ?? null,
     dumpPct:    userSettings?.dumpPct    ?? null,
@@ -42,6 +46,14 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { coinFilter, pumpPct, dumpPct } = await req.json();
+
+  // pumpPct/dumpPct 변경은 PRO 전용
+  if ((pumpPct != null || dumpPct != null)) {
+    const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+    if (dbUser?.tier !== 'PRO') {
+      return NextResponse.json({ error: 'PRO 플랜 전용 기능입니다' }, { status: 403 });
+    }
+  }
 
   await prisma.userSettings.upsert({
     where: { userId: user.id },

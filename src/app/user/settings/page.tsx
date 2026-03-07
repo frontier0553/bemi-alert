@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CandlestickChart, Bell, Save } from 'lucide-react';
+import { CandlestickChart, Bell, Save, Zap, Lock } from 'lucide-react';
 
 interface UserSettingsData {
+  tier:              string;
   coinFilter:        string | null;
   pumpPct:           number | null;
   dumpPct:           number | null;
@@ -110,6 +111,48 @@ export default function UserSettingsPage() {
           </button>
         </div>
 
+        {/* ── 플랜 상태 ── */}
+        <div className={`rounded-2xl border p-5 flex items-center justify-between gap-4 ${
+          data.tier === 'PRO'
+            ? 'border-cyan-400/25 bg-cyan-400/5'
+            : 'border-white/10 bg-white/[0.04]'
+        }`}>
+          <div className="flex items-center gap-3">
+            {data.tier === 'PRO' ? (
+              <>
+                <span className="rounded-full bg-cyan-400/15 border border-cyan-400/25 px-3 py-1 text-xs font-bold text-cyan-300">PRO</span>
+                <span className="text-sm text-zinc-300">30일 이력 · 개인 임계값 사용 가능</span>
+              </>
+            ) : (
+              <>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-zinc-400">FREE</span>
+                <span className="text-sm text-zinc-500">7일 이력 · 임계값은 글로벌 기본값만 사용</span>
+              </>
+            )}
+          </div>
+          {data.tier === 'PRO' ? (
+            <a
+              href="/api/billing"
+              onClick={async e => {
+                e.preventDefault();
+                const res = await fetch('/api/billing');
+                const d = await res.json();
+                if (d.portalUrl) window.location.href = d.portalUrl;
+              }}
+              className="shrink-0 text-xs text-zinc-400 hover:text-zinc-200 underline"
+            >
+              구독 관리
+            </a>
+          ) : (
+            <Link
+              href="/pricing"
+              className="shrink-0 flex items-center gap-1.5 rounded-xl bg-cyan-400 px-3 py-1.5 text-xs font-bold text-black hover:bg-cyan-300 transition-colors"
+            >
+              <Zap className="h-3 w-3" /> PRO 업그레이드
+            </Link>
+          )}
+        </div>
+
         {/* ── 관심 코인 필터 ── */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
           <h2 className="mb-1 text-sm font-semibold text-zinc-200">관심 코인 필터</h2>
@@ -124,8 +167,15 @@ export default function UserSettingsPage() {
         </div>
 
         {/* ── 개인 임계값 ── */}
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-          <h2 className="mb-1 text-sm font-semibold text-zinc-200">개인 임계값</h2>
+        <div className={`rounded-2xl border p-5 ${data.tier === 'PRO' ? 'border-white/10 bg-white/[0.04]' : 'border-white/5 bg-white/[0.02] opacity-70'}`}>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-sm font-semibold text-zinc-200">개인 임계값</h2>
+            {data.tier !== 'PRO' && (
+              <span className="flex items-center gap-1 rounded-full bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+                <Lock className="h-2.5 w-2.5" /> PRO 전용
+              </span>
+            )}
+          </div>
           <p className="mb-4 text-xs text-zinc-500">비워두면 글로벌 기본값 사용 (PUMP: {data.globalParams.SCAN_PUMP_PCT}%, DUMP: {data.globalParams.SCAN_DUMP_PCT}%)</p>
           <div className="flex gap-4 flex-wrap">
             <div>
@@ -136,7 +186,8 @@ export default function UserSettingsPage() {
                   placeholder={data.globalParams.SCAN_PUMP_PCT}
                   value={pumpPct}
                   onChange={e => setPumpPct(e.target.value)}
-                  className="w-24 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-400/40 tabular-nums"
+                  disabled={data.tier !== 'PRO'}
+                  className="w-24 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-400/40 tabular-nums disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <span className="text-sm text-zinc-500">%</span>
               </div>
@@ -149,7 +200,8 @@ export default function UserSettingsPage() {
                   placeholder={data.globalParams.SCAN_DUMP_PCT}
                   value={dumpPct}
                   onChange={e => setDumpPct(e.target.value)}
-                  className="w-24 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-red-400/40 tabular-nums"
+                  disabled={data.tier !== 'PRO'}
+                  className="w-24 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-red-400/40 tabular-nums disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <span className="text-sm text-zinc-500">%</span>
               </div>

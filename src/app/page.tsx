@@ -283,6 +283,10 @@ export default function Home() {
                         className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
                         <History className="h-3.5 w-3.5 text-zinc-500" /> 알림 이력
                       </Link>
+                      <Link href="/pricing" onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-cyan-400 hover:bg-white/5 transition-colors">
+                        <Bell className="h-3.5 w-3.5 text-cyan-500" /> 플랜 / PRO
+                      </Link>
                       <Link href="/help" onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
                         <HelpCircle className="h-3.5 w-3.5 text-zinc-500" /> 도움말

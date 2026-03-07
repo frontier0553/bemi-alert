@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 
-const DAYS = 7;
 const LIMIT = 100;
 
 export async function GET() {
@@ -10,10 +9,14 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const since = new Date(Date.now() - DAYS * 24 * 60 * 60 * 1000);
-
-  // 유저 설정 조회
-  const settings = await prisma.userSettings.findUnique({ where: { userId: user.id } });
+  // tier 조회 → FREE: 7일, PRO: 30일
+  const [dbUser, settings] = await Promise.all([
+    prisma.user.findUnique({ where: { id: user.id } }),
+    prisma.userSettings.findUnique({ where: { userId: user.id } }),
+  ]);
+  const days  = dbUser?.tier === 'PRO' ? 30 : 7;
+  const tier  = dbUser?.tier ?? 'FREE';
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   const coinFilter: string[] | null = settings?.coinFilter
     ? JSON.parse(settings.coinFilter)
     : null;
@@ -84,5 +87,5 @@ export async function GET() {
   ].sort((a, b) => new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime())
    .slice(0, LIMIT);
 
-  return NextResponse.json({ timeline, coinFilter });
+  return NextResponse.json({ timeline, coinFilter, tier, days });
 }

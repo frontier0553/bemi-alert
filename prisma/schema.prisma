@@ -30,6 +30,14 @@ model UserSettings {
   updatedAt  DateTime @updatedAt
 }
 
+// ── Stripe Billing ────────────────────────────────────────────
+model StripeCustomer {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  stripeCustomerId String   @unique
+  createdAt        DateTime @default(now())
+}
+
 // ── Visitor Tracking ─────────────────────────────────────────
 model DailyVisit {
   date  String @id   // "YYYY-MM-DD"
