@@ -34,6 +34,7 @@ export default function Home() {
   const [isAdmin, setIsAdmin]             = useState(false);
   const [visitStats, setVisitStats]       = useState<{ today: number; total: number } | null>(null);
   const [user, setUser]                   = useState<User | null>(null);
+  const [userChecked, setUserChecked]     = useState(false);
   const [menuOpen, setMenuOpen]           = useState(false);
   const menuRef                           = useRef<HTMLDivElement>(null);
 
@@ -120,7 +121,10 @@ export default function Home() {
       .catch(() => {});
     // 로그인 상태 확인
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      setUserChecked(true);
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
     });
@@ -143,6 +147,14 @@ export default function Home() {
   const scannerEvents = uniqueBySymbol.filter(ev =>
     scannerFilter === 'ALL' ? true : ev.type === scannerFilter,
   );
+
+  // 인증 확인 전 빈 화면
+  if (!userChecked) return (
+    <div className="min-h-screen bg-[#06080d]" />
+  );
+
+  // 비로그인 → 랜딩 페이지
+  if (!user) return <LandingPage stats={stats} />;
 
   return (
     <div className="min-h-screen bg-[#06080d] text-zinc-100">
@@ -591,6 +603,190 @@ function FuturesRow({ f }: { f: FuturesAlertRow }) {
         {valueStr}
       </span>
       <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
+    </div>
+  );
+}
+
+// ── 랜딩 페이지 ──────────────────────────────────────────────────
+
+function LandingPage({ stats }: { stats: Stats | null }) {
+  const supabase = createClient();
+
+  async function handleLogin() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${location.origin}/` },
+    });
+  }
+
+  const features = [
+    {
+      icon: '📈',
+      title: 'PUMP / DUMP 감지',
+      desc: '3분·5분 가격 변동 +3% 이상, 거래량 3배 이상 조건으로 과매수·과매도 신호를 실시간 포착합니다.',
+      color: 'border-emerald-500/20 bg-emerald-500/5',
+      iconBg: 'bg-emerald-500/10 border-emerald-500/20',
+    },
+    {
+      icon: '🐋',
+      title: '고래 거래 추적',
+      desc: '대량 매수·매도를 탐지해 스마트머니 방향을 파악합니다. 압력 스코어로 강도를 수치화합니다.',
+      color: 'border-cyan-500/20 bg-cyan-500/5',
+      iconBg: 'bg-cyan-500/10 border-cyan-500/20',
+    },
+    {
+      icon: '📊',
+      title: '선물 시장 신호',
+      desc: '펀딩비 이상과 OI 급변을 모니터링해 롱·숏 과열 구간을 조기에 감지합니다.',
+      color: 'border-violet-500/20 bg-violet-500/5',
+      iconBg: 'bg-violet-500/10 border-violet-500/20',
+    },
+    {
+      icon: '🔔',
+      title: '텔레그램 실시간 알림',
+      desc: '감지 즉시 텔레그램 메시지로 발송. 관심 코인만 필터링해 원하는 알림만 받을 수 있습니다.',
+      color: 'border-amber-500/20 bg-amber-500/5',
+      iconBg: 'bg-amber-500/10 border-amber-500/20',
+    },
+  ];
+
+  const steps = [
+    { num: '1', label: '구글 로그인', desc: '소셜 계정으로 즉시 시작' },
+    { num: '2', label: '코인 필터 설정', desc: '관심 코인만 골라서 구독' },
+    { num: '3', label: '텔레그램 연동', desc: '봇에서 /link CODE 입력' },
+    { num: '4', label: '알림 수신', desc: '신호 발생 즉시 메시지 도착' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#06080d] text-zinc-100">
+      {/* 배경 글로우 */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-cyan-500/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-violet-500/5 blur-[100px] rounded-full" />
+      </div>
+
+      {/* 헤더 */}
+      <header className="relative z-10 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1100px] items-center justify-between px-5 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
+              <CandlestickChart className="h-4 w-4 text-cyan-300" />
+            </div>
+            <span className="font-bold tracking-tight">Bemi Alert</span>
+          </div>
+          <button
+            onClick={handleLogin}
+            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10 transition-colors"
+          >
+            <LogIn className="h-4 w-4" />
+            구글로 시작하기
+          </button>
+        </div>
+      </header>
+
+      <main className="relative mx-auto max-w-[1100px] px-5">
+
+        {/* Hero */}
+        <section className="py-20 text-center flex flex-col items-center gap-6">
+          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1.5 text-xs font-semibold text-cyan-300 tracking-wider uppercase">
+            실시간 암호화폐 모니터링
+          </span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight max-w-3xl">
+            펌프·덤프를{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-400">
+              3분 만에
+            </span>{' '}
+            포착하세요
+          </h1>
+          <p className="text-zinc-400 text-lg max-w-xl leading-relaxed">
+            바이낸스 상위 200개 코인을 30초마다 스캔합니다.
+            고래 거래, 선물 시장 이상 신호까지 텔레그램으로 즉시 전달합니다.
+          </p>
+          <button
+            onClick={handleLogin}
+            className="mt-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-500 px-8 py-3.5 text-base font-bold text-white shadow-lg hover:opacity-90 transition-opacity"
+          >
+            무료로 시작하기 →
+          </button>
+
+          {/* 실시간 통계 */}
+          {stats && (
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm">
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2 flex items-center gap-2">
+                <span className="text-zinc-500">오늘 감지</span>
+                <span className="font-bold text-zinc-100">{stats.todayTotal}건</span>
+              </div>
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-5 py-2 flex items-center gap-2">
+                <span className="text-zinc-500">PUMP</span>
+                <span className="font-bold text-emerald-300">{stats.todayPumps}건</span>
+              </div>
+              <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-5 py-2 flex items-center gap-2">
+                <span className="text-zinc-500">DUMP</span>
+                <span className="font-bold text-red-300">{stats.todayDumps}건</span>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* 기능 카드 */}
+        <section className="py-12">
+          <h2 className="text-center text-2xl font-bold mb-8 text-zinc-100">주요 기능</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {features.map(f => (
+              <div key={f.title} className={`rounded-2xl border p-6 ${f.color}`}>
+                <div className={`mb-4 w-11 h-11 rounded-xl border flex items-center justify-center text-xl ${f.iconBg}`}>
+                  {f.icon}
+                </div>
+                <h3 className="font-bold text-zinc-100 mb-2">{f.title}</h3>
+                <p className="text-sm text-zinc-400 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section className="py-12">
+          <h2 className="text-center text-2xl font-bold mb-10 text-zinc-100">이용 방법</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {steps.map((s, i) => (
+              <div key={s.num} className="relative flex flex-col items-center text-center gap-3">
+                {i < steps.length - 1 && (
+                  <div className="hidden sm:block absolute top-5 left-[calc(50%+20px)] w-[calc(100%-40px)] h-px border-t border-dashed border-white/10" />
+                )}
+                <div className="w-10 h-10 rounded-full border border-cyan-400/30 bg-cyan-400/10 flex items-center justify-center text-sm font-bold text-cyan-300">
+                  {s.num}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-zinc-100">{s.label}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">{s.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-16 text-center">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-8 py-12 flex flex-col items-center gap-5">
+            <h2 className="text-3xl font-extrabold text-zinc-100">지금 바로 시작하세요</h2>
+            <p className="text-zinc-400 max-w-md">
+              구글 계정 하나로 즉시 이용 가능합니다. 별도 설치 없이 브라우저와 텔레그램만 있으면 됩니다.
+            </p>
+            <button
+              onClick={handleLogin}
+              className="rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-500 px-10 py-3.5 text-base font-bold text-white shadow-lg hover:opacity-90 transition-opacity"
+            >
+              구글로 무료 시작하기
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+      {/* 푸터 */}
+      <footer className="relative border-t border-white/5 py-6 text-center text-xs text-zinc-600">
+        © 2025 Bemi Alert · 본 서비스는 투자 조언을 제공하지 않습니다.
+      </footer>
     </div>
   );
 }
