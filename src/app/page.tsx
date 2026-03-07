@@ -197,17 +197,19 @@ export default function Home() {
                 {/* 아바타 버튼 */}
                 <button
                   onClick={() => setMenuOpen(o => !o)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 overflow-hidden hover:border-white/30 transition-colors"
+                  className="p-0 rounded-full hover:ring-2 hover:ring-white/20 transition-all"
                 >
                   {user.user_metadata?.avatar_url ? (
                     <img
                       src={user.user_metadata.avatar_url}
                       alt="프로필"
-                      className="h-full w-full object-cover"
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 rounded-full object-cover block"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span className="flex h-full w-full items-center justify-center bg-cyan-400/15 text-[11px] font-bold text-cyan-300">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-cyan-400/15 text-[11px] font-bold text-cyan-300">
                       {user.email?.[0].toUpperCase()}
                     </span>
                   )}
