@@ -197,7 +197,7 @@ export default function Home() {
                 {/* 아바타 버튼 */}
                 <button
                   onClick={() => setMenuOpen(o => !o)}
-                  className="p-0 rounded-full hover:ring-2 hover:ring-white/20 transition-all"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-0 hover:ring-2 hover:ring-white/20 transition-all"
                 >
                   {user.user_metadata?.avatar_url ? (
                     <img
