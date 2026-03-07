@@ -175,7 +175,7 @@ export default function Home() {
             <button
               onClick={fetchData}
               title="새로고침"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-zinc-400 hover:text-zinc-200 transition-colors"
             >
               <RefreshCw className="h-3.5 w-3.5" />
             </button>
@@ -186,7 +186,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               title="텔레그램 알림 봇"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/15 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-400/25 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/15 transition-colors"
             >
               <Bell className="h-3.5 w-3.5" />
             </a>
@@ -197,7 +197,7 @@ export default function Home() {
                 {/* 아바타 버튼 */}
                 <button
                   onClick={() => setMenuOpen(o => !o)}
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 overflow-hidden hover:border-white/20 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 overflow-hidden hover:border-white/30 transition-colors"
                 >
                   {user.user_metadata?.avatar_url ? (
                     <img
@@ -207,7 +207,7 @@ export default function Home() {
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span className="text-[11px] font-bold text-cyan-300">
+                    <span className="flex h-full w-full items-center justify-center bg-cyan-400/15 text-[11px] font-bold text-cyan-300">
                       {user.email?.[0].toUpperCase()}
                     </span>
                   )}
