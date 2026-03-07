@@ -310,7 +310,7 @@ export default function Home() {
             </div>
 
             {/* 컬럼 헤더 */}
-            <div className="grid grid-cols-[16px_56px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            <div className="grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               <span />
               <span>심볼</span>
               <span>방향</span>
@@ -351,10 +351,10 @@ export default function Home() {
             <span className="text-xs text-zinc-600">펀딩비 극단 · OI 급변</span>
           </div>
           {/* 컬럼 헤더 */}
-          <div className="grid grid-cols-[88px_56px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+          <div className="grid grid-cols-[100px_84px_1fr_90px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
             <span>유형</span>
             <span>심볼</span>
-            <span>내용</span>
+            <span>상세</span>
             <span className="text-right">수치</span>
             <span className="text-right">시각</span>
           </div>
@@ -449,7 +449,7 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
   }
 
   return (
-    <div className="grid grid-cols-[16px_56px_72px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className={`h-2 w-2 rounded-full ${heat}`} />
       <span className="font-semibold text-sm text-zinc-100 truncate">
         {w.symbol.replace(QUOTE_RE, '')}
@@ -501,25 +501,52 @@ function FuturesRow({ f }: { f: FuturesAlertRow }) {
 
   const badgeLabel = isFunding ? '💸 펀딩비' : isOiSurge ? '📈 OI 급증' : '📉 OI 급감';
 
-  const desc = isFunding
-    ? (f.note === 'LONG_EXTREME' ? '롱 과열' : '숏 과열')
-    : f.note ?? '';
-
+  const isLong   = f.note === 'LONG_EXTREME';
   const valueStr = isFunding
     ? `${f.value > 0 ? '+' : ''}${f.value.toFixed(4)}%`
     : `${f.value > 0 ? '+' : ''}${f.value.toFixed(2)}%`;
-
   const valueColor = f.value > 0 ? 'text-emerald-300' : 'text-red-300';
 
   return (
-    <div className="grid grid-cols-[88px_56px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[100px_84px_1fr_90px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeStyle}`}>
         {badgeLabel}
       </span>
       <span className="font-bold text-sm text-zinc-100 truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
-      <span className="text-xs text-zinc-400 truncate">{desc}</span>
+
+      {/* 상세 컬럼 */}
+      {isFunding ? (
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold border ${
+            isLong
+              ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+              : 'border-red-500/25 bg-red-500/10 text-red-300'
+          }`}>
+            {isLong ? '롱 과열' : '숏 과열'}
+          </span>
+          {f.markPrice != null && (
+            <span className="text-xs text-zinc-500 tabular-nums truncate">
+              mark <span className="text-zinc-300">${f.markPrice < 1 ? f.markPrice.toFixed(4) : f.markPrice.toFixed(2)}</span>
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold border ${
+            isOiSurge
+              ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+              : 'border-red-500/25 bg-red-500/10 text-red-300'
+          }`}>
+            {isOiSurge ? '포지션 증가' : '포지션 감소'}
+          </span>
+          {f.note && (
+            <span className="text-xs text-zinc-400 font-mono truncate">{f.note}</span>
+          )}
+        </div>
+      )}
+
       <span className={`text-sm font-bold tabular-nums text-right ${valueColor}`}>
         {valueStr}
       </span>
