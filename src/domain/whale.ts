@@ -1,4 +1,5 @@
 import type { AggTrade } from '../data/whales';
+import { whaleConfidence } from './confidence';
 
 // ── Thresholds ───────────────────────────────────────────────
 const WHALE_USD_MIN     = 100_000;    // $100K absolute minimum
@@ -85,22 +86,30 @@ export function detectWhaleActivity(
 }
 
 export function formatWhaleAlert(result: WhaleResult): string {
-  const base  = result.symbol.replace(/USDT$/, '');
-  const isAcc = result.type === 'ACCUMULATION';
-  const isDump = result.type === 'DUMP';
-  const icon  = isAcc ? '🐋' : isDump ? '🔴' : '🟡';
-  const label = isAcc ? '고래 매집' : isDump ? '고래 매도' : '고래 활동';
-  const sign  = result.score > 0 ? '+' : '';
+  const base     = result.symbol.replace(/USDT$/, '');
+  const dirIcon  = result.direction === 'BUY' ? '🟢' : result.direction === 'SELL' ? '🔴' : '🟡';
+  const sizeStr  = result.topTradeSize >= 1_000_000
+    ? `$${(result.topTradeSize / 1_000_000).toFixed(1)}M`
+    : `$${(result.topTradeSize / 1_000).toFixed(0)}K`;
+  const price    = result.topTradePrice;
+  const priceStr = price >= 1 ? price.toFixed(2) : price.toFixed(4);
+  const conf     = whaleConfidence(result.score);
 
-  return `
-${icon} <b>${label}</b>
+  return `🐋 Whale Activity
 
-💰 <b>Symbol</b>: ${base}
-📊 <b>Score</b>: ${sign}${result.score}
-🟢 <b>Buy</b>: ${result.whaleBuys}건 ($${(result.totalBuyVol / 1000).toFixed(0)}K)
-🔴 <b>Sell</b>: ${result.whaleSells}건 ($${(result.totalSellVol / 1000).toFixed(0)}K)
-💵 <b>최대 단건</b>: $${(result.topTradeSize / 1000).toFixed(0)}K @ $${result.topTradePrice}
+🪙 ${base}
 
-#whale #${base.toLowerCase()}
-`.trim();
+Direction
+${dirIcon} ${result.direction}
+
+Size
+${sizeStr}
+
+Confidence
+${conf.score}% (${conf.level})
+
+💰 Price
+$${priceStr}
+
+#whale #${base.toLowerCase()}`.trim();
 }

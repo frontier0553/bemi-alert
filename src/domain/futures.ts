@@ -1,4 +1,5 @@
 import type { FundingInfo, OiSnapshot } from '../data/futures';
+import { fundingConfidence, oiConfidence } from './confidence';
 
 // ── 임계값 ────────────────────────────────────────────────────
 export const FUNDING_THRESHOLD = 0.001;  // |rate| ≥ 0.1% per 8h → 극단
@@ -49,37 +50,54 @@ export function detectOiSpike(snapshots: OiSnapshot[]): OiSignal | null {
 
 // ── 텔레그램 메시지 포맷 ──────────────────────────────────────
 export function formatFundingAlert(sig: FundingSignal): string {
-  const base  = sig.symbol.replace(/USDT$/, '');
-  const pct   = (sig.fundingRate * 100).toFixed(4);
-  const sign  = sig.fundingRate > 0 ? '+' : '';
-  const label = sig.direction === 'LONG_EXTREME' ? '롱 과열 ⚠️' : '숏 과열 ⚠️';
+  const base     = sig.symbol.replace(/USDT$/, '');
+  const pct      = (sig.fundingRate * 100).toFixed(4);
+  const sign     = sig.fundingRate > 0 ? '+' : '';
+  const interp   = sig.direction === 'LONG_EXTREME' ? 'Longs overheated' : 'Shorts overheated';
+  const price    = sig.markPrice;
+  const priceStr = price >= 1 ? price.toFixed(2) : price.toFixed(4);
+  const conf     = fundingConfidence(sig.fundingRate);
 
-  return `
-💸 <b>펀딩비 극단</b>
+  return `⚠️ Funding Extreme
 
-💰 <b>Symbol</b>: ${base}
-📊 <b>펀딩비</b>: ${sign}${pct}% (${label})
-💵 <b>Mark Price</b>: $${sig.markPrice.toFixed(4)}
+🪙 ${base}
 
-#funding #${base.toLowerCase()}
-`.trim();
+Funding
+${sign}${pct}% (${interp})
+
+Confidence
+${conf.score}% (${conf.level})
+
+💰 Price
+$${priceStr}
+
+#funding #${base.toLowerCase()}`.trim();
 }
 
 export function formatOiAlert(sig: OiSignal): string {
-  const base  = sig.symbol.replace(/USDT$/, '');
-  const pct   = sig.oiChangePct.toFixed(2);
-  const sign  = sig.oiChangePct > 0 ? '+' : '';
-  const icon  = sig.direction === 'SURGE' ? '📈' : '📉';
-  const label = sig.direction === 'SURGE' ? '포지션 빌드업' : '포지션 청산';
+  const base        = sig.symbol.replace(/USDT$/, '');
+  const sign        = sig.oiChangePct > 0 ? '+' : '';
+  const oiStr       = sig.oiUsd >= 1_000_000
+    ? `$${(sig.oiUsd / 1_000_000).toFixed(1)}M`
+    : `$${(sig.oiUsd / 1_000).toFixed(0)}K`;
+  const signalLabel = sig.direction === 'SURGE' ? 'Position Buildup' : 'Position Unwind';
+  const conf        = oiConfidence(sig.oiChangePct);
 
-  return `
-${icon} <b>OI 급변</b>
+  return `📊 OI Alert
 
-💰 <b>Symbol</b>: ${base}
-📊 <b>변화율</b>: ${sign}${pct}%
-💵 <b>OI 규모</b>: $${(sig.oiUsd / 1_000_000).toFixed(1)}M
-🔖 <b>신호</b>: ${label}
+🪙 ${base}
 
-#oi #${base.toLowerCase()}
-`.trim();
+OI Change
+${sign}${sig.oiChangePct.toFixed(2)}%
+
+OI Size
+${oiStr}
+
+Signal
+${signalLabel}
+
+Confidence
+${conf.score}% (${conf.level})
+
+#oi #${base.toLowerCase()}`.trim();
 }

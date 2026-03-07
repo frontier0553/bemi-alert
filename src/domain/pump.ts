@@ -1,4 +1,5 @@
 import type { Kline } from '../data/binance';
+import { pumpConfidence } from './confidence';
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -156,31 +157,40 @@ export function applyFakeDumpFilters(
 const QUOTE_RE = /(USDT|USDC|BUSD|FDUSD|TUSD|DAI|BTC|ETH|BNB|XRP|TRX|TRY|EUR|GBP|AUD|BRL|RUB|UAH|PLN|RON|ZAR)$/;
 
 /**
- * Format the Telegram alert message (HTML parse_mode).
- * type: 'PUMP' → 🔵, 'DUMP' → 🔴
+ * Format the Telegram alert message (plain text).
+ * type: 'PUMP' → 🚀, 'DUMP' → 📉
  */
 export function formatAlert(
   symbol: string,
   result: PumpResult,
-  detectedAt: Date = new Date(),
+  _detectedAt: Date = new Date(),
   type: 'PUMP' | 'DUMP' = 'PUMP',
 ): string {
-  const baseCoin  = symbol.replace(QUOTE_RE, '');
-  const isPump    = type === 'PUMP';
-  const dot       = isPump ? '🔵' : '🔴';
-  const arrow     = isPump ? '📈' : '📉';
-  const moveSign  = isPump ? '+' : '';
-  const tag       = isPump ? '#pump' : '#dump';
+  const base     = symbol.replace(QUOTE_RE, '');
+  const isPump   = type === 'PUMP';
+  const icon     = isPump ? '🚀' : '📉';
+  const title    = isPump ? 'Pump Signal' : 'Dump Signal';
+  const sign     = isPump ? '+' : '';
+  const tag      = isPump ? '#pump' : '#dump';
+  const price    = result.metrics.closeNow;
+  const priceStr = price >= 1 ? price.toFixed(2) : price.toFixed(4);
+  const conf     = pumpConfidence(result.changePct, result.volRatio);
 
-  return `
-${dot} <b>BEMI ALERT</b>
+  return `${icon} ${title}
 
-💰 <b>Symbol</b>: ${baseCoin}
-${arrow} <b>Move</b>: ${moveSign}${result.changePct.toFixed(1)}% (${result.changeWindow})
-📊 <b>Volume</b>: x${result.volRatio.toFixed(1)}
+🪙 ${base}
 
-⏱ <b>Time</b>: ${detectedAt.toUTCString()}
+Move
+${sign}${result.changePct.toFixed(1)}% (${result.changeWindow})
 
-${tag} #crypto
-`.trim();
+Volume
+x${result.volRatio.toFixed(1)}
+
+Confidence
+${conf.score}% (${conf.level})
+
+💰 Price
+$${priceStr}
+
+${tag} #${base.toLowerCase()}`.trim();
 }
