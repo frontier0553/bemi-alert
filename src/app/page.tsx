@@ -199,9 +199,18 @@ export default function Home() {
                   onClick={() => setMenuOpen(o => !o)}
                   className="flex h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 pl-1.5 pr-2.5 text-zinc-300 hover:text-zinc-100 transition-colors"
                 >
-                  <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-cyan-400/15 text-[11px] font-bold text-cyan-300">
-                    {user.email?.[0].toUpperCase()}
-                  </span>
+                  {user.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt="프로필"
+                      className="h-5 w-5 rounded-lg object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-cyan-400/15 text-[11px] font-bold text-cyan-300">
+                      {user.email?.[0].toUpperCase()}
+                    </span>
+                  )}
                   <ChevronDown className={`h-3 w-3 text-zinc-600 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
