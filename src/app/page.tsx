@@ -197,21 +197,20 @@ export default function Home() {
                 {/* 아바타 버튼 */}
                 <button
                   onClick={() => setMenuOpen(o => !o)}
-                  className="flex h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 pl-1.5 pr-2.5 text-zinc-300 hover:text-zinc-100 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 overflow-hidden hover:border-white/20 transition-colors"
                 >
                   {user.user_metadata?.avatar_url ? (
                     <img
                       src={user.user_metadata.avatar_url}
                       alt="프로필"
-                      className="h-5 w-5 rounded-lg object-cover"
+                      className="h-full w-full object-cover"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-cyan-400/15 text-[11px] font-bold text-cyan-300">
+                    <span className="text-[11px] font-bold text-cyan-300">
                       {user.email?.[0].toUpperCase()}
                     </span>
                   )}
-                  <ChevronDown className={`h-3 w-3 text-zinc-600 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* 드롭다운 */}
