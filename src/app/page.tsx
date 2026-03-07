@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut } from 'lucide-react';
+import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut, HelpCircle, ShieldCheck, ChevronDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { MarketSummaryCards } from './components/MarketSummaryCards';
@@ -34,6 +34,18 @@ export default function Home() {
   const [isAdmin, setIsAdmin]             = useState(false);
   const [visitStats, setVisitStats]       = useState<{ today: number; total: number } | null>(null);
   const [user, setUser]                   = useState<User | null>(null);
+  const [menuOpen, setMenuOpen]           = useState(false);
+  const menuRef                           = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -158,74 +170,88 @@ export default function Home() {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href="/help"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
-              Help
-            </Link>
+          <div className="flex items-center gap-1.5">
+            {/* 새로고침 — 아이콘만 */}
             <button
               onClick={fetchData}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+              title="새로고침"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-400 hover:text-zinc-200 transition-colors"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              새로고침
             </button>
-            {isAdmin && (
-              <>
-                <Link
-                  href="/settings"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-                >
-                  <Settings2 className="h-3.5 w-3.5" />
-                  설정
-                </Link>
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-1.5 text-sm text-amber-300 hover:bg-amber-400/15 transition-colors"
-                >
-                  관리자
-                </Link>
-              </>
-            )}
-            {user && !isAdmin && (
-              <Link
-                href="/user/settings"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-              >
-                <Settings2 className="h-3.5 w-3.5" />
-                내 설정
-              </Link>
-            )}
+
+            {/* 텔레그램 — 아이콘만 */}
             <a
               href="https://t.me/bemialert_bot"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-3 py-1.5 text-sm text-cyan-300 hover:bg-cyan-400/15 transition-colors"
+              title="텔레그램 알림 봇"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/15 transition-colors"
             >
               <Bell className="h-3.5 w-3.5" />
-              텔레그램 알림
             </a>
+
+            {/* 로그인 상태 */}
             {user ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:block max-w-[120px] truncate text-xs text-zinc-500">
-                  {user.email}
-                </span>
-                <form action="/api/auth/signout" method="POST">
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    로그아웃
-                  </button>
-                </form>
+              <div className="relative" ref={menuRef}>
+                {/* 아바타 버튼 */}
+                <button
+                  onClick={() => setMenuOpen(o => !o)}
+                  className="flex h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 pl-1.5 pr-2.5 text-zinc-300 hover:text-zinc-100 transition-colors"
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-cyan-400/15 text-[11px] font-bold text-cyan-300">
+                    {user.email?.[0].toUpperCase()}
+                  </span>
+                  <ChevronDown className={`h-3 w-3 text-zinc-600 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* 드롭다운 */}
+                {menuOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-xl border border-white/10 bg-[#0e1117] shadow-2xl">
+                    {/* 이메일 */}
+                    <div className="border-b border-white/5 px-4 py-3">
+                      <p className="truncate text-xs text-zinc-500">{user.email}</p>
+                    </div>
+                    {/* 메뉴 */}
+                    <div className="py-1">
+                      {isAdmin ? (
+                        <>
+                          <Link href="/settings" onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
+                            <Settings2 className="h-3.5 w-3.5 text-zinc-500" /> 설정
+                          </Link>
+                          <Link href="/admin" onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-amber-300 hover:bg-white/5 transition-colors">
+                            <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> 관리자
+                          </Link>
+                        </>
+                      ) : (
+                        <Link href="/user/settings" onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
+                          <Settings2 className="h-3.5 w-3.5 text-zinc-500" /> 내 설정
+                        </Link>
+                      )}
+                      <Link href="/help" onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 transition-colors">
+                        <HelpCircle className="h-3.5 w-3.5 text-zinc-500" /> 도움말
+                      </Link>
+                    </div>
+                    {/* 로그아웃 */}
+                    <div className="border-t border-white/5 py-1">
+                      <form action="/api/auth/signout" method="POST">
+                        <button type="submit"
+                          className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:bg-white/5 transition-colors">
+                          <LogOut className="h-3.5 w-3.5" /> 로그아웃
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="flex h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
               >
                 <LogIn className="h-3.5 w-3.5" />
                 로그인
