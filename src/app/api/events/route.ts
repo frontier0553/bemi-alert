@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     type:         s.type as 'PUMP' | 'DUMP',
     changePct:    s.changePct,
     volumeMult:   s.volRatio,
-    price:        s.metaJson ? (JSON.parse(s.metaJson) as { closeNow?: number }).closeNow ?? 0 : 0,
+    price:        s.metaJson ? (() => { try { return (JSON.parse(s.metaJson) as { closeNow?: number }).closeNow ?? 0; } catch { return 0; } })() : 0,
     detectedAt:   s.detectedAt.toISOString(),
     changeWindow: s.changeWindow,
     volRatio:     s.volRatio,

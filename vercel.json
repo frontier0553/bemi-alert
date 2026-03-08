@@ -1,3 +1,8 @@
 {
-  "regions": ["sin1"]
+  "regions": ["sin1"],
+  "crons": [
+    { "path": "/api/scan",         "schedule": "* * * * *"    },
+    { "path": "/api/futures-scan", "schedule": "*/5 * * * *"  },
+    { "path": "/api/whale-scan",   "schedule": "*/10 * * * *" }
+  ]
 }

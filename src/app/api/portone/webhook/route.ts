@@ -9,12 +9,14 @@ export async function POST(req: NextRequest) {
   const rawBody  = await req.text();
   const signature = req.headers.get('x-portone-signature') ?? '';
 
-  // 시그니처 검증 (PORTONE_WEBHOOK_SECRET 설정 시에만)
-  if (process.env.PORTONE_WEBHOOK_SECRET) {
-    const valid = await verifyWebhookSignature(rawBody, signature);
-    if (!valid) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-    }
+  // 시그니처 필수 검증 (PORTONE_WEBHOOK_SECRET 미설정 시 거부)
+  if (!process.env.PORTONE_WEBHOOK_SECRET) {
+    console.error('[portone-webhook] PORTONE_WEBHOOK_SECRET 환경변수 미설정');
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+  }
+  const valid = await verifyWebhookSignature(rawBody, signature);
+  if (!valid) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
   let payload: { type: string; data?: { paymentId?: string; billingKey?: string } };

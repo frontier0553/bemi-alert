@@ -52,6 +52,10 @@ export async function POST(req: NextRequest) {
     await sendTelegramMessage(chatId, STOPPED);
   } else if (text.startsWith('/link ')) {
     const code = text.slice(6).trim();
+    if (!/^\d{6}$/.test(code)) {
+      await sendTelegramMessage(chatId, '❌ 코드는 6자리 숫자여야 합니다.\n\n설정 페이지에서 코드를 발급받아 입력해주세요.');
+      return NextResponse.json({ ok: true });
+    }
     const user = await prisma.user.findFirst({
       where: {
         linkCode: code,

@@ -9,17 +9,22 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // tier 조회 → FREE: 7일, PRO: 30일
-  const [dbUser, settings] = await Promise.all([
-    prisma.user.findUnique({ where: { id: user.id } }),
+  const [, settings] = await Promise.all([
+    Promise.resolve(null),
     prisma.userSettings.findUnique({ where: { userId: user.id } }),
   ]);
-  const days  = dbUser?.tier === 'PRO' ? 30 : 7;
-  const tier  = dbUser?.tier ?? 'FREE';
+  const days = 30;
+  const tier = 'FREE';
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-  const coinFilter: string[] | null = settings?.coinFilter
-    ? JSON.parse(settings.coinFilter)
-    : null;
+  let coinFilter: string[] | null = null;
+  if (settings?.coinFilter) {
+    try {
+      const parsed = JSON.parse(settings.coinFilter);
+      coinFilter = Array.isArray(parsed) ? parsed.filter(c => typeof c === 'string') : null;
+    } catch {
+      coinFilter = null;
+    }
+  }
 
   // 코인 필터 조건 헬퍼
   function symbolFilter(field: string) {

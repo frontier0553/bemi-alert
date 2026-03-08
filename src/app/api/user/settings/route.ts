@@ -45,14 +45,18 @@ export async function PATCH(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { coinFilter, pumpPct, dumpPct } = await req.json();
+  let coinFilter: string | null, pumpPct: number | null, dumpPct: number | null;
+  try {
+    ({ coinFilter, pumpPct, dumpPct } = await req.json());
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
-  // pumpPct/dumpPct 변경은 PRO 전용
-  if ((pumpPct != null || dumpPct != null)) {
-    const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-    if (dbUser?.tier !== 'PRO') {
-      return NextResponse.json({ error: 'PRO 플랜 전용 기능입니다' }, { status: 403 });
-    }
+  if (pumpPct != null && (typeof pumpPct !== 'number' || pumpPct < 0.5 || pumpPct > 50)) {
+    return NextResponse.json({ error: 'pumpPct는 0.5~50 범위여야 합니다' }, { status: 400 });
+  }
+  if (dumpPct != null && (typeof dumpPct !== 'number' || dumpPct < 0.5 || dumpPct > 50)) {
+    return NextResponse.json({ error: 'dumpPct는 0.5~50 범위여야 합니다' }, { status: 400 });
   }
 
   await prisma.userSettings.upsert({

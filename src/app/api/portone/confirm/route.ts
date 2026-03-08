@@ -13,9 +13,18 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { billingKey, paymentId, pgProvider } = await req.json();
-  if (!billingKey || !paymentId) {
+  let body: { billingKey?: unknown; paymentId?: unknown; pgProvider?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+  const { billingKey, paymentId, pgProvider } = body;
+  if (typeof billingKey !== 'string' || typeof paymentId !== 'string' || !billingKey || !paymentId) {
     return NextResponse.json({ error: 'billingKey, paymentId 필요' }, { status: 400 });
+  }
+  if (!/^[A-Za-z0-9_\-]{4,200}$/.test(paymentId)) {
+    return NextResponse.json({ error: '잘못된 paymentId 형식' }, { status: 400 });
   }
 
   // 이미 PRO인 경우 결제 불필요

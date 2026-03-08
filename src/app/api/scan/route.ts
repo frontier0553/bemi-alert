@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runScanOnce } from '@/data/scanner';
+import { verifyCronSecret } from '@/lib/cron-auth';
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-cron-secret');
-  if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
+  if (!verifyCronSecret(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

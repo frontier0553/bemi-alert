@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 
@@ -10,7 +10,7 @@ const DEFAULTS: Record<string, string> = {
   SCAN_COOLDOWN_MINUTES: '30',
 };
 
-// 허용된 키와 유효 범위
+// ?덉슜???ㅼ? ?좏슚 踰붿쐞
 const BOUNDS: Record<string, [number, number]> = {
   SCAN_TOP_N:            [10,  500],
   SCAN_PUMP_PCT:         [1,   50],
@@ -39,9 +39,12 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await req.json() as Record<string, unknown>;
+  let body: Record<string, unknown>;
+  try { body = await req.json(); } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
-  // 허용된 키만, 범위 내 값만 통과
+  // ?덉슜???ㅻ쭔, 踰붿쐞 ??媛믩쭔 ?듦낵
   const validated: Record<string, string> = {};
   for (const [key, rawValue] of Object.entries(body)) {
     if (!BOUNDS[key]) continue;
