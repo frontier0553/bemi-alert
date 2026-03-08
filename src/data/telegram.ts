@@ -25,7 +25,7 @@ export async function sendTelegramMessage(chatId: string, message: string): Prom
           data:  { isActive: false },
         }).catch(() => {});
       } else {
-        console.error(`[telegram] sendMessage ${chatId} failed (${res.status}):`, text);
+        console.error(`[telegram] sendMessage failed (${res.status}):`, text);
       }
     }
   } catch (err) {

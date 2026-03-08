@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rateLimit';
 
 const LIMIT = 100;
 
@@ -8,6 +9,11 @@ export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // 분당 30회 제한
+  if (!rateLimit(`alerts:${user.id}`, 30, 60_000)) {
+    return NextResponse.json({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 });
+  }
 
   const [, settings] = await Promise.all([
     Promise.resolve(null),

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rateLimit';
 
 async function getSessionUser() {
   const supabase = await createClient();
@@ -45,11 +46,29 @@ export async function PATCH(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // 분당 10회 제한
+  if (!rateLimit(`settings:${user.id}`, 10, 60_000)) {
+    return NextResponse.json({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 });
+  }
+
   let coinFilter: string | null, pumpPct: number | null, dumpPct: number | null;
   try {
     ({ coinFilter, pumpPct, dumpPct } = await req.json());
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  // coinFilter 유효성 검증: JSON 배열 of 문자열, 최대 50개
+  if (coinFilter != null) {
+    let parsed: unknown;
+    try { parsed = JSON.parse(coinFilter); } catch { parsed = null; }
+    if (
+      !Array.isArray(parsed) ||
+      parsed.length > 50 ||
+      parsed.some(c => typeof c !== 'string' || !/^[A-Z0-9]{1,20}$/.test(c))
+    ) {
+      return NextResponse.json({ error: 'coinFilter 형식이 올바르지 않습니다' }, { status: 400 });
+    }
   }
 
   if (pumpPct != null && (typeof pumpPct !== 'number' || pumpPct < 0.5 || pumpPct > 50)) {

@@ -20,6 +20,15 @@ const STOPPED = `🔕 알림이 중지되었습니다.
 다시 받으려면 /start 를 입력하세요.`;
 
 export async function POST(req: NextRequest) {
+  // Telegram 웹훅 서명 검증
+  const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const token = req.headers.get('x-telegram-bot-api-secret-token');
+    if (token !== webhookSecret) {
+      return NextResponse.json({ ok: false }, { status: 403 });
+    }
+  }
+
   let body: any;
   try {
     body = await req.json();
