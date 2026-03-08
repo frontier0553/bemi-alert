@@ -12,14 +12,14 @@ export function RawEventRow({ ev }: { ev: Event }) {
 
   return (
     <div
-      className={`flex items-center gap-4 px-5 py-4 border-b border-edge-subtle border-l-2 ${borderColor} hover:bg-surface-hover transition-colors`}
+      className={`flex items-center gap-4 px-5 py-4 border-b border-white/5 border-l-2 ${borderColor} hover:bg-white/[0.02] transition-colors`}
     >
       {/* Type + Symbol */}
       <div className="flex items-center gap-2.5 w-52 min-w-0 shrink-0">
         <span className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold border ${badgeCls}`}>
           {isPump ? '▲ PUMP' : '▼ DUMP'}
         </span>
-        <span className="font-bold text-[15px] text-ink-primary truncate">{baseCoin(ev.symbol)}</span>
+        <span className="font-bold text-[15px] text-zinc-200 truncate">{baseCoin(ev.symbol)}</span>
       </div>
 
       {/* Change % */}
@@ -29,17 +29,17 @@ export function RawEventRow({ ev }: { ev: Event }) {
 
       {/* Volume */}
       <div className="flex flex-col w-36 shrink-0">
-        <span className="text-sm font-semibold text-ink-primary">x{fmt(ev.volumeMult, 1)}</span>
-        <span className="text-xs text-ink-secondary">{volAboveAvg(ev.volumeMult)}</span>
+        <span className="text-sm font-semibold text-zinc-200">x{fmt(ev.volumeMult, 1)}</span>
+        <span className="text-xs text-zinc-500">{volAboveAvg(ev.volumeMult)}</span>
       </div>
 
       {/* Price */}
-      <div className="text-sm tabular-nums text-ink-secondary w-28 shrink-0">
+      <div className="text-sm tabular-nums text-zinc-500 w-28 shrink-0">
         {formatPrice(ev.price)}
       </div>
 
       {/* Time */}
-      <div className="text-xs text-ink-secondary ml-auto shrink-0">{timeAgo(ev.detectedAt)}</div>
+      <div className="text-xs text-zinc-500 ml-auto shrink-0">{timeAgo(ev.detectedAt)}</div>
     </div>
   );
 }
@@ -60,14 +60,14 @@ export function GroupedRow({ g }: { g: GroupedSymbol }) {
 
   return (
     <div
-      className={`flex items-center gap-4 px-5 py-4 border-b border-edge-subtle border-l-2 ${borderColor} hover:bg-surface-hover transition-colors`}
+      className={`flex items-center gap-4 px-5 py-4 border-b border-white/5 border-l-2 ${borderColor} hover:bg-white/[0.02] transition-colors`}
     >
       {/* Type + Symbol */}
       <div className="flex items-center gap-2.5 w-52 min-w-0 shrink-0">
         <span className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold border ${badgeCls}`}>
           {badgeLabel}
         </span>
-        <span className="font-bold text-[15px] text-ink-primary truncate">{baseCoin(g.symbol)}</span>
+        <span className="font-bold text-[15px] text-zinc-200 truncate">{baseCoin(g.symbol)}</span>
       </div>
 
       {/* Strongest change */}
@@ -77,18 +77,18 @@ export function GroupedRow({ g }: { g: GroupedSymbol }) {
 
       {/* Volume */}
       <div className="flex flex-col w-36 shrink-0">
-        <span className="text-sm font-semibold text-ink-primary">x{fmt(g.latest.volumeMult, 1)}</span>
-        <span className="text-xs text-ink-secondary">{volAboveAvg(g.latest.volumeMult)}</span>
+        <span className="text-sm font-semibold text-zinc-200">x{fmt(g.latest.volumeMult, 1)}</span>
+        <span className="text-xs text-zinc-500">{volAboveAvg(g.latest.volumeMult)}</span>
       </div>
 
       {/* Price */}
-      <div className="text-sm tabular-nums text-ink-secondary w-28 shrink-0">
+      <div className="text-sm tabular-nums text-zinc-500 w-28 shrink-0">
         {formatPrice(g.latest.price)}
       </div>
 
       {/* Time + Count */}
       <div className="flex items-center gap-3 ml-auto shrink-0">
-        <span className="text-xs text-ink-secondary">{timeAgo(g.latest.detectedAt)}</span>
+        <span className="text-xs text-zinc-500">{timeAgo(g.latest.detectedAt)}</span>
         {g.count > 1 && (
           <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-signal/10 border border-signal/30 text-signal">
             🔥 {g.count}회

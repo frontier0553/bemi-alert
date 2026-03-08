@@ -11,7 +11,7 @@ export function HistoryTable({
   groupBy: boolean;
 }) {
   return (
-    <div className="bg-surface-card border border-edge-subtle rounded-2xl overflow-hidden overflow-x-auto">
+    <div className="bg-[#06080d] border border-white/10 rounded-2xl overflow-hidden overflow-x-auto">
       {/* Column headers */}
       <div className="flex items-center gap-4 px-5 py-2 border-b border-white/5 bg-black/20">
         <div className="w-52 shrink-0 text-xs font-semibold uppercase tracking-wider text-zinc-400">
