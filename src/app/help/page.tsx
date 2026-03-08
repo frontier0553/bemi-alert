@@ -57,7 +57,7 @@ export default function HelpPage() {
             </div>
             <span className="text-base font-bold tracking-tight">Bemi Alert</span>
           </div>
-          <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">← 대시보드</Link>
+          <Link href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300">← 대시보드</Link>
         </div>
       </header>
 

@@ -134,7 +134,7 @@ export default function SettingsPage() {
           </div>
           <nav className="flex items-center gap-1">
             <Link
-              href="/"
+              href="/dashboard"
               className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
             >
               대시보드
