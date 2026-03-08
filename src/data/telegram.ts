@@ -76,7 +76,8 @@ export async function sendTelegramAlertToSubscribers(
 
       // 코인 필터 체크
       if (prefs.coinFilter) {
-        const coins: string[] = JSON.parse(prefs.coinFilter);
+        let coins: string[] = [];
+        try { coins = JSON.parse(prefs.coinFilter); } catch { /* 잘못된 JSON이면 필터 무시 */ }
         if (coins.length > 0 && !coins.includes(baseCoin)) return Promise.resolve();
       }
 
