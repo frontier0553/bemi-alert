@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CandlestickChart, Check, X, Zap } from 'lucide-react';
+import { Zap, Check, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import * as PortOne from '@portone/browser-sdk/v2';
@@ -114,7 +114,7 @@ export default function PricingPage() {
         <div className="mx-auto flex max-w-[900px] items-center justify-between px-5 py-3">
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
-              <CandlestickChart className="h-4 w-4 text-cyan-300" />
+              <Zap className="h-4 w-4 text-cyan-300" />
             </div>
             <span className="text-base font-bold tracking-tight">Bemi Alert</span>
           </Link>

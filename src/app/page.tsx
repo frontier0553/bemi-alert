@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Bell, CandlestickChart, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut, HelpCircle, ShieldCheck, ChevronDown, ChevronUp, ChevronsUpDown, History } from 'lucide-react';
+import { Bell, Zap, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut, HelpCircle, ShieldCheck, ChevronDown, ChevronUp, ChevronsUpDown, History } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { MarketSummaryCards } from './components/MarketSummaryCards';
@@ -192,7 +192,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
-              <CandlestickChart className="h-4 w-4 text-cyan-300" />
+              <Zap className="h-4 w-4 text-cyan-300" />
             </div>
             <span className="text-base font-bold tracking-tight">Bemi Alert</span>
             {lastUpdated && (
@@ -697,7 +697,7 @@ function LandingPage({ stats }: { stats: Stats | null }) {
         <div className="mx-auto flex max-w-[1100px] items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
-              <CandlestickChart className="h-4 w-4 text-cyan-300" />
+              <Zap className="h-4 w-4 text-cyan-300" />
             </div>
             <span className="font-bold tracking-tight">Bemi Alert</span>
           </div>

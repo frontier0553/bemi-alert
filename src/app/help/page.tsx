@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  CandlestickChart, TrendingUp, TrendingDown, Waves,
-  ChevronDown, Zap, BarChart2, Clock, AlertTriangle,
+  Zap, TrendingUp, TrendingDown, Waves,
+  ChevronDown, BarChart2, Clock, AlertTriangle,
 } from 'lucide-react';
 
 /* ── FAQ 아코디언 ────────────────────────────────────────── */
@@ -53,7 +53,7 @@ export default function HelpPage() {
         <div className="mx-auto flex max-w-[900px] items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
-              <CandlestickChart className="h-4 w-4 text-cyan-300" />
+              <Zap className="h-4 w-4 text-cyan-300" />
             </div>
             <span className="text-base font-bold tracking-tight">Bemi Alert</span>
           </div>

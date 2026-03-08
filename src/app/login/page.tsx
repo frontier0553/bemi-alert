@@ -1,7 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { CandlestickChart } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 export default function LoginPage() {
   async function handleGoogleLogin() {
@@ -22,7 +22,7 @@ export default function LoginPage() {
         {/* 로고 */}
         <div className="mb-8 flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10">
-            <CandlestickChart className="h-7 w-7 text-cyan-300" />
+            <Zap className="h-7 w-7 text-cyan-300" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold tracking-tight">Bemi Alert</h1>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CandlestickChart, Settings2, Save } from 'lucide-react';
+import { Zap, Settings2, Save } from 'lucide-react';
 
 interface SettingConfig {
   key:         string;
@@ -128,7 +128,7 @@ export default function SettingsPage() {
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
-              <CandlestickChart className="h-4 w-4 text-cyan-300" />
+              <Zap className="h-4 w-4 text-cyan-300" />
             </div>
             <span className="text-base font-bold tracking-tight">Bemi Alert</span>
           </div>
