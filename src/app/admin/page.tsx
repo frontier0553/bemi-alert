@@ -152,7 +152,8 @@ export default function AdminPage() {
   /* 유저 필터 */
   const filteredUsers = users.filter(u => {
     const matchEmail = u.email.toLowerCase().includes(search.toLowerCase());
-    const matchTier  = tierFilter === 'ALL' || u.tier === tierFilter;
+    const tierNorm = (t: string) => (t === 'PAID' ? 'PRO' : t);
+    const matchTier  = tierFilter === 'ALL' || tierNorm(u.tier) === tierFilter;
     return matchEmail && matchTier;
   });
 
@@ -327,11 +328,11 @@ export default function AdminPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                          u.tier === 'PRO'
+                          u.tier !== 'FREE'
                             ? 'bg-cyan-500/20 text-cyan-300'
                             : 'bg-zinc-700/50 text-zinc-400'
                         }`}>
-                          {u.tier}
+                          {u.tier === 'PAID' ? 'PRO' : u.tier}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -339,7 +340,7 @@ export default function AdminPage() {
                           onClick={() => toggleTier(u)}
                           className="text-xs px-3 py-1 rounded border border-white/10 hover:bg-white/10 text-zinc-400 hover:text-zinc-200 transition-colors"
                         >
-                          {u.tier === 'FREE' ? 'PRO로 변경' : 'FREE로 변경'}
+                          {u.tier === 'FREE' ? 'PRO로 변경' : 'FREE로 변경 (현재: PRO)'}
                         </button>
                       </td>
                     </tr>
