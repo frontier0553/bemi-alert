@@ -10,11 +10,11 @@ datasource db {
 
 // ── Users ─────────────────────────────────────────────────────
 model User {
-  id          String        @id           // Supabase auth UUID
+  id          String        @id // Supabase auth UUID
   email       String        @unique
-  tier        String        @default("FREE")  // "FREE" | "PAID"
-  linkCode    String?       // 6자리 텔레그램 연동 코드
-  linkCodeExp DateTime?     // 연동 코드 만료 시각
+  tier        String        @default("FREE") // "FREE" | "PAID"
+  linkCode    String? // 6자리 텔레그램 연동 코드
+  linkCodeExp DateTime? // 연동 코드 만료 시각
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   settings    UserSettings?
@@ -24,9 +24,9 @@ model User {
 model UserSettings {
   userId     String   @id
   user       User     @relation(fields: [userId], references: [id])
-  coinFilter String?  // JSON 배열 ex) ["BTC","ETH"], null=전체
-  pumpPct    Float?   // null=글로벌 기본값 사용
-  dumpPct    Float?   // null=글로벌 기본값 사용
+  coinFilter String? // JSON 배열 ex) ["BTC","ETH"], null=전체
+  pumpPct    Float? // null=글로벌 기본값 사용
+  dumpPct    Float? // null=글로벌 기본값 사용
   updatedAt  DateTime @updatedAt
 }
 
@@ -34,16 +34,16 @@ model UserSettings {
 model PortOneSubscription {
   id         String    @id @default(cuid())
   userId     String    @unique
-  billingKey String    // 포트원 빌링키 (카드 등록 시 발급)
-  pgProvider String?   // "TOSSPAYMENTS" | "KCP" 등
+  billingKey String // 포트원 빌링키 (카드 등록 시 발급)
+  pgProvider String? // "TOSSPAYMENTS" | "KCP" 등
   startedAt  DateTime  @default(now())
-  expiresAt  DateTime  // 현재 구독 만료일
+  expiresAt  DateTime // 현재 구독 만료일
   canceledAt DateTime? // 해지 처리 시각
 }
 
 // ── Visitor Tracking ─────────────────────────────────────────
 model DailyVisit {
-  date  String @id   // "YYYY-MM-DD"
+  date  String @id // "YYYY-MM-DD"
   count Int    @default(0)
 }
 
@@ -80,7 +80,7 @@ model Signal {
 
 model Cooldown {
   symbol      String
-  type        String   @default("PUMP")   // "PUMP" | "DUMP"
+  type        String   @default("PUMP") // "PUMP" | "DUMP"
   lastSentAt  DateTime
   lastMaxMove Float
 
@@ -99,21 +99,21 @@ model Subscriber {
   username  String?
   firstName String?
   isActive  Boolean  @default(true)
-  userId    String?  // 연동된 User ID (optional)
+  userId    String? // 연동된 User ID (optional)
   joinedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 // ── Futures Signals (Funding Rate / OI) ──────────────────────
 model FuturesAlert {
-  id          String   @id @default(cuid())
-  symbol      String
-  alertType   String   // "FUNDING" | "OI_SURGE" | "OI_DROP"
-  value       Float    // funding rate (%) or OI change (%)
-  markPrice   Float?   // funding 감지 시 mark price
-  note        String?  // 부가 설명
+  id        String  @id @default(cuid())
+  symbol    String
+  alertType String // "FUNDING" | "OI_SURGE" | "OI_DROP"
+  value     Float // funding rate (%) or OI change (%)
+  markPrice Float? // funding 감지 시 mark price
+  note      String? // 부가 설명
 
-  detectedAt  DateTime @default(now())
+  detectedAt DateTime @default(now())
 
   @@index([detectedAt])
   @@index([symbol, detectedAt])
@@ -123,13 +123,13 @@ model FuturesAlert {
 model WhaleEvent {
   id         String   @id @default(cuid())
   symbol     String
-  direction  String   // "BUY" | "SELL" | "MIXED"
-  tradeSize  Float    // largest single whale trade (USD)
+  direction  String // "BUY" | "SELL" | "MIXED"
+  tradeSize  Float // largest single whale trade (USD)
   price      Float
-  score      Int      // -100..+100
+  score      Int // -100..+100
   whaleBuys  Int
   whaleSells Int
-  type       String   // "ACCUMULATION" | "DUMP" | "NEUTRAL"
+  type       String // "ACCUMULATION" | "DUMP" | "NEUTRAL"
   detectedAt DateTime @default(now())
 
   @@index([detectedAt])
