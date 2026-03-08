@@ -62,8 +62,8 @@ export async function POST(req: NextRequest) {
   await prisma.$transaction([
     prisma.portOneSubscription.upsert({
       where:  { userId: user.id },
-      update: { billingKey, pgProvider: pgProvider ?? null, expiresAt, canceledAt: null, startedAt: new Date() },
-      create: { userId: user.id, billingKey, pgProvider: pgProvider ?? null, expiresAt },
+      update: { billingKey, pgProvider: typeof pgProvider === 'string' ? pgProvider : null, expiresAt, canceledAt: null, startedAt: new Date() },
+      create: { userId: user.id, billingKey, pgProvider: typeof pgProvider === 'string' ? pgProvider : null, expiresAt },
     }),
     prisma.user.update({ where: { id: user.id }, data: { tier: 'PRO' } }),
   ]);

@@ -63,15 +63,15 @@ export async function PATCH(req: NextRequest) {
     where: { userId: user.id },
     update: {
       coinFilter: coinFilter ?? null,
-      pumpPct:    pumpPct != null ? parseFloat(pumpPct) : null,
-      dumpPct:    dumpPct != null ? parseFloat(dumpPct) : null,
+      pumpPct:    pumpPct ?? null,
+      dumpPct:    dumpPct ?? null,
       updatedAt:  new Date(),
     },
     create: {
       userId:     user.id,
       coinFilter: coinFilter ?? null,
-      pumpPct:    pumpPct != null ? parseFloat(pumpPct) : null,
-      dumpPct:    dumpPct != null ? parseFloat(dumpPct) : null,
+      pumpPct:    pumpPct ?? null,
+      dumpPct:    dumpPct ?? null,
     },
   });
 
