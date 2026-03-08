@@ -124,11 +124,11 @@ export default function LandingPage() {
               { coin: 'DOGE', type: 'DUMP', pct: '-8.7%',  color: 'text-red-400',     badge: 'bg-red-500/20 text-red-300' },
               { coin: 'SOL',  type: 'PUMP', pct: '+6.2%',  color: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
             ].map(({ coin, type, pct, color, badge }) => (
-              <div key={coin} className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.015] px-3 py-2">
+              <div key={coin} className="grid grid-cols-[80px_72px_1fr_60px] items-center rounded-lg border border-white/5 bg-white/[0.015] px-3 py-2">
                 <span className="text-sm font-semibold text-zinc-200">{coin}</span>
-                <span className={`text-xs px-2 py-0.5 rounded font-medium ${badge}`}>{type}</span>
-                <span className={`text-sm font-bold ${color}`}>{pct}</span>
-                <span className="text-xs text-zinc-600">방금 전</span>
+                <span className={`text-xs px-2 py-0.5 rounded font-medium w-fit ${badge}`}>{type}</span>
+                <span className={`text-sm font-bold text-right ${color}`}>{pct}</span>
+                <span className="text-xs text-zinc-600 text-right">방금 전</span>
               </div>
             ))}
           </div>
