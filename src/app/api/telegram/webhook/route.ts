@@ -13,7 +13,9 @@ const WELCOME = `🚀 <b>Bemi Alert에 오신 것을 환영합니다!</b>
 
 알림을 시작했습니다. 신호가 감지되면 여기로 바로 보내드릴게요.
 
-중지하려면 /stop 을 입력하세요.`;
+/stop — 알림 중지
+/status — 구독 상태 확인
+/link [코드] — 계정 연동`;
 
 const STOPPED = `🔕 알림이 중지되었습니다.
 
@@ -46,7 +48,23 @@ export async function POST(req: NextRequest) {
 
   if (!chatId) return NextResponse.json({ ok: true });
 
-  if (text.startsWith('/start')) {
+  if (text.startsWith('/status')) {
+    const sub = await prisma.subscriber.findUnique({ where: { chatId } });
+    if (!sub || !sub.isActive) {
+      await sendTelegramMessage(chatId, '❌ 현재 알림 구독 중이 아닙니다.\n\n/start 를 입력해 구독을 시작하세요.');
+    } else {
+      const linked = sub.userId ? '✅ 계정 연동됨' : '⚠️ 미연동\n(bemialert.com/user/settings 에서 코드 입력)';
+      const name   = sub.firstName ? sub.firstName : (sub.username ?? '');
+      await sendTelegramMessage(chatId,
+        `📊 <b>구독 상태</b>\n\n` +
+        `상태: ✅ 활성\n` +
+        `이름: ${name}\n` +
+        `계정: ${linked}\n\n` +
+        `중지하려면 /stop\n` +
+        `계정 연동하려면 /link [코드]`,
+      );
+    }
+  } else if (text.startsWith('/start')) {
     await prisma.subscriber.upsert({
       where:  { chatId },
       update: { isActive: true, username, firstName },

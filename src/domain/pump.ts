@@ -192,5 +192,7 @@ ${conf.score}% (${conf.level})
 💰 Price
 $${priceStr}
 
+📊 <a href="https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}">차트 보기</a>
+
 ${tag} #${base.toLowerCase()}`.trim();
 }
