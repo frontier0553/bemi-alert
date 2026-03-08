@@ -453,12 +453,12 @@ export default function Home() {
             </div>
           </div>
           {/* 컬럼 헤더 */}
-          <div className="grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            <span>Symbol</span>
-            <span>Event</span>
-            <span className="text-right">Value</span>
-            <span>Status</span>
-            <span className="text-right">Time</span>
+          <div className="grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400">
+            <span>심볼</span>
+            <span>이벤트</span>
+            <span className="text-right">값</span>
+            <span>상태</span>
+            <span className="text-right">시간</span>
           </div>
           <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto">
             {futuresLoading ? (
