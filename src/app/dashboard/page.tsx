@@ -443,6 +443,14 @@ export default function Home() {
               </button>
               <span className="text-right">시각</span>
             </div>
+            {/* 컬럼 헤더 — 모바일 */}
+            <div className="block sm:hidden grid grid-cols-[12px_72px_52px_1fr_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <span />
+              <span>심볼</span>
+              <span>방향</span>
+              <span className="text-right">압력</span>
+              <span className="text-right">시각</span>
+            </div>
             <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
               {whalesLoading ? (
                 <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
@@ -482,9 +490,16 @@ export default function Home() {
           <div className="hidden sm:grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400">
             <span>심볼</span>
             <span>이벤트</span>
-            <span className="text-right">값</span>
+            <span className="text-right">비율</span>
             <span>상태</span>
             <span className="text-right">시간</span>
+          </div>
+          {/* 컬럼 헤더 — 모바일 */}
+          <div className="block sm:hidden grid grid-cols-[72px_60px_1fr_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+            <span>심볼</span>
+            <span>이벤트</span>
+            <span className="text-right">비율</span>
+            <span className="text-right">시각</span>
           </div>
           <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto">
             {futuresLoading ? (
@@ -584,7 +599,7 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
     <>
       {/* 모바일 카드 */}
       <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="grid grid-cols-[12px_72px_52px_1fr_auto] items-center gap-x-2">
+        <div className="grid grid-cols-[12px_72px_52px_1fr_44px] items-center gap-x-2">
           <span className={`h-2 w-2 rounded-full ${heat}`} />
           <span className="font-semibold text-sm text-zinc-100 truncate">{w.symbol.replace(QUOTE_RE, '')}</span>
           <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
@@ -665,7 +680,7 @@ function FuturesRow({ f }: { f: FuturesAlertRow }) {
     <>
       {/* 모바일 카드 */}
       <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="grid grid-cols-[72px_60px_1fr_auto] items-center gap-x-2">
+        <div className="grid grid-cols-[72px_60px_1fr_44px] items-center gap-x-2">
           <span className="font-bold text-sm text-zinc-100 truncate">
             {f.symbol.replace(QUOTE_RE, '')}
           </span>

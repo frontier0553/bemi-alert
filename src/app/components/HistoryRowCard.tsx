@@ -13,19 +13,17 @@ export function RawEventRow({ ev }: { ev: Event }) {
     <>
       {/* 모바일 카드 */}
       <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeCls}`}>
-              {isPump ? '▲ PUMP' : '▼ DUMP'}
-            </span>
-            <span className="font-bold text-sm text-zinc-100">{baseCoin(ev.symbol)}</span>
-            <span className={`text-sm font-bold tabular-nums ${changeColor}`}>
-              {ev.changePct > 0 ? '+' : ''}{fmt(ev.changePct)}%
-            </span>
-          </div>
-          <span className="shrink-0 text-xs text-zinc-600 tabular-nums">{timeAgo(ev.detectedAt)}</span>
+        <div className="grid grid-cols-[52px_1fr_56px_44px] items-center gap-x-2">
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeCls}`}>
+            {isPump ? '▲ PUMP' : '▼ DUMP'}
+          </span>
+          <span className="font-bold text-sm text-zinc-100 truncate">{baseCoin(ev.symbol)}</span>
+          <span className={`text-sm font-bold tabular-nums text-right ${changeColor}`}>
+            {ev.changePct > 0 ? '+' : ''}{fmt(ev.changePct)}%
+          </span>
+          <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(ev.detectedAt)}</span>
         </div>
-        <div className="mt-0.5 ml-[52px] flex gap-2 text-xs text-zinc-500">
+        <div className="mt-0.5 pl-[60px] flex gap-2 text-xs text-zinc-500">
           <span>x{fmt(ev.volumeMult, 1)} · {volAboveAvg(ev.volumeMult)}</span>
           <span className="text-zinc-600">{formatPrice(ev.price)}</span>
         </div>
@@ -70,26 +68,24 @@ export function GroupedRow({ g }: { g: GroupedSymbol }) {
     <>
       {/* 모바일 카드 */}
       <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeCls}`}>
-              {badgeLabel}
-            </span>
-            <span className="font-bold text-sm text-zinc-100">{baseCoin(g.symbol)}</span>
-            <span className={`text-sm font-bold tabular-nums ${changeColor}`}>
-              {g.strongest.changePct > 0 ? '+' : ''}{fmt(g.strongest.changePct)}%
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+        <div className="grid grid-cols-[52px_1fr_56px_44px] items-center gap-x-2">
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeCls}`}>
+            {badgeLabel}
+          </span>
+          <span className="font-bold text-sm text-zinc-100 truncate">{baseCoin(g.symbol)}</span>
+          <span className={`text-sm font-bold tabular-nums text-right ${changeColor}`}>
+            {g.strongest.changePct > 0 ? '+' : ''}{fmt(g.strongest.changePct)}%
+          </span>
+          <div className="flex flex-col items-end">
             <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(g.latest.detectedAt)}</span>
             {g.count > 1 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-500/10 border border-violet-500/25 text-violet-300">
+              <span className="px-1 py-0 rounded-full text-[9px] font-semibold bg-violet-500/10 border border-violet-500/25 text-violet-300">
                 🔥{g.count}회
               </span>
             )}
           </div>
         </div>
-        <div className="mt-0.5 ml-[52px] flex gap-2 text-xs text-zinc-500">
+        <div className="mt-0.5 pl-[60px] flex gap-2 text-xs text-zinc-500">
           <span>x{fmt(g.latest.volumeMult, 1)} · {volAboveAvg(g.latest.volumeMult)}</span>
           <span className="text-zinc-600">{formatPrice(g.latest.price)}</span>
         </div>
