@@ -458,7 +458,7 @@ export default function Home() {
         </div>
 
         {/* ── 선물 신호 (펀딩비 + OI) ── */}
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
           <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
             <div className="flex items-center gap-2.5">
               <TrendingUp className="h-4 w-4 text-violet-400" />
@@ -502,7 +502,7 @@ export default function Home() {
         </div>
 
         {/* ── Full-width: 감지 내역 ── */}
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
           <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
             <span className="text-sm font-semibold">📋 감지 내역</span>
           </div>
