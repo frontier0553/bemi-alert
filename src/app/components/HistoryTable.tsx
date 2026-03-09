@@ -11,9 +11,9 @@ export function HistoryTable({
   groupBy: boolean;
 }) {
   return (
-    <div className="overflow-x-auto">
-      {/* 컬럼 헤더 */}
-      <div className="grid grid-cols-[200px_100px_160px_120px_1fr] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400 min-w-[640px]">
+    <div>
+      {/* 컬럼 헤더 — 데스크탑만 */}
+      <div className="hidden sm:grid grid-cols-[200px_100px_160px_120px_1fr] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400">
         <span>타입 / 심볼</span>
         <span>
           최대 변동
@@ -25,7 +25,7 @@ export function HistoryTable({
       </div>
 
       {/* 행 */}
-      <div className="divide-y divide-white/[0.04] min-w-[640px]">
+      <div className="divide-y divide-white/[0.04]">
         {groupBy
           ? grouped.map(g => <GroupedRow key={g.symbol} g={g} />)
           : events.map(ev => <RawEventRow key={ev.id} ev={ev} />)
