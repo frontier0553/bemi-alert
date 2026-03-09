@@ -65,12 +65,44 @@ export async function POST(req: NextRequest) {
       );
     }
   } else if (text.startsWith('/start')) {
+    // 딥링크: /start 123456 (t.me/bemialert_bot?start=CODE)
+    const deepCode = text.slice(6).trim();
+
+    // 구독자 등록 (항상)
     await prisma.subscriber.upsert({
       where:  { chatId },
       update: { isActive: true, username, firstName },
       create: { chatId, username, firstName },
     });
-    await sendTelegramMessage(chatId, WELCOME);
+
+    if (/^\d{6}$/.test(deepCode)) {
+      // 코드로 계정 자동 연동
+      const user = await prisma.user.findFirst({
+        where: { linkCode: deepCode, linkCodeExp: { gt: new Date() } },
+      });
+      if (!user) {
+        await sendTelegramMessage(chatId,
+          '⚠️ 코드가 만료되었습니다.\n\n' +
+          '<a href="https://bemialert.com/user/settings">설정 페이지</a>에서 새 코드를 발급받고 다시 시도해주세요.'
+        );
+      } else {
+        await prisma.user.update({
+          where: { id: user.id },
+          data:  { linkCode: null, linkCodeExp: null },
+        });
+        await prisma.subscriber.update({
+          where: { chatId },
+          data:  { userId: user.id },
+        });
+        await sendTelegramMessage(chatId,
+          `✅ <b>${user.email}</b> 계정과 연동되었습니다!\n\n` +
+          `이제 개인 설정에 맞춘 알림을 받습니다.\n\n` +
+          `/stop — 알림 중지\n/status — 구독 상태 확인`
+        );
+      }
+    } else {
+      await sendTelegramMessage(chatId, WELCOME);
+    }
   } else if (text.startsWith('/stop')) {
     await prisma.subscriber.updateMany({
       where: { chatId },

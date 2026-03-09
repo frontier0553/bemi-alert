@@ -236,28 +236,45 @@ export default function UserSettingsPage() {
               </span>
             </div>
           ) : (
-            <div className="mt-3 space-y-3">
-              <p className="text-xs text-zinc-500">
-                텔레그램 알림을 받으려면 봇과 계정을 연동하세요.
-              </p>
-              <div className="text-xs text-zinc-400 space-y-1">
-                <div>1. 아래 코드 생성 버튼 클릭</div>
-                <div>2. <a href="https://t.me/bemialert_bot" target="_blank" rel="noopener" className="text-cyan-400 hover:underline">@bemialert_bot</a> 에서 <code className="text-amber-300">/link [코드]</code> 입력</div>
-              </div>
+            <div className="mt-4 space-y-3">
+              <p className="text-xs text-zinc-500">버튼 클릭 한 번으로 텔레그램과 연동됩니다.</p>
+
               {linkCode ? (
-                <div className="flex items-center gap-3 rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-3">
-                  <span className="text-2xl font-bold tracking-[0.2em] tabular-nums text-amber-300">{linkCode}</span>
-                  <span className="text-xs text-zinc-500">만료: {linkExpiry}</span>
+                <div className="space-y-3">
+                  <a
+                    href={`https://t.me/bemialert_bot?start=${linkCode}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm px-4 py-3 transition-colors"
+                  >
+                    <Bell className="h-4 w-4" />
+                    텔레그램 앱에서 연동하기 →
+                  </a>
+                  <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-zinc-500">코드:</span>
+                      <span className="font-bold tracking-[0.15em] tabular-nums text-amber-300 text-sm">{linkCode}</span>
+                    </div>
+                    <span className="text-xs text-zinc-600">만료 {linkExpiry}</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-600">
+                    버튼 클릭 → 텔레그램에서 <b className="text-zinc-400">시작</b> 탭 → 연동 완료
+                  </p>
                 </div>
               ) : (
                 <button
                   onClick={handleGenLinkCode}
                   disabled={linking}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300 hover:bg-white/10 transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-cyan-500/90 hover:bg-cyan-400 text-black font-semibold text-sm px-4 py-3 transition-colors disabled:opacity-50"
                 >
-                  {linking ? '생성 중...' : '코드 생성'}
+                  <Bell className="h-4 w-4" />
+                  {linking ? '준비 중...' : '텔레그램으로 연동하기'}
                 </button>
               )}
+
+              <p className="text-[11px] text-zinc-600">
+                수동: <a href="https://t.me/bemialert_bot" target="_blank" rel="noopener" className="text-cyan-500 hover:underline">@bemialert_bot</a> → <code className="text-amber-400">/link {linkCode || '[코드]'}</code>
+              </p>
             </div>
           )}
         </div>

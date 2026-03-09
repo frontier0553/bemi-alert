@@ -37,6 +37,7 @@ export default function Home() {
   const [userChecked, setUserChecked]     = useState(false);
   const [menuOpen, setMenuOpen]           = useState(false);
   const menuRef                           = useRef<HTMLDivElement>(null);
+  const [telegramLinked, setTelegramLinked] = useState<boolean | null>(null);
   const [whaleSortKey, setWhaleSortKey]   = useState<'symbol'|'direction'|'tradeSize'|'score'>('score');
   const [whaleSortDir, setWhaleSortDir]   = useState<'asc'|'desc'>('desc');
   const [futuresFilter, setFuturesFilter] = useState<'ALL'|'FUNDING'|'OI'>('ALL');
@@ -131,6 +132,13 @@ export default function Home() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
     });
+
+    // 텔레그램 연동 여부 확인
+    fetch('/api/user/settings')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setTelegramLinked(d.telegramLinked ?? false))
+      .catch(() => {});
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -186,6 +194,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#06080d] text-zinc-100">
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.05),transparent_25%)]" />
+
+      {/* ── 텔레그램 미연동 배너 ── */}
+      {telegramLinked === false && (
+        <div className="relative z-40 border-b border-cyan-400/15 bg-cyan-400/5 px-5 py-2.5">
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-xs text-zinc-300">
+              <Bell className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+              <span>텔레그램 연동 시 신호 감지 즉시 알림을 받을 수 있습니다.</span>
+            </div>
+            <Link
+              href="/user/settings"
+              className="shrink-0 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-semibold px-3 py-1.5 transition-colors"
+            >
+              지금 연동하기
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* ── Header ── */}
       <header className="relative z-50 border-b border-white/5 bg-black/40 backdrop-blur-xl">
