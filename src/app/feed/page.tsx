@@ -118,52 +118,54 @@ export default function FeedPage() {
 
         {/* 테이블 */}
         <div className="rounded-xl border border-white/[0.07] bg-white/[0.015] overflow-hidden">
-          {/* 헤더 */}
-          <div className="grid grid-cols-[180px_90px_90px_90px_1fr] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold tracking-wider text-zinc-500">
-            <span>타입 / 심볼</span>
-            <span>변동폭</span>
-            <span>거래량</span>
-            <span>현재가</span>
-            <span className="text-right">감지 시각</span>
-          </div>
+          <div className="overflow-x-auto">
+            {/* 헤더 */}
+            <div className="grid grid-cols-[160px_80px_80px_88px_80px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold tracking-wider text-zinc-500 min-w-[488px]">
+              <span>타입 / 심볼</span>
+              <span>변동폭</span>
+              <span>거래량</span>
+              <span>현재가</span>
+              <span className="text-right">시각</span>
+            </div>
 
-          {/* 행 */}
-          <div className="divide-y divide-white/[0.04]">
-            {signals.length === 0 ? (
-              <div className="py-16 text-center text-sm text-zinc-600">감지된 신호가 없습니다</div>
-            ) : signals.map(s => {
-              const isPump = s.type === 'PUMP';
-              const badgeCls = isPump
-                ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
-                : 'border-red-500/25 bg-red-500/10 text-red-300';
-              const coin = baseCoin(s.symbol);
-              const tvUrl = `https://www.tradingview.com/chart/?symbol=BINANCE:${s.symbol}`;
-              return (
-                <div key={s.id} className="grid grid-cols-[180px_90px_90px_90px_1fr] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeCls}`}>
-                      {isPump ? '▲ PUMP' : '▼ DUMP'}
+            {/* 행 */}
+            <div className="divide-y divide-white/[0.04]">
+              {signals.length === 0 ? (
+                <div className="py-16 text-center text-sm text-zinc-600">감지된 신호가 없습니다</div>
+              ) : signals.map(s => {
+                const isPump = s.type === 'PUMP';
+                const badgeCls = isPump
+                  ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+                  : 'border-red-500/25 bg-red-500/10 text-red-300';
+                const coin = baseCoin(s.symbol);
+                const tvUrl = `https://www.tradingview.com/chart/?symbol=BINANCE:${s.symbol}`;
+                return (
+                  <div key={s.id} className="grid grid-cols-[160px_80px_80px_88px_80px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors min-w-[488px]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeCls}`}>
+                        {isPump ? '▲ PUMP' : '▼ DUMP'}
+                      </span>
+                      <a
+                        href={tvUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold text-sm text-zinc-100 truncate hover:text-cyan-300 transition-colors"
+                      >
+                        {coin}
+                      </a>
+                    </div>
+                    <span className={`text-sm font-bold tabular-nums ${isPump ? 'text-emerald-300' : 'text-red-300'}`}>
+                      {isPump ? '+' : ''}{s.changePct.toFixed(1)}%
                     </span>
-                    <a
-                      href={tvUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold text-sm text-zinc-100 truncate hover:text-cyan-300 transition-colors"
-                    >
-                      {coin}
-                    </a>
+                    <span className="text-sm text-zinc-300">x{s.volumeMult.toFixed(1)}</span>
+                    <span className="text-sm tabular-nums text-zinc-500">
+                      ${s.price >= 1 ? s.price.toFixed(2) : s.price.toFixed(4)}
+                    </span>
+                    <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(s.detectedAt)}</span>
                   </div>
-                  <span className={`text-sm font-bold tabular-nums ${isPump ? 'text-emerald-300' : 'text-red-300'}`}>
-                    {isPump ? '+' : ''}{s.changePct.toFixed(1)}%
-                  </span>
-                  <span className="text-sm text-zinc-300">x{s.volumeMult.toFixed(1)}</span>
-                  <span className="text-sm tabular-nums text-zinc-500">
-                    ${s.price >= 1 ? s.price.toFixed(2) : s.price.toFixed(4)}
-                  </span>
-                  <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(s.detectedAt)}</span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
