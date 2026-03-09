@@ -417,42 +417,40 @@ export default function Home() {
               <span className="text-xs text-zinc-600">상위 30 코인</span>
             </div>
 
-            {/* 컬럼 헤더 + 행 (모바일 가로 스크롤) */}
-            <div className="overflow-x-auto">
-              <div className="grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 min-w-[420px]">
-                <span />
-                <button onClick={() => handleWhaleSort('symbol')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
-                  심볼<WhaleSortIcon col="symbol" />
-                </button>
-                <button onClick={() => handleWhaleSort('direction')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
-                  방향<WhaleSortIcon col="direction" />
-                </button>
-                <button onClick={() => handleWhaleSort('tradeSize')} className="flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
-                  거래규모<WhaleSortIcon col="tradeSize" />
-                </button>
-                <button onClick={() => handleWhaleSort('score')} className="group relative flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
-                  압력지수<WhaleSortIcon col="score" />
-                  <span className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0e1117] p-3 text-left text-[11px] font-normal normal-case tracking-normal text-zinc-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
-                    <span className="block font-semibold text-zinc-100 mb-1.5">고래 압력 지수 (-100 ~ +100)</span>
-                    <span className="block text-zinc-400 leading-relaxed">(매수건 × 2) − (매도건 × 2) + 거래량 스파이크</span>
-                    <span className="mt-2 block space-y-1">
-                      <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />+40 이상: 강한 매집</span>
-                      <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />−40 이하: 강한 매도</span>
-                      <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" />그 외: 중립</span>
-                    </span>
+            {/* 컬럼 헤더 — 데스크탑만 */}
+            <div className="hidden sm:grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <span />
+              <button onClick={() => handleWhaleSort('symbol')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
+                심볼<WhaleSortIcon col="symbol" />
+              </button>
+              <button onClick={() => handleWhaleSort('direction')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
+                방향<WhaleSortIcon col="direction" />
+              </button>
+              <button onClick={() => handleWhaleSort('tradeSize')} className="flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
+                거래규모<WhaleSortIcon col="tradeSize" />
+              </button>
+              <button onClick={() => handleWhaleSort('score')} className="group relative flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
+                압력지수<WhaleSortIcon col="score" />
+                <span className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0e1117] p-3 text-left text-[11px] font-normal normal-case tracking-normal text-zinc-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
+                  <span className="block font-semibold text-zinc-100 mb-1.5">고래 압력 지수 (-100 ~ +100)</span>
+                  <span className="block text-zinc-400 leading-relaxed">(매수건 × 2) − (매도건 × 2) + 거래량 스파이크</span>
+                  <span className="mt-2 block space-y-1">
+                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />+40 이상: 강한 매집</span>
+                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />−40 이하: 강한 매도</span>
+                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" />그 외: 중립</span>
                   </span>
-                </button>
-                <span className="text-right">시각</span>
-              </div>
-              <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto min-w-[420px]">
-                {whalesLoading ? (
-                  <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
-                ) : whales.length === 0 ? (
-                  <div className="py-10 text-center text-sm text-zinc-600">고래 활동 없음</div>
-                ) : (
-                  sortedWhales.map(w => <WhaleRow key={w.id} w={w} />)
-                )}
-              </div>
+                </span>
+              </button>
+              <span className="text-right">시각</span>
+            </div>
+            <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
+              {whalesLoading ? (
+                <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
+              ) : whales.length === 0 ? (
+                <div className="py-10 text-center text-sm text-zinc-600">고래 활동 없음</div>
+              ) : (
+                sortedWhales.map(w => <WhaleRow key={w.id} w={w} />)
+              )}
             </div>
           </div>
         </div>
@@ -480,24 +478,22 @@ export default function Home() {
               ))}
             </div>
           </div>
-          {/* 컬럼 헤더 + 행 (모바일 가로 스크롤) */}
-          <div className="overflow-x-auto">
-            <div className="grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400 min-w-[414px]">
-              <span>심볼</span>
-              <span>이벤트</span>
-              <span className="text-right">값</span>
-              <span>상태</span>
-              <span className="text-right">시간</span>
-            </div>
-            <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto min-w-[414px]">
-              {futuresLoading ? (
-                <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
-              ) : filteredFutures.length === 0 ? (
-                <div className="py-10 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
-              ) : (
-                filteredFutures.map(f => <FuturesRow key={f.id} f={f} />)
-              )}
-            </div>
+          {/* 컬럼 헤더 — 데스크탑만 */}
+          <div className="hidden sm:grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400">
+            <span>심볼</span>
+            <span>이벤트</span>
+            <span className="text-right">값</span>
+            <span>상태</span>
+            <span className="text-right">시간</span>
+          </div>
+          <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto">
+            {futuresLoading ? (
+              <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
+            ) : filteredFutures.length === 0 ? (
+              <div className="py-10 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
+            ) : (
+              filteredFutures.map(f => <FuturesRow key={f.id} f={f} />)
+            )}
           </div>
         </div>
 
@@ -574,6 +570,10 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
     : 'bg-amber-400';
   const scoreColor = w.score > 0 ? 'text-emerald-300' : w.score < 0 ? 'text-red-300' : 'text-zinc-400';
   const barColor   = w.score > 0 ? 'bg-emerald-400' : w.score < 0 ? 'bg-red-400' : 'bg-amber-400';
+  const dirBadge   = isBuy
+    ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+    : isMix ? 'border-amber-500/25 bg-amber-500/10 text-amber-300'
+    : 'border-red-500/25 bg-red-500/10 text-red-300';
 
   function fmtUsd(v: number) {
     if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
@@ -581,31 +581,52 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
   }
 
   return (
-    <div className="grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-      <span className={`h-2 w-2 rounded-full ${heat}`} />
-      <span className="font-semibold text-sm text-zinc-100 truncate">
-        {w.symbol.replace(QUOTE_RE, '')}
-      </span>
-      <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${
-        isBuy ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
-        : isMix ? 'border-amber-500/25 bg-amber-500/10 text-amber-300'
-        : 'border-red-500/25 bg-red-500/10 text-red-300'
-      }`}>
-        {w.direction}
-      </span>
-      <span className="text-sm font-semibold text-zinc-200 tabular-nums text-right">
-        {fmtUsd(w.tradeSize)}
-      </span>
-      <div className="flex flex-col items-end gap-1">
-        <span className={`text-sm font-bold tabular-nums leading-none ${scoreColor}`}>
-          {w.score > 0 ? '+' : ''}{w.score}
-        </span>
-        <div className="h-0.5 w-full rounded-full bg-white/5">
-          <div className={`h-0.5 rounded-full ${barColor}`} style={{ width: `${absScore}%` }} />
+    <>
+      {/* 모바일 카드 */}
+      <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`h-2 w-2 shrink-0 rounded-full ${heat}`} />
+            <span className="font-semibold text-sm text-zinc-100">{w.symbol.replace(QUOTE_RE, '')}</span>
+            <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
+              {w.direction}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`text-sm font-bold tabular-nums ${scoreColor}`}>
+              {w.score > 0 ? '+' : ''}{w.score}
+            </span>
+            <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(w.detectedAt)}</span>
+          </div>
+        </div>
+        <div className="mt-0.5 ml-[16px] text-xs text-zinc-500">
+          거래규모 {fmtUsd(w.tradeSize)}
         </div>
       </div>
-      <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
-    </div>
+
+      {/* 데스크탑 테이블 행 */}
+      <div className="hidden sm:grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+        <span className={`h-2 w-2 rounded-full ${heat}`} />
+        <span className="font-semibold text-sm text-zinc-100 truncate">
+          {w.symbol.replace(QUOTE_RE, '')}
+        </span>
+        <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
+          {w.direction}
+        </span>
+        <span className="text-sm font-semibold text-zinc-200 tabular-nums text-right">
+          {fmtUsd(w.tradeSize)}
+        </span>
+        <div className="flex flex-col items-end gap-1">
+          <span className={`text-sm font-bold tabular-nums leading-none ${scoreColor}`}>
+            {w.score > 0 ? '+' : ''}{w.score}
+          </span>
+          <div className="h-0.5 w-full rounded-full bg-white/5">
+            <div className={`h-0.5 rounded-full ${barColor}`} style={{ width: `${absScore}%` }} />
+          </div>
+        </div>
+        <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
+      </div>
+    </>
   );
 }
 
@@ -645,21 +666,47 @@ function FuturesRow({ f }: { f: FuturesAlertRow }) {
     : 'bg-red-500/10 text-red-300';
 
   return (
-    <div className="grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-      <span className="font-bold text-sm text-zinc-100 truncate">
-        {f.symbol.replace(QUOTE_RE, '')}
-      </span>
-      <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
-        {eventLabel}
-      </span>
-      <span className={`text-sm font-bold tabular-nums text-right ${valueColor}`}>
-        {valueStr}
-      </span>
-      <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
-        {statusLabel}
-      </span>
-      <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
-    </div>
+    <>
+      {/* 모바일 카드 */}
+      <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-bold text-sm text-zinc-100 truncate">
+              {f.symbol.replace(QUOTE_RE, '')}
+            </span>
+            <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
+              {eventLabel}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`text-sm font-bold tabular-nums ${valueColor}`}>{valueStr}</span>
+            <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(f.detectedAt)}</span>
+          </div>
+        </div>
+        <div className="mt-0.5">
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
+            {statusLabel}
+          </span>
+        </div>
+      </div>
+
+      {/* 데스크탑 테이블 행 */}
+      <div className="hidden sm:grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+        <span className="font-bold text-sm text-zinc-100 truncate">
+          {f.symbol.replace(QUOTE_RE, '')}
+        </span>
+        <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
+          {eventLabel}
+        </span>
+        <span className={`text-sm font-bold tabular-nums text-right ${valueColor}`}>
+          {valueStr}
+        </span>
+        <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
+          {statusLabel}
+        </span>
+        <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
+      </div>
+    </>
   );
 }
 
