@@ -584,22 +584,18 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
     <>
       {/* 모바일 카드 */}
       <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className={`h-2 w-2 shrink-0 rounded-full ${heat}`} />
-            <span className="font-semibold text-sm text-zinc-100">{w.symbol.replace(QUOTE_RE, '')}</span>
-            <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
-              {w.direction}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-sm font-bold tabular-nums ${scoreColor}`}>
-              {w.score > 0 ? '+' : ''}{w.score}
-            </span>
-            <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(w.detectedAt)}</span>
-          </div>
+        <div className="grid grid-cols-[12px_72px_52px_1fr_auto] items-center gap-x-2">
+          <span className={`h-2 w-2 rounded-full ${heat}`} />
+          <span className="font-semibold text-sm text-zinc-100 truncate">{w.symbol.replace(QUOTE_RE, '')}</span>
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
+            {w.direction}
+          </span>
+          <span className={`text-sm font-bold tabular-nums text-right ${scoreColor}`}>
+            {w.score > 0 ? '+' : ''}{w.score}
+          </span>
+          <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(w.detectedAt)}</span>
         </div>
-        <div className="mt-0.5 ml-[16px] text-xs text-zinc-500">
+        <div className="mt-0.5 pl-5 text-xs text-zinc-500">
           거래규모 {fmtUsd(w.tradeSize)}
         </div>
       </div>
@@ -669,19 +665,15 @@ function FuturesRow({ f }: { f: FuturesAlertRow }) {
     <>
       {/* 모바일 카드 */}
       <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="font-bold text-sm text-zinc-100 truncate">
-              {f.symbol.replace(QUOTE_RE, '')}
-            </span>
-            <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
-              {eventLabel}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-sm font-bold tabular-nums ${valueColor}`}>{valueStr}</span>
-            <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(f.detectedAt)}</span>
-          </div>
+        <div className="grid grid-cols-[72px_60px_1fr_auto] items-center gap-x-2">
+          <span className="font-bold text-sm text-zinc-100 truncate">
+            {f.symbol.replace(QUOTE_RE, '')}
+          </span>
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
+            {eventLabel}
+          </span>
+          <span className={`text-sm font-bold tabular-nums text-right ${valueColor}`}>{valueStr}</span>
+          <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(f.detectedAt)}</span>
         </div>
         <div className="mt-0.5">
           <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
