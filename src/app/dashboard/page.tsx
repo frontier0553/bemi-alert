@@ -391,40 +391,42 @@ export default function Home() {
               <span className="text-xs text-zinc-600">상위 30 코인</span>
             </div>
 
-            {/* 컬럼 헤더 */}
-            <div className="grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <span />
-              <button onClick={() => handleWhaleSort('symbol')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
-                심볼<WhaleSortIcon col="symbol" />
-              </button>
-              <button onClick={() => handleWhaleSort('direction')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
-                방향<WhaleSortIcon col="direction" />
-              </button>
-              <button onClick={() => handleWhaleSort('tradeSize')} className="flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
-                거래규모<WhaleSortIcon col="tradeSize" />
-              </button>
-              <button onClick={() => handleWhaleSort('score')} className="group relative flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
-                압력지수<WhaleSortIcon col="score" />
-                <span className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0e1117] p-3 text-left text-[11px] font-normal normal-case tracking-normal text-zinc-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
-                  <span className="block font-semibold text-zinc-100 mb-1.5">고래 압력 지수 (-100 ~ +100)</span>
-                  <span className="block text-zinc-400 leading-relaxed">(매수건 × 2) − (매도건 × 2) + 거래량 스파이크</span>
-                  <span className="mt-2 block space-y-1">
-                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />+40 이상: 강한 매집</span>
-                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />−40 이하: 강한 매도</span>
-                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" />그 외: 중립</span>
+            {/* 컬럼 헤더 + 행 (모바일 가로 스크롤) */}
+            <div className="overflow-x-auto">
+              <div className="grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 min-w-[420px]">
+                <span />
+                <button onClick={() => handleWhaleSort('symbol')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
+                  심볼<WhaleSortIcon col="symbol" />
+                </button>
+                <button onClick={() => handleWhaleSort('direction')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
+                  방향<WhaleSortIcon col="direction" />
+                </button>
+                <button onClick={() => handleWhaleSort('tradeSize')} className="flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
+                  거래규모<WhaleSortIcon col="tradeSize" />
+                </button>
+                <button onClick={() => handleWhaleSort('score')} className="group relative flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
+                  압력지수<WhaleSortIcon col="score" />
+                  <span className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0e1117] p-3 text-left text-[11px] font-normal normal-case tracking-normal text-zinc-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
+                    <span className="block font-semibold text-zinc-100 mb-1.5">고래 압력 지수 (-100 ~ +100)</span>
+                    <span className="block text-zinc-400 leading-relaxed">(매수건 × 2) − (매도건 × 2) + 거래량 스파이크</span>
+                    <span className="mt-2 block space-y-1">
+                      <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />+40 이상: 강한 매집</span>
+                      <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />−40 이하: 강한 매도</span>
+                      <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" />그 외: 중립</span>
+                    </span>
                   </span>
-                </span>
-              </button>
-              <span className="text-right">시각</span>
-            </div>
-            <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
-              {whalesLoading ? (
-                <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
-              ) : whales.length === 0 ? (
-                <div className="py-10 text-center text-sm text-zinc-600">고래 활동 없음</div>
-              ) : (
-                sortedWhales.map(w => <WhaleRow key={w.id} w={w} />)
-              )}
+                </button>
+                <span className="text-right">시각</span>
+              </div>
+              <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto min-w-[420px]">
+                {whalesLoading ? (
+                  <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
+                ) : whales.length === 0 ? (
+                  <div className="py-10 text-center text-sm text-zinc-600">고래 활동 없음</div>
+                ) : (
+                  sortedWhales.map(w => <WhaleRow key={w.id} w={w} />)
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -452,22 +454,24 @@ export default function Home() {
               ))}
             </div>
           </div>
-          {/* 컬럼 헤더 */}
-          <div className="grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400">
-            <span>심볼</span>
-            <span>이벤트</span>
-            <span className="text-right">값</span>
-            <span>상태</span>
-            <span className="text-right">시간</span>
-          </div>
-          <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto">
-            {futuresLoading ? (
-              <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
-            ) : filteredFutures.length === 0 ? (
-              <div className="py-10 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
-            ) : (
-              filteredFutures.map(f => <FuturesRow key={f.id} f={f} />)
-            )}
+          {/* 컬럼 헤더 + 행 (모바일 가로 스크롤) */}
+          <div className="overflow-x-auto">
+            <div className="grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400 min-w-[414px]">
+              <span>심볼</span>
+              <span>이벤트</span>
+              <span className="text-right">값</span>
+              <span>상태</span>
+              <span className="text-right">시간</span>
+            </div>
+            <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto min-w-[414px]">
+              {futuresLoading ? (
+                <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
+              ) : filteredFutures.length === 0 ? (
+                <div className="py-10 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
+              ) : (
+                filteredFutures.map(f => <FuturesRow key={f.id} f={f} />)
+              )}
+            </div>
           </div>
         </div>
 

@@ -58,7 +58,7 @@ export async function sendTelegramAlertToSubscribers(
 
   // userId 있는 구독자들의 UserSettings 일괄 조회
   const userIds = subscribers.map(s => s.userId).filter(Boolean) as string[];
-  const settingsMap = new Map<string, { coinFilter: string | null; pumpPct: number | null; dumpPct: number | null }>();
+  const settingsMap = new Map<string, { coinFilter: string | null; pumpPct: number | null; dumpPct: number | null; alertTypes: string | null }>();
   if (userIds.length > 0) {
     const rows = await prisma.userSettings.findMany({ where: { userId: { in: userIds } } });
     for (const r of rows) settingsMap.set(r.userId, r);
@@ -73,6 +73,13 @@ export async function sendTelegramAlertToSubscribers(
 
       const prefs = settingsMap.get(s.userId);
       if (!prefs) return sendTelegramMessage(s.chatId, message); // 설정 없으면 전체 발송
+
+      // 알림 유형 필터 체크
+      if (prefs.alertTypes) {
+        let types: string[] = [];
+        try { types = JSON.parse(prefs.alertTypes); } catch { /* 무시 */ }
+        if (types.length > 0 && !types.includes(filter.alertType)) return Promise.resolve();
+      }
 
       // 코인 필터 체크
       if (prefs.coinFilter) {

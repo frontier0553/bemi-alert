@@ -32,9 +32,10 @@ export async function GET() {
 
   return NextResponse.json({
     tier,
-    coinFilter: userSettings?.coinFilter ?? null,
-    pumpPct:    userSettings?.pumpPct    ?? null,
-    dumpPct:    userSettings?.dumpPct    ?? null,
+    coinFilter:  userSettings?.coinFilter  ?? null,
+    pumpPct:     userSettings?.pumpPct     ?? null,
+    dumpPct:     userSettings?.dumpPct     ?? null,
+    alertTypes:  userSettings?.alertTypes  ?? null,
     telegramLinked: !!subscriber,
     telegramUsername: subscriber?.username ?? null,
     globalParams,
@@ -51,11 +52,24 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 });
   }
 
-  let coinFilter: string | null, pumpPct: number | null, dumpPct: number | null;
+  let coinFilter: string | null, pumpPct: number | null, dumpPct: number | null, alertTypes: string | null;
   try {
-    ({ coinFilter, pumpPct, dumpPct } = await req.json());
+    ({ coinFilter, pumpPct, dumpPct, alertTypes } = await req.json());
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  // alertTypes 유효성 검증
+  const VALID_ALERT_TYPES = ['PUMP', 'DUMP', 'WHALE', 'FUTURES'];
+  if (alertTypes != null) {
+    let parsed: unknown;
+    try { parsed = JSON.parse(alertTypes); } catch { parsed = null; }
+    if (
+      !Array.isArray(parsed) ||
+      parsed.some(t => !VALID_ALERT_TYPES.includes(t as string))
+    ) {
+      return NextResponse.json({ error: 'alertTypes 형식이 올바르지 않습니다' }, { status: 400 });
+    }
   }
 
   // coinFilter 유효성 검증: JSON 배열 of 문자열, 최대 50개
@@ -81,16 +95,18 @@ export async function PATCH(req: NextRequest) {
   await prisma.userSettings.upsert({
     where: { userId: user.id },
     update: {
-      coinFilter: coinFilter ?? null,
-      pumpPct:    pumpPct ?? null,
-      dumpPct:    dumpPct ?? null,
-      updatedAt:  new Date(),
+      coinFilter:  coinFilter  ?? null,
+      pumpPct:     pumpPct     ?? null,
+      dumpPct:     dumpPct     ?? null,
+      alertTypes:  alertTypes  ?? null,
+      updatedAt:   new Date(),
     },
     create: {
-      userId:     user.id,
-      coinFilter: coinFilter ?? null,
-      pumpPct:    pumpPct ?? null,
-      dumpPct:    dumpPct ?? null,
+      userId:      user.id,
+      coinFilter:  coinFilter  ?? null,
+      pumpPct:     pumpPct     ?? null,
+      dumpPct:     dumpPct     ?? null,
+      alertTypes:  alertTypes  ?? null,
     },
   });
 

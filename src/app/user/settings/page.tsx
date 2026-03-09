@@ -5,11 +5,19 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Zap, Bell, Save } from 'lucide-react';
 
+const ALL_ALERT_TYPES = [
+  { value: 'PUMP',    label: '▲ PUMP',    desc: '스팟 급등 신호',     color: 'text-emerald-300' },
+  { value: 'DUMP',    label: '▼ DUMP',    desc: '스팟 급락 신호',     color: 'text-red-300'     },
+  { value: 'WHALE',   label: '🐋 고래',   desc: '대량 매수·매도 감지', color: 'text-cyan-300'    },
+  { value: 'FUTURES', label: '📊 선물',   desc: '펀딩률·OI 이상 감지', color: 'text-violet-300'  },
+] as const;
+
 interface UserSettingsData {
   tier:              string;
   coinFilter:        string | null;
   pumpPct:           number | null;
   dumpPct:           number | null;
+  alertTypes:        string | null;
   telegramLinked:    boolean;
   telegramUsername:  string | null;
   globalParams:      Record<string, string>;
@@ -21,6 +29,8 @@ export default function UserSettingsPage() {
   const [coins, setCoins]         = useState('');   // comma-separated input
   const [pumpPct, setPumpPct]     = useState('');
   const [dumpPct, setDumpPct]     = useState('');
+  // null = 전체 선택 (기본), 아니면 선택된 타입 배열
+  const [alertTypes, setAlertTypes] = useState<string[]>(['PUMP', 'DUMP', 'WHALE', 'FUTURES']);
   const [saved, setSaved]         = useState(false);
   const [linkCode, setLinkCode]   = useState<string | null>(null);
   const [linkExpiry, setLinkExpiry] = useState<string | null>(null);
@@ -41,6 +51,9 @@ export default function UserSettingsPage() {
         }
         if (d.pumpPct != null) setPumpPct(String(d.pumpPct));
         if (d.dumpPct != null) setDumpPct(String(d.dumpPct));
+        if (d.alertTypes) {
+          try { setAlertTypes(JSON.parse(d.alertTypes)); } catch {}
+        }
       })
       .catch(() => router.replace('/login'));
   }, [router]);
@@ -53,9 +66,10 @@ export default function UserSettingsPage() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        coinFilter: coinArr ? JSON.stringify(coinArr) : null,
-        pumpPct:    pumpPct ? parseFloat(pumpPct) : null,
-        dumpPct:    dumpPct ? parseFloat(dumpPct) : null,
+        coinFilter:  coinArr ? JSON.stringify(coinArr) : null,
+        pumpPct:     pumpPct ? parseFloat(pumpPct) : null,
+        dumpPct:     dumpPct ? parseFloat(dumpPct) : null,
+        alertTypes:  alertTypes.length === 4 ? null : JSON.stringify(alertTypes),
       }),
     });
     setSaved(true);
@@ -118,6 +132,44 @@ export default function UserSettingsPage() {
             <span className="text-sm text-zinc-300">현재 모든 기능 무료 제공 중</span>
           </div>
           <span className="text-xs text-zinc-600">유료 플랜 준비 중</span>
+        </div>
+
+        {/* ── 알림 수신 유형 ── */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <h2 className="mb-1 text-sm font-semibold text-zinc-200">알림 수신 유형</h2>
+          <p className="mb-4 text-xs text-zinc-500">받고 싶은 알림 종류를 선택하세요. 모두 선택하면 전체 수신.</p>
+          <div className="grid grid-cols-2 gap-3">
+            {ALL_ALERT_TYPES.map(({ value, label, desc, color }) => {
+              const checked = alertTypes.includes(value);
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setAlertTypes(prev =>
+                    checked ? prev.filter(t => t !== value) : [...prev, value]
+                  )}
+                  className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors ${
+                    checked
+                      ? 'border-white/15 bg-white/[0.06]'
+                      : 'border-white/5 bg-white/[0.02] opacity-50'
+                  }`}
+                >
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] font-bold transition-all ${
+                    checked ? 'border-cyan-400/50 bg-cyan-400/20 text-cyan-300' : 'border-zinc-600 text-zinc-700'
+                  }`}>
+                    {checked ? '✓' : ''}
+                  </span>
+                  <div>
+                    <div className={`text-xs font-semibold ${color}`}>{label}</div>
+                    <div className="text-[10px] text-zinc-600 mt-0.5">{desc}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          {alertTypes.length === 0 && (
+            <p className="mt-3 text-xs text-amber-400">⚠️ 아무것도 선택하지 않으면 알림을 받지 않습니다.</p>
+          )}
         </div>
 
         {/* ── 관심 코인 필터 ── */}

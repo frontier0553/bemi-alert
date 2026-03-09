@@ -27,6 +27,7 @@ model UserSettings {
   coinFilter String? // JSON 배열 ex) ["BTC","ETH"], null=전체
   pumpPct    Float? // null=글로벌 기본값 사용
   dumpPct    Float? // null=글로벌 기본값 사용
+  alertTypes String? // JSON: ["PUMP","DUMP","WHALE","FUTURES"], null=모두 받기
   updatedAt  DateTime @updatedAt
 }
 
