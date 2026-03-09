@@ -13,7 +13,7 @@ import { checkCooldown, updateCooldown } from './cooldown';
 import { sendTelegramAlertToSubscribers } from './telegram';
 import { prisma } from '../lib/prisma';
 
-const SCAN_TOP_N_DEFAULT = 200;
+const SCAN_TOP_N_DEFAULT = 100;
 const BATCH_SIZE         = 20;
 
 // ── Settings ─────────────────────────────────────────────────
