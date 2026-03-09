@@ -1,32 +1,16 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import {
   Zap, Bell, TrendingUp, Waves, Filter,
-  History, ArrowRight, Bot, BarChart2, ShieldCheck,
+  ArrowRight, Bot, BarChart2, ShieldCheck,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
-export default function LandingPage() {
-  const router = useRouter();
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        router.replace('/dashboard');
-      } else {
-        setChecking(false);
-      }
-    });
-  }, [router]);
-
-  if (checking) {
-    return <div className="min-h-screen bg-[#06080d]" />;
-  }
+export default async function LandingPage() {
+  // 서버에서 세션 확인 → 로그인 상태면 즉시 대시보드로
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) redirect('/dashboard');
 
   return (
     <div className="min-h-screen bg-[#06080d] text-zinc-100 overflow-x-hidden">
@@ -90,10 +74,10 @@ export default function LandingPage() {
             무료로 시작하기 <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/dashboard"
+            href="/feed"
             className="flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-300 text-sm transition-colors"
           >
-            대시보드 둘러보기
+            실시간 신호 보기
           </Link>
         </div>
 
@@ -105,12 +89,11 @@ export default function LandingPage() {
             <span className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
             <span className="ml-3 text-xs text-zinc-600">bemialert.com/dashboard</span>
           </div>
-          <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
-              { label: '감지된 신호', value: '247', color: 'text-cyan-300' },
-              { label: '활성 구독자', value: '1,832', color: 'text-violet-300' },
-              { label: '오늘 알림', value: '38', color: 'text-emerald-300' },
-              { label: '스캔 간격', value: '1분', color: 'text-orange-300' },
+              { label: '감지된 신호',  value: '200+',  color: 'text-cyan-300'    },
+              { label: '오늘 알림',    value: '38',    color: 'text-emerald-300' },
+              { label: '스캔 간격',    value: '1분',   color: 'text-orange-300'  },
             ].map(({ label, value, color }) => (
               <div key={label} className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-3 text-center">
                 <div className={`text-xl font-bold ${color}`}>{value}</div>
@@ -121,7 +104,7 @@ export default function LandingPage() {
           <div className="px-4 pb-4 space-y-2">
             {[
               { coin: 'PEPE', type: 'PUMP', pct: '+12.4%', color: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
-              { coin: 'DOGE', type: 'DUMP', pct: '-8.7%',  color: 'text-red-400',     badge: 'bg-red-500/20 text-red-300' },
+              { coin: 'DOGE', type: 'DUMP', pct: '-8.7%',  color: 'text-red-400',     badge: 'bg-red-500/20 text-red-300'       },
               { coin: 'SOL',  type: 'PUMP', pct: '+6.2%',  color: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
             ].map(({ coin, type, pct, color, badge }) => (
               <div key={coin} className="grid grid-cols-[80px_72px_1fr_60px] items-center rounded-lg border border-white/5 bg-white/[0.015] px-3 py-2">
@@ -168,9 +151,9 @@ export default function LandingPage() {
               desc: '관심 코인만 선택해 불필요한 알림 제거. 원하는 종목만 집중 모니터링.',
             },
             {
-              icon: <History className="h-5 w-5 text-pink-300" />,
-              title: '알림 이력 30일',
-              desc: '지난 30일간 발송된 알림 이력을 조회하고 패턴을 분석.',
+              icon: <Bell className="h-5 w-5 text-pink-300" />,
+              title: '알림 유형 선택',
+              desc: 'PUMP·DUMP·웨일·선물 중 받고 싶은 알림만 골라서 수신할 수 있습니다.',
             },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 hover:bg-white/[0.04] transition-colors">
@@ -248,10 +231,9 @@ export default function LandingPage() {
             <span>Bemi Alert</span>
           </div>
           <div className="flex items-center gap-4 text-xs text-zinc-600">
+            <Link href="/feed"    className="hover:text-zinc-400 transition-colors">실시간 피드</Link>
             <Link href="/privacy" className="hover:text-zinc-400 transition-colors">개인정보처리방침</Link>
             <Link href="/terms"   className="hover:text-zinc-400 transition-colors">이용약관</Link>
-            <Link href="/help"    className="hover:text-zinc-400 transition-colors">도움말</Link>
-            <Link href="/pricing" className="hover:text-zinc-400 transition-colors">요금제</Link>
           </div>
         </div>
       </footer>
