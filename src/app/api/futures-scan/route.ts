@@ -52,7 +52,10 @@ export async function POST(req: NextRequest) {
       });
       savedFunding++;
 
-      await sendTelegramAlertToSubscribers(formatFundingAlert(signal), {
+      await sendTelegramAlertToSubscribers({
+        ko: formatFundingAlert(signal, 'ko'),
+        en: formatFundingAlert(signal, 'en'),
+      }, {
         symbol:    signal.symbol,
         changePct: signal.fundingRate * 100,
         alertType: 'FUTURES',
@@ -92,7 +95,10 @@ export async function POST(req: NextRequest) {
         });
         savedOi++;
 
-        await sendTelegramAlertToSubscribers(formatOiAlert(signal), {
+        await sendTelegramAlertToSubscribers({
+          ko: formatOiAlert(signal, 'ko'),
+          en: formatOiAlert(signal, 'en'),
+        }, {
           symbol:    signal.symbol,
           changePct: signal.oiChangePct,
           alertType: 'FUTURES',

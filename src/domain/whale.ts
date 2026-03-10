@@ -1,5 +1,6 @@
 import type { AggTrade } from '../data/whales';
 import { whaleConfidence } from './confidence';
+import { confLevelKo } from './pump';
 
 // ── Thresholds ───────────────────────────────────────────────
 const WHALE_USD_MIN     = 100_000;    // $100K absolute minimum
@@ -85,7 +86,7 @@ export function detectWhaleActivity(
   };
 }
 
-export function formatWhaleAlert(result: WhaleResult): string {
+export function formatWhaleAlert(result: WhaleResult, lang: 'ko' | 'en' = 'ko'): string {
   const base     = result.symbol.replace(/USDT$/, '');
   const dirIcon  = result.direction === 'BUY' ? '🟢' : result.direction === 'SELL' ? '🔴' : '🟡';
   const sizeStr  = result.topTradeSize >= 1_000_000
@@ -94,6 +95,27 @@ export function formatWhaleAlert(result: WhaleResult): string {
   const price    = result.topTradePrice;
   const priceStr = price >= 1 ? price.toFixed(2) : price.toFixed(4);
   const conf     = whaleConfidence(result.score);
+
+  if (lang === 'ko') {
+    const dirKo = result.direction === 'BUY' ? '매수' : result.direction === 'SELL' ? '매도' : '혼합';
+    return `🐋 고래 포착
+
+🪙 ${base}
+
+방향
+${dirIcon} ${dirKo}
+
+최대 거래
+${sizeStr}
+
+신뢰도
+${conf.score}% (${confLevelKo(conf.level)})
+
+💰 가격
+$${priceStr}
+
+#고래 #${base.toLowerCase()}`.trim();
+  }
 
   return `🐋 Whale Activity
 

@@ -67,11 +67,14 @@ async function processSymbol(
       });
       await updateCooldown(symbol, pumpResult.maxMove, 'PUMP');
 
-      const msg = formatAlert(symbol, pumpResult, new Date(), 'PUMP');
-      await sendTelegramAlertToSubscribers(msg, {
+      const pumpMsgs = {
+        ko: formatAlert(symbol, pumpResult, new Date(), 'PUMP', 'ko'),
+        en: formatAlert(symbol, pumpResult, new Date(), 'PUMP', 'en'),
+      };
+      await sendTelegramAlertToSubscribers(pumpMsgs, {
         symbol, changePct: pumpResult.changePct, alertType: 'PUMP',
       });
-      alerts.push(msg);
+      alerts.push(pumpMsgs.ko);
     }
   }
 
@@ -96,11 +99,14 @@ async function processSymbol(
       });
       await updateCooldown(symbol, dumpResult.maxMove, 'DUMP');
 
-      const msg = formatAlert(symbol, dumpResult, new Date(), 'DUMP');
-      await sendTelegramAlertToSubscribers(msg, {
+      const dumpMsgs = {
+        ko: formatAlert(symbol, dumpResult, new Date(), 'DUMP', 'ko'),
+        en: formatAlert(symbol, dumpResult, new Date(), 'DUMP', 'en'),
+      };
+      await sendTelegramAlertToSubscribers(dumpMsgs, {
         symbol, changePct: dumpResult.changePct, alertType: 'DUMP',
       });
-      alerts.push(msg);
+      alerts.push(dumpMsgs.ko);
     }
   }
 

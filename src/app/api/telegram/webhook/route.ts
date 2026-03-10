@@ -7,15 +7,17 @@ const WELCOME = `🚀 <b>Bemi Alert에 오신 것을 환영합니다!</b>
 실시간 코인 펌프 감지 알림을 보내드립니다.
 
 현재 제공:
-• 📈 Pump Alerts
-• 📊 Volume Spike Alerts
-• ⚡ 실시간 텔레그램 알림
+• 🚀 펌프/덤프 알림
+• 🐋 고래 감지
+• 📊 선물 신호 (펀딩/OI)
 
 알림을 시작했습니다. 신호가 감지되면 여기로 바로 보내드릴게요.
 
 /stop — 알림 중지
 /status — 구독 상태 확인
-/link [코드] — 계정 연동`;
+/link [코드] — 계정 연동
+/lang ko — 한국어 알림
+/lang en — English alerts`;
 
 const STOPPED = `🔕 알림이 중지되었습니다.
 
@@ -53,14 +55,17 @@ export async function POST(req: NextRequest) {
     if (!sub || !sub.isActive) {
       await sendTelegramMessage(chatId, '❌ 현재 알림 구독 중이 아닙니다.\n\n/start 를 입력해 구독을 시작하세요.');
     } else {
-      const linked = sub.userId ? '✅ 계정 연동됨' : '⚠️ 미연동\n(bemialert.com/user/settings 에서 코드 입력)';
-      const name   = sub.firstName ? sub.firstName : (sub.username ?? '');
+      const linked  = sub.userId ? '✅ 계정 연동됨' : '⚠️ 미연동\n(bemialert.com/user/settings 에서 코드 입력)';
+      const name    = sub.firstName ? sub.firstName : (sub.username ?? '');
+      const langStr = (sub.lang ?? 'ko') === 'en' ? '🇺🇸 English' : '🇰🇷 한국어';
       await sendTelegramMessage(chatId,
         `📊 <b>구독 상태</b>\n\n` +
         `상태: ✅ 활성\n` +
         `이름: ${name}\n` +
+        `언어: ${langStr}\n` +
         `계정: ${linked}\n\n` +
         `중지하려면 /stop\n` +
+        `언어 변경: /lang ko | /lang en\n` +
         `계정 연동하려면 /link [코드]`,
       );
     }
@@ -109,6 +114,23 @@ export async function POST(req: NextRequest) {
       data:  { isActive: false },
     });
     await sendTelegramMessage(chatId, STOPPED);
+  } else if (text.startsWith('/lang')) {
+    const langArg = text.slice(5).trim().toLowerCase();
+    if (langArg !== 'ko' && langArg !== 'en') {
+      await sendTelegramMessage(chatId,
+        '❌ 지원 언어: <b>ko</b> (한국어) / <b>en</b> (English)\n\n예시:\n/lang ko — 한국어\n/lang en — English'
+      );
+    } else {
+      await prisma.subscriber.upsert({
+        where:  { chatId },
+        update: { lang: langArg },
+        create: { chatId, username, firstName, lang: langArg },
+      });
+      const confirm = langArg === 'ko'
+        ? '✅ 알림 언어가 <b>한국어</b>로 설정되었습니다.'
+        : '✅ Alert language set to <b>English</b>.';
+      await sendTelegramMessage(chatId, confirm);
+    }
   } else if (text.startsWith('/link ')) {
     const code = text.slice(6).trim();
     if (!/^\d{6}$/.test(code)) {

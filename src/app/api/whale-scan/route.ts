@@ -66,8 +66,11 @@ export async function POST(req: NextRequest) {
       saved++;
 
       if (Math.abs(w.score) >= ALERT_THRESHOLD) {
-        const msg = formatWhaleAlert(w);
-        await sendTelegramAlertToSubscribers(msg, {
+        const whaleMsgs = {
+          ko: formatWhaleAlert(w, 'ko'),
+          en: formatWhaleAlert(w, 'en'),
+        };
+        await sendTelegramAlertToSubscribers(whaleMsgs, {
           symbol:    w.symbol,
           changePct: w.score,
           alertType: 'WHALE',

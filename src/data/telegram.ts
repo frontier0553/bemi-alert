@@ -39,20 +39,24 @@ interface AlertFilter {
   alertType: 'PUMP' | 'DUMP' | 'WHALE' | 'FUTURES';
 }
 
-/** Broadcast to all active subscribers, respecting per-user preferences. */
+/** 언어별 메시지 또는 단일 메시지 */
+export type AlertMessages = string | { ko: string; en: string };
+
+/** Broadcast to all active subscribers, respecting per-user preferences and language. */
 export async function sendTelegramAlertToSubscribers(
-  message: string,
+  messages: AlertMessages,
   filter?: AlertFilter,
 ): Promise<void> {
   if (!BOT_TOKEN) return;
 
   const subscribers = await prisma.subscriber.findMany({
     where: { isActive: true },
-    select: { chatId: true, userId: true },
+    select: { chatId: true, userId: true, lang: true },
   });
 
   if (subscribers.length === 0) {
-    if (ADMIN_CHAT) await sendTelegramMessage(ADMIN_CHAT, message);
+    const fallback = typeof messages === 'string' ? messages : messages.ko;
+    if (ADMIN_CHAT) await sendTelegramMessage(ADMIN_CHAT, fallback);
     return;
   }
 
@@ -68,6 +72,10 @@ export async function sendTelegramAlertToSubscribers(
 
   await Promise.allSettled(
     subscribers.map(s => {
+      // 언어에 따라 메시지 선택
+      const lang = (s.lang ?? 'ko') as 'ko' | 'en';
+      const message = typeof messages === 'string' ? messages : messages[lang];
+
       // userId 없는 구독자 (봇만 구독) → 무조건 발송
       if (!s.userId || !filter) return sendTelegramMessage(s.chatId, message);
 

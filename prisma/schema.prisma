@@ -100,6 +100,7 @@ model Subscriber {
   username  String?
   firstName String?
   isActive  Boolean  @default(true)
+  lang      String   @default("ko") // "ko" | "en"
   userId    String? // 연동된 User ID (optional)
   joinedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt

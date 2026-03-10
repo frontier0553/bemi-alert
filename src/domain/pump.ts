@@ -177,26 +177,57 @@ export function applyFakeDumpFilters(
 
 const QUOTE_RE = /(USDT|USDC|BUSD|FDUSD|TUSD|DAI|BTC|ETH|BNB|XRP|TRX|TRY|EUR|GBP|AUD|BRL|RUB|UAH|PLN|RON|ZAR)$/;
 
+export function confLevelKo(level: 'Low' | 'Medium' | 'High'): string {
+  return level === 'High' ? '높음' : level === 'Medium' ? '보통' : '낮음';
+}
+
 /**
- * Format the Telegram alert message (plain text).
+ * Format the Telegram alert message.
  * type: 'PUMP' → 🚀, 'DUMP' → 📉
+ * lang: 'ko' (한국어) | 'en' (English)
  */
 export function formatAlert(
   symbol: string,
   result: PumpResult,
   _detectedAt: Date = new Date(),
   type: 'PUMP' | 'DUMP' = 'PUMP',
+  lang: 'ko' | 'en' = 'ko',
 ): string {
   const base     = symbol.replace(QUOTE_RE, '');
   const isPump   = type === 'PUMP';
   const icon     = isPump ? '🚀' : '📉';
-  const title    = isPump ? 'Pump Signal' : 'Dump Signal';
   const sign     = isPump ? '+' : '';
-  const tag      = isPump ? '#pump' : '#dump';
   const price    = result.metrics.closeNow;
   const priceStr = price >= 1 ? price.toFixed(2) : price.toFixed(4);
   const conf     = pumpConfidence(result.changePct, result.volRatio);
+  const chart    = `https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}`;
 
+  if (lang === 'ko') {
+    const title = isPump ? '펌프 신호' : '덤프 신호';
+    const tag   = isPump ? '#펌프' : '#덤프';
+    return `${icon} ${title}
+
+🪙 ${base}
+
+변동
+${sign}${result.changePct.toFixed(1)}% (${result.changeWindow})
+
+거래량
+x${result.volRatio.toFixed(1)}
+
+신뢰도
+${conf.score}% (${confLevelKo(conf.level)})
+
+💰 가격
+$${priceStr}
+
+📊 <a href="${chart}">차트 보기</a>
+
+${tag} #${base.toLowerCase()}`.trim();
+  }
+
+  const title = isPump ? 'Pump Signal' : 'Dump Signal';
+  const tag   = isPump ? '#pump' : '#dump';
   return `${icon} ${title}
 
 🪙 ${base}
@@ -213,7 +244,7 @@ ${conf.score}% (${conf.level})
 💰 Price
 $${priceStr}
 
-📊 <a href="https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}">차트 보기</a>
+📊 <a href="${chart}">Chart</a>
 
 ${tag} #${base.toLowerCase()}`.trim();
 }
