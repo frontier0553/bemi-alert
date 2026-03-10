@@ -400,7 +400,7 @@ export default function Home() {
             </div>
 
             {/* Whale Flow */}
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
               <div className="flex flex-wrap items-center justify-between gap-y-2 border-b border-white/5 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Waves className="h-3.5 w-3.5 text-cyan-300" />
@@ -421,7 +421,7 @@ export default function Home() {
                 </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[auto_1fr_56px_62px_40px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[auto_1fr_44px_60px_40px_36px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 {/* 점 색상 툴팁 */}
                 <div className="relative group flex justify-center cursor-help">
                   <span className="text-center">강도</span>
@@ -446,7 +446,7 @@ export default function Home() {
                     <p className="mt-1 text-red-400">-40 이하 — 강한 매도 압력</p>
                   </div>
                 </div>
-                <span className="hidden sm:block text-right">감지 시각</span>
+                <span className="text-right">감지 시각</span>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[300px] overflow-y-auto">
                 {whalesLoading ? (
@@ -672,7 +672,7 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   const barPct = Math.min(100, Math.abs(w.score)); // %
 
   return (
-    <div className="grid grid-cols-[auto_1fr_56px_62px_40px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[auto_1fr_44px_60px_40px_36px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       {/* 강도 점 — 중앙 */}
       <div className="flex justify-center">
         <span className={`h-2 w-2 rounded-full shrink-0 ${heat}`} />
@@ -706,8 +706,8 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
           {w.score > 0 ? '+' : ''}{w.score}
         </span>
       </div>
-      {/* 감지 시각 — 데스크탑만 */}
-      <span className="hidden sm:block text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
+      {/* 감지 시각 */}
+      <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
     </div>
   );
 }
