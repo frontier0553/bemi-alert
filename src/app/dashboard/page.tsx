@@ -377,12 +377,13 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-[80px_1fr_68px_56px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <span>유형</span>
-              <span>심볼</span>
-              <span className="text-right">변동폭</span>
-              <span className="text-right">거래량</span>
-              <span className="text-right">시각</span>
+            <div className="flex items-center justify-between border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+              <span>유형 · 심볼</span>
+              <div className="flex items-center gap-4">
+                <span>변동폭</span>
+                <span>거래량</span>
+                <span className="w-10 text-right">시각</span>
+              </div>
             </div>
             <div className="divide-y divide-white/[0.04] max-h-[520px] overflow-y-auto">
               {loading ? (
@@ -561,33 +562,35 @@ function Scanner24hSummary({ events }: { events: Event[] }) {
 function ScannerRow({ ev }: { ev: Event }) {
   const isPump  = ev.type === 'PUMP';
   const volMult = ev.volRatio ?? ev.volumeMult ?? 1;
-  const bar     = Math.min(100, Math.round((volMult / 20) * 100));
 
   return (
-    <div className="grid grid-cols-[80px_1fr_68px_56px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-      {/* 유형 뱃지 */}
-      <span className={`w-fit rounded-md px-2.5 py-1 text-[11px] font-bold border ${
-        isPump
-          ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
-          : 'border-red-500/25 bg-red-500/10 text-red-300'
-      }`}>
-        {isPump ? '▲ PUMP' : '▼ DUMP'}
-      </span>
-      {/* 심볼 */}
-      <span className="font-bold text-sm text-zinc-100 truncate">{baseCoin(ev.symbol)}</span>
-      {/* 변동폭 */}
-      <span className={`text-sm font-bold tabular-nums text-right ${isPump ? 'text-emerald-300' : 'text-red-300'}`}>
-        {ev.changePct > 0 ? '+' : ''}{fmt(ev.changePct)}%
-      </span>
-      {/* 거래량 배수 + 미니 바 */}
-      <div className="flex flex-col items-end gap-1">
-        <span className="text-xs font-semibold tabular-nums text-zinc-400">x{fmt(volMult, 1)}</span>
-        <div className="h-0.5 w-full rounded-full bg-white/5">
-          <div className={`h-0.5 rounded-full ${isPump ? 'bg-emerald-400' : 'bg-red-400'}`} style={{ width: `${bar}%` }} />
-        </div>
+    <div className={`flex items-center justify-between gap-3 border-l-2 px-4 py-3 transition-colors ${
+      isPump
+        ? 'border-emerald-500/50 hover:bg-emerald-500/[0.03]'
+        : 'border-red-500/50 hover:bg-red-500/[0.03]'
+    }`}>
+      {/* 왼쪽: 유형 뱃지 + 심볼 */}
+      <div className="flex items-center gap-2.5 min-w-0">
+        <span className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-bold border ${
+          isPump
+            ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+            : 'border-red-500/25 bg-red-500/10 text-red-300'
+        }`}>
+          {isPump ? '▲ PUMP' : '▼ DUMP'}
+        </span>
+        <span className="font-bold text-sm text-zinc-100 truncate">{baseCoin(ev.symbol)}</span>
       </div>
-      {/* 시각 */}
-      <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(ev.detectedAt)}</span>
+
+      {/* 오른쪽: 변동폭 + 거래량 배수 + 시각 */}
+      <div className="flex items-center gap-4 shrink-0">
+        <span className={`text-sm font-bold tabular-nums w-16 text-right ${isPump ? 'text-emerald-300' : 'text-red-300'}`}>
+          {ev.changePct > 0 ? '+' : ''}{fmt(ev.changePct)}%
+        </span>
+        <span className="text-xs font-semibold tabular-nums text-zinc-500 w-12 text-right">
+          x{fmt(volMult, 1)}
+        </span>
+        <span className="text-xs text-zinc-600 tabular-nums w-10 text-right">{timeAgo(ev.detectedAt)}</span>
+      </div>
     </div>
   );
 }
