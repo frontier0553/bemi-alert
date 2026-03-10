@@ -342,10 +342,10 @@ export default function Home() {
         )}
 
         {/* ── 메인 2컬럼: 좌(신호) / 우(시황+고래+선물) ── */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr] lg:items-start">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr] lg:items-stretch">
 
           {/* ── Left: 실시간 신호 ── */}
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+          <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
             <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <div className="flex flex-col">
@@ -385,7 +385,7 @@ export default function Home() {
                 <span className="w-10 text-right">시각</span>
               </div>
             </div>
-            <div className="divide-y divide-white/[0.04] max-h-[520px] overflow-y-auto">
+            <div className="flex-1 divide-y divide-white/[0.04] overflow-y-auto">
               {loading ? (
                 <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
               ) : scannerEvents.length === 0 ? (
