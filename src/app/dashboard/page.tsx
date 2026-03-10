@@ -424,9 +424,15 @@ export default function Home() {
                 </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[8px_120px_56px_64px_120px_44px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[8px_90px_52px_56px_64px_120px_44px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span title="점 색상 = 압력 강도 (초록≥+40 / 노랑 중립 / 빨강≤-40)" className="cursor-help">•</span>
-                <span>심볼 · 매수/매도</span>
+                <span>심볼</span>
+                <span>
+                  <span className="text-emerald-600">B</span>
+                  <span className="text-zinc-700">/</span>
+                  <span className="text-red-600">S</span>
+                  <span className="normal-case tracking-normal font-normal text-zinc-700 ml-0.5">건수</span>
+                </span>
                 <span>방향</span>
                 <span className="text-right">규모</span>
                 <span className="text-right">압력지수 <span className="normal-case tracking-normal font-normal text-zinc-700">-100~+100</span></span>
@@ -656,17 +662,18 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   const barPct = Math.min(100, Math.abs(w.score)); // %
 
   return (
-    <div className="grid grid-cols-[8px_120px_56px_64px_120px_44px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[8px_90px_52px_56px_64px_120px_44px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       {/* 강도 점 */}
       <span className={`h-2 w-2 rounded-full shrink-0 ${heat}`} />
-      {/* 심볼 + 매수/매도 건수 */}
-      <div className="flex flex-col min-w-0">
-        <span className="font-semibold text-sm text-zinc-100 truncate">
-          {w.symbol.replace(QUOTE_RE, '')}
-        </span>
-        <span className="text-[9px] text-zinc-600 tabular-nums">
-          B{w.whaleBuys} · S{w.whaleSells}
-        </span>
+      {/* 심볼 */}
+      <span className="font-semibold text-sm text-zinc-100 truncate">
+        {w.symbol.replace(QUOTE_RE, '')}
+      </span>
+      {/* 매수/매도 건수 */}
+      <div className="flex items-center gap-1 text-xs tabular-nums">
+        <span className="font-semibold text-emerald-500">B{w.whaleBuys}</span>
+        <span className="text-zinc-700">·</span>
+        <span className="font-semibold text-red-500">S{w.whaleSells}</span>
       </div>
       {/* 방향 */}
       <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
