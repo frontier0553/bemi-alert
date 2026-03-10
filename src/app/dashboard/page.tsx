@@ -424,12 +424,9 @@ export default function Home() {
                 </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="overflow-x-auto">
-              <div className="grid grid-cols-[auto_1fr_40px_40px_60px_72px_164px_56px] min-w-[560px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span title="점 색상 = 강도 (초록: 매수 우세 / 노랑: 중립 / 빨강: 매도 우세)" className="cursor-help text-center">강도</span>
                 <span>코인</span>
-                <span className="text-center">매수</span>
-                <span className="text-center">매도</span>
                 <span className="text-center">흐름</span>
                 <span className="text-right">거래 규모</span>
                 <span className="text-right">매수/매도 강도</span>
@@ -446,7 +443,6 @@ export default function Home() {
                     .map(w => <WhaleCompactRow key={w.id} w={w} />)
                 )}
               </div>
-              </div>{/* /overflow-x-auto */}
             </div>
 
             {/* 선물 신호 */}
@@ -457,8 +453,7 @@ export default function Home() {
                 <span className="text-xs text-zinc-600">펀딩비 이상 · OI 급변</span>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="overflow-x-auto">
-              <div className="grid grid-cols-[100px_56px_1fr_72px_44px] min-w-[360px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[100px_56px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span>심볼</span>
                 <span>이벤트</span>
                 <span className="text-right">비율</span>
@@ -474,7 +469,6 @@ export default function Home() {
                   futures.map(f => <FuturesCompactRow key={f.id} f={f} />)
                 )}
               </div>
-              </div>{/* /overflow-x-auto */}
             </div>
 
           </div>
@@ -662,7 +656,7 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   const barPct = Math.min(100, Math.abs(w.score)); // %
 
   return (
-    <div className="grid grid-cols-[auto_1fr_40px_40px_60px_72px_164px_56px] min-w-[560px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       {/* 강도 점 — 중앙 */}
       <div className="flex justify-center">
         <span className={`h-2 w-2 rounded-full shrink-0 ${heat}`} />
@@ -671,10 +665,6 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
       <span className="font-semibold text-sm text-zinc-100 truncate">
         {w.symbol.replace(QUOTE_RE, '')}
       </span>
-      {/* 매수 건수 — 중앙 */}
-      <span className="text-xs font-bold tabular-nums text-emerald-400 text-center">{w.whaleBuys}</span>
-      {/* 매도 건수 — 중앙 */}
-      <span className="text-xs font-bold tabular-nums text-red-400 text-center">{w.whaleSells}</span>
       {/* 흐름 — 중앙 */}
       <div className="flex justify-center">
         <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
@@ -741,7 +731,7 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
     : 'bg-red-500/10 text-red-300';
 
   return (
-    <div className="grid grid-cols-[100px_56px_1fr_72px_44px] min-w-[360px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[100px_56px_1fr_72px_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className="font-bold text-sm text-zinc-100 truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
