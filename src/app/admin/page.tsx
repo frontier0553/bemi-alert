@@ -11,6 +11,24 @@ interface UserRow {
   createdAt: string;
 }
 
+interface BacktestRow {
+  id: string;
+  symbol: string;
+  type: 'PUMP' | 'DUMP';
+  changePct: number;
+  volRatio: number;
+  detectedAt: string;
+  at5m: number | null;
+  at15m: number | null;
+  at30m: number | null;
+}
+
+interface BacktestResult {
+  days: number;
+  summary: { total: number; hit5: number; hit15: number; hit30: number };
+  rows: BacktestRow[];
+}
+
 interface Stats {
   totalUsers: number;
   telegramSubscribers: number;
@@ -67,6 +85,10 @@ export default function AdminPage() {
   const [settingsMsg,    setSettingsMsg]    = useState('');
   const [draftSettings,  setDraftSettings] = useState<ScanSettings | null>(null);
 
+  const [btDays,    setBtDays]    = useState(3);
+  const [btLoading, setBtLoading] = useState(false);
+  const [btResult,  setBtResult]  = useState<BacktestResult | null>(null);
+
   /* 데이터 로드 */
   const load = useCallback(async () => {
     const meRes = await fetch('/api/admin/me').then(r => r.json());
@@ -86,6 +108,21 @@ export default function AdminPage() {
   }, [router]);
 
   useEffect(() => { load(); }, [load]);
+
+  /* 신호 백테스트 */
+  async function runBacktest() {
+    setBtLoading(true);
+    setBtResult(null);
+    try {
+      const res = await fetch(`/api/admin/backtest?days=${btDays}`);
+      const data = await res.json();
+      setBtResult(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setBtLoading(false);
+    }
+  }
 
   /* tier 변경 */
   async function toggleTier(user: UserRow) {
@@ -273,7 +310,135 @@ export default function AdminPage() {
           </div>
         </section>
 
-        {/* ── 4. 유저 목록 ── */}
+        {/* ── 4. 신호 검증 (백테스트) ── */}
+        <section>
+          <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">신호 검증 (백테스트)</div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
+            <SectionHeader>감지 신호 → 실제 가격 비교</SectionHeader>
+            <div className="p-4 flex flex-wrap items-center gap-3">
+              <div className="flex gap-1">
+                {[1, 3, 7, 14].map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setBtDays(d)}
+                    className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                      btDays === d
+                        ? 'bg-violet-600/80 text-white'
+                        : 'border border-white/10 text-zinc-400 hover:bg-white/10'
+                    }`}
+                  >
+                    {d}일
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={runBacktest}
+                disabled={btLoading}
+                className="px-4 py-1.5 text-sm rounded-lg bg-violet-600/80 hover:bg-violet-600 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-wait"
+              >
+                {btLoading ? '분석 중...' : '검증 실행'}
+              </button>
+              {btLoading && (
+                <span className="text-xs text-zinc-500">Binance API 조회 중 (신호 수에 따라 수 초 소요)</span>
+              )}
+            </div>
+
+            {btResult && (
+              <>
+                {/* 요약 카드 */}
+                <div className="px-4 pb-3 grid grid-cols-3 gap-3">
+                  {[
+                    { label: '+5분 적중률',  hit: btResult.summary.hit5,  total: btResult.summary.total },
+                    { label: '+15분 적중률', hit: btResult.summary.hit15, total: btResult.summary.total },
+                    { label: '+30분 적중률', hit: btResult.summary.hit30, total: btResult.summary.total },
+                  ].map(({ label, hit, total }) => {
+                    const rate = total > 0 ? Math.round(hit / total * 100) : 0;
+                    const color = rate >= 60 ? 'text-emerald-400' : rate >= 45 ? 'text-amber-400' : 'text-red-400';
+                    return (
+                      <div key={label} className="rounded-lg border border-white/10 bg-black/20 px-3 py-3 text-center">
+                        <div className={`text-xl font-bold tabular-nums ${color}`}>{rate}%</div>
+                        <div className="text-[11px] text-zinc-500 mt-0.5">{label}</div>
+                        <div className="text-[10px] text-zinc-600">{hit}/{total}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* 신호별 결과 테이블 */}
+                <div className="border-t border-white/5 overflow-x-auto">
+                  <table className="w-full text-xs min-w-[640px]">
+                    <thead>
+                      <tr className="text-zinc-500 border-b border-white/10 bg-black/20">
+                        <th className="text-left px-4 py-2">시각(KST)</th>
+                        <th className="text-left px-4 py-2">심볼</th>
+                        <th className="text-center px-3 py-2">타입</th>
+                        <th className="text-right px-3 py-2">감지변동</th>
+                        <th className="text-right px-3 py-2">거래량배율</th>
+                        <th className="text-right px-3 py-2">+5분</th>
+                        <th className="text-right px-3 py-2">+15분</th>
+                        <th className="text-right px-3 py-2">+30분</th>
+                        <th className="text-center px-3 py-2">결과</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {btResult.rows.map(row => {
+                        const isPump = row.type === 'PUMP';
+                        const hit15 = row.at15m !== null && (isPump ? row.at15m > 0 : row.at15m < 0);
+                        const fmtPct = (v: number | null) => {
+                          if (v === null) return <span className="text-zinc-600">-</span>;
+                          const isGood = isPump ? v > 0 : v < 0;
+                          return (
+                            <span className={isGood ? 'text-emerald-400' : 'text-red-400'}>
+                              {v > 0 ? '+' : ''}{v.toFixed(2)}%
+                            </span>
+                          );
+                        };
+                        const kst = new Date(
+                          new Date(row.detectedAt).getTime() + 9 * 3600 * 1000
+                        ).toISOString().replace('T', ' ').slice(0, 16);
+
+                        return (
+                          <tr key={row.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                            <td className="px-4 py-2 text-zinc-400 tabular-nums">{kst}</td>
+                            <td className="px-4 py-2 font-medium text-zinc-200">
+                              {row.symbol.replace(/USDT$/, '')}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              <span className={`rounded px-1.5 py-0.5 font-bold text-[10px] border ${
+                                isPump
+                                  ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
+                                  : 'border-red-500/25 bg-red-500/10 text-red-300'
+                              }`}>
+                                {row.type}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-right tabular-nums text-zinc-300">
+                              {row.changePct > 0 ? '+' : ''}{row.changePct.toFixed(2)}%
+                            </td>
+                            <td className="px-3 py-2 text-right tabular-nums text-zinc-400">
+                              x{row.volRatio.toFixed(1)}
+                            </td>
+                            <td className="px-3 py-2 text-right tabular-nums">{fmtPct(row.at5m)}</td>
+                            <td className="px-3 py-2 text-right tabular-nums">{fmtPct(row.at15m)}</td>
+                            <td className="px-3 py-2 text-right tabular-nums">{fmtPct(row.at30m)}</td>
+                            <td className="px-3 py-2 text-center text-base">
+                              {row.at15m === null ? '⏳' : hit15 ? '✅' : '❌'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="px-4 py-2 text-[11px] text-zinc-600 border-t border-white/5">
+                  ✅ 기준: +15분 후 예측 방향 일치 | 총 {btResult.rows.length}개 신호 ({btResult.days}일)
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+
+        {/* ── 5. 유저 목록 ── */}
         <section>
           <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">유저 관리</div>
           <div className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
