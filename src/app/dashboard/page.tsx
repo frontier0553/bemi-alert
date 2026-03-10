@@ -459,7 +459,7 @@ export default function Home() {
               <div className="grid grid-cols-[100px_80px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span>코인</span>
                 <span>신호 유형</span>
-                <span className="text-right">지표값</span>
+                <span className="text-right">비율(%)</span>
                 <span>시장 해석</span>
                 <span className="text-right">감지 시각</span>
               </div>
