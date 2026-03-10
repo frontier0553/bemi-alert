@@ -401,14 +401,23 @@ export default function Home() {
             {/* 전체 시황 히트맵 */}
             <MarketHeatmap />
 
-            {/* Whale Flow Top 5 */}
+            {/* Whale Flow */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
               <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
                 <Waves className="h-3.5 w-3.5 text-cyan-300" />
                 <span className="text-sm font-semibold">Whale Flow</span>
-                <span className="text-xs text-zinc-600">압력 Top 5</span>
+                <span className="text-xs text-zinc-600">상위 30 코인</span>
               </div>
-              <div className="divide-y divide-white/[0.04]">
+              {/* 컬럼 헤더 */}
+              <div className="grid grid-cols-[10px_1fr_52px_56px_44px_36px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                <span />
+                <span>심볼</span>
+                <span>방향</span>
+                <span className="text-right">거래규모</span>
+                <span className="text-right">압력</span>
+                <span className="text-right">시각</span>
+              </div>
+              <div className="divide-y divide-white/[0.04] max-h-[300px] overflow-y-auto">
                 {whalesLoading ? (
                   <div className="py-6 text-center text-sm text-zinc-600">로딩 중...</div>
                 ) : whales.length === 0 ? (
@@ -416,26 +425,32 @@ export default function Home() {
                 ) : (
                   [...whales]
                     .sort((a, b) => Math.abs(b.score) - Math.abs(a.score))
-                    .slice(0, 5)
                     .map(w => <WhaleCompactRow key={w.id} w={w} />)
                 )}
               </div>
             </div>
 
-            {/* 선물 신호 Top 5 */}
+            {/* 선물 신호 */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
               <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
                 <TrendingUp className="h-3.5 w-3.5 text-violet-400" />
                 <span className="text-sm font-semibold">선물 신호</span>
-                <span className="text-xs text-zinc-600">최신 5건</span>
               </div>
-              <div className="divide-y divide-white/[0.04]">
+              {/* 컬럼 헤더 */}
+              <div className="grid grid-cols-[1fr_48px_72px_60px_36px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                <span>심볼</span>
+                <span>이벤트</span>
+                <span className="text-right">비율</span>
+                <span>상태</span>
+                <span className="text-right">시각</span>
+              </div>
+              <div className="divide-y divide-white/[0.04] max-h-[240px] overflow-y-auto">
                 {futuresLoading ? (
                   <div className="py-6 text-center text-sm text-zinc-600">로딩 중...</div>
                 ) : futures.length === 0 ? (
                   <div className="py-6 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
                 ) : (
-                  futures.slice(0, 5).map(f => <FuturesCompactRow key={f.id} f={f} />)
+                  futures.map(f => <FuturesCompactRow key={f.id} f={f} />)
                 )}
               </div>
             </div>
@@ -598,13 +613,16 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   }
 
   return (
-    <div className="grid grid-cols-[10px_1fr_48px_44px_36px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[10px_1fr_52px_56px_44px_36px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className={`h-2 w-2 rounded-full ${heat}`} />
       <span className="font-semibold text-sm text-zinc-100 truncate">
         {w.symbol.replace(QUOTE_RE, '')}
       </span>
       <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
         {w.direction}
+      </span>
+      <span className="text-xs font-semibold tabular-nums text-right text-zinc-300">
+        {fmtUsd(w.tradeSize)}
       </span>
       <span className={`text-xs font-bold tabular-nums text-right ${scoreColor}`}>
         {w.score > 0 ? '+' : ''}{w.score}
@@ -641,8 +659,15 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
     : `${f.value > 0 ? '+' : ''}${f.value.toFixed(2)}%`;
   const valueColor = f.value > 0 ? 'text-emerald-300' : 'text-red-300';
 
+  const statusLabel = isFunding
+    ? (f.value > 0 ? 'Long Hot' : 'Short Hot')
+    : (isOiSurge ? 'OI Rising' : 'OI Falling');
+  const statusStyle = (isFunding ? f.value > 0 : isOiSurge)
+    ? 'bg-emerald-500/10 text-emerald-300'
+    : 'bg-red-500/10 text-red-300';
+
   return (
-    <div className="grid grid-cols-[1fr_40px_72px_36px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[1fr_48px_72px_60px_36px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className="font-bold text-sm text-zinc-100 truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
@@ -651,6 +676,9 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
       </span>
       <span className={`text-xs font-bold tabular-nums text-right ${valueColor}`}>
         {valueStr}
+      </span>
+      <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
+        {statusLabel}
       </span>
       <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
     </div>
