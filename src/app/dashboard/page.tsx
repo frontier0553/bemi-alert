@@ -341,81 +341,98 @@ export default function Home() {
           </div>
         )}
 
-        {/* ── 메인 2컬럼: 좌(신호) / 우(시황+고래+선물) ── */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr] lg:items-stretch">
+        {/* ── 메인 2컬럼: 좌(신호+고래+선물) / 우(히트맵) ── */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr] lg:items-start">
 
-          {/* ── Left: 실시간 신호 ── */}
-          <div className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
-            <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">📡 실시간 PUMP / DUMP</span>
-                  <span className="text-[10px] text-zinc-600">단기 급등·급락 감지 (최근 1시간)</span>
-                </div>
-                {liveEvents.length > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-red-400/30 bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-300">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
-                    LIVE {liveEvents.length}
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-1">
-                {(['ALL', 'PUMP', 'DUMP'] as FilterType[]).map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setScannerFilter(f)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-                      scannerFilter === f
-                        ? f === 'PUMP' ? 'bg-emerald-500/15 text-emerald-300'
-                        : f === 'DUMP' ? 'bg-red-500/15 text-red-300'
-                        : 'bg-white/10 text-zinc-100'
-                        : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                  >
-                    {f === 'ALL' ? '전체' : f === 'PUMP' ? '▲ PUMP' : '▼ DUMP'}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center justify-between border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-              <span>유형 · 심볼</span>
-              <div className="flex items-center gap-4">
-                <span>변동폭</span>
-                <span>거래량</span>
-                <span className="w-10 text-right">시각</span>
-              </div>
-            </div>
-            <div className="flex-1 divide-y divide-white/[0.04] overflow-y-auto">
-              {loading ? (
-                <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
-              ) : scannerEvents.length === 0 ? (
-                <Scanner24hSummary events={events} />
-              ) : (
-                scannerEvents.map(ev => <ScannerRow key={ev.id} ev={ev} />)
-              )}
-            </div>
-          </div>
-
-          {/* ── Right: 사이드 패널 ── */}
+          {/* ── Left: 신호 + Whale + 선물 ── */}
           <div className="flex flex-col gap-4">
 
-            {/* 전체 시황 히트맵 */}
-            <MarketHeatmap />
+            {/* 실시간 신호 */}
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+              <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">📡 실시간 PUMP / DUMP</span>
+                    <span className="text-[10px] text-zinc-600">단기 급등·급락 감지 (최근 1시간)</span>
+                  </div>
+                  {liveEvents.length > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-red-400/30 bg-red-400/10 px-2 py-0.5 text-[10px] font-bold text-red-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
+                      LIVE {liveEvents.length}
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-1">
+                  {(['ALL', 'PUMP', 'DUMP'] as FilterType[]).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setScannerFilter(f)}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                        scannerFilter === f
+                          ? f === 'PUMP' ? 'bg-emerald-500/15 text-emerald-300'
+                          : f === 'DUMP' ? 'bg-red-500/15 text-red-300'
+                          : 'bg-white/10 text-zinc-100'
+                          : 'text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      {f === 'ALL' ? '전체' : f === 'PUMP' ? '▲ PUMP' : '▼ DUMP'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-b border-white/5 bg-black/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                <span>유형 · 심볼</span>
+                <div className="flex items-center gap-4">
+                  <span>변동폭</span>
+                  <span>거래량</span>
+                  <span className="w-10 text-right">시각</span>
+                </div>
+              </div>
+              <div className="divide-y divide-white/[0.04]">
+                {loading ? (
+                  <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
+                ) : scannerEvents.length === 0 ? (
+                  <Scanner24hSummary events={events} />
+                ) : (
+                  scannerEvents.map(ev => <ScannerRow key={ev.id} ev={ev} />)
+                )}
+              </div>
+            </div>
 
             {/* Whale Flow */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
-              <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
-                <Waves className="h-3.5 w-3.5 text-cyan-300" />
-                <span className="text-sm font-semibold">Whale Flow</span>
-                <span className="text-xs text-zinc-600">상위 30 코인</span>
+              <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Waves className="h-3.5 w-3.5 text-cyan-300" />
+                  <span className="text-sm font-semibold">Whale Flow</span>
+                  <span className="text-xs text-zinc-600">상위 30 코인</span>
+                </div>
+                {/* 압력지수 범례 */}
+                <div className="flex items-center gap-3 text-[10px] text-zinc-600">
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    매집 ≥+40
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                    매도 ≤-40
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    중립
+                  </span>
+                </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[10px_1fr_52px_56px_44px_36px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[10px_1fr_52px_56px_80px_36px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span />
                 <span>심볼</span>
                 <span>방향</span>
                 <span className="text-right">거래규모</span>
-                <span className="text-right">압력</span>
+                <span className="text-right">
+                  압력지수
+                  <span className="normal-case tracking-normal font-normal text-zinc-700 ml-0.5">(-100~+100)</span>
+                </span>
                 <span className="text-right">시각</span>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[300px] overflow-y-auto">
@@ -436,6 +453,7 @@ export default function Home() {
               <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
                 <TrendingUp className="h-3.5 w-3.5 text-violet-400" />
                 <span className="text-sm font-semibold">선물 신호</span>
+                <span className="text-xs text-zinc-600">펀딩비 이상 · OI 급변</span>
               </div>
               {/* 컬럼 헤더 */}
               <div className="grid grid-cols-[1fr_48px_72px_60px_36px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
@@ -457,6 +475,12 @@ export default function Home() {
             </div>
 
           </div>
+
+          {/* ── Right: 전체 시황 히트맵 (sticky) ── */}
+          <div className="lg:sticky lg:top-4">
+            <MarketHeatmap />
+          </div>
+
         </div>
 
         {/* ── 감지 이력 링크 배너 ── */}
@@ -615,8 +639,10 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
     return `$${(v / 1_000).toFixed(0)}K`;
   }
 
+  const pct = Math.min(50, Math.abs(w.score) / 2); // 0~50px (score -100~+100)
+
   return (
-    <div className="grid grid-cols-[10px_1fr_52px_56px_44px_36px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[10px_1fr_52px_56px_80px_36px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className={`h-2 w-2 rounded-full ${heat}`} />
       <span className="font-semibold text-sm text-zinc-100 truncate">
         {w.symbol.replace(QUOTE_RE, '')}
@@ -627,9 +653,19 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
       <span className="text-xs font-semibold tabular-nums text-right text-zinc-300">
         {fmtUsd(w.tradeSize)}
       </span>
-      <span className={`text-xs font-bold tabular-nums text-right ${scoreColor}`}>
-        {w.score > 0 ? '+' : ''}{w.score}
-      </span>
+      {/* 압력지수: 미니 바 + 숫자 */}
+      <div className="flex items-center justify-end gap-1.5">
+        <div className="relative h-1 w-10 rounded-full bg-white/5 overflow-hidden">
+          {w.score >= 0 ? (
+            <div className="absolute left-1/2 h-1 rounded-full bg-emerald-400" style={{ width: `${pct}%` }} />
+          ) : (
+            <div className="absolute right-1/2 h-1 rounded-full bg-red-400" style={{ width: `${pct}%` }} />
+          )}
+        </div>
+        <span className={`text-xs font-bold tabular-nums w-7 text-right ${scoreColor}`}>
+          {w.score > 0 ? '+' : ''}{w.score}
+        </span>
+      </div>
       <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
     </div>
   );
