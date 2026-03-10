@@ -424,7 +424,7 @@ export default function Home() {
                 </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[10px_1fr_52px_56px_80px_36px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[10px_100px_56px_64px_1fr_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span />
                 <span>심볼</span>
                 <span>방향</span>
@@ -456,7 +456,7 @@ export default function Home() {
                 <span className="text-xs text-zinc-600">펀딩비 이상 · OI 급변</span>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[1fr_48px_72px_60px_36px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[100px_56px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span>심볼</span>
                 <span>이벤트</span>
                 <span className="text-right">비율</span>
@@ -509,9 +509,15 @@ function Scanner24hSummary({ events }: { events: Event[] }) {
 
   if (day.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 py-10 text-center">
-        <span className="text-2xl">🔍</span>
-        <p className="text-sm text-zinc-600">최근 1시간 내 감지된 신호 없음</p>
+      <div className="flex flex-col items-center gap-3 py-12 text-center">
+        <span className="text-3xl opacity-40">📡</span>
+        <p className="text-sm text-zinc-500">최근 1시간 내 감지된 신호 없음</p>
+        <Link
+          href="/user/alerts"
+          className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-white/10 transition-colors"
+        >
+          알림 이력 전체 보기 →
+        </Link>
       </div>
     );
   }
@@ -526,24 +532,34 @@ function Scanner24hSummary({ events }: { events: Event[] }) {
   return (
     <div className="px-4 py-5 space-y-4">
       {/* 요약 헤더 */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-zinc-500">최근 1시간 감지 없음 ·</span>
-        <span className="text-xs font-semibold text-zinc-300">최근 24시간 요약</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-zinc-600" />
+          <span className="text-xs text-zinc-500">최근 1시간 신호 없음</span>
+          <span className="text-zinc-700">·</span>
+          <span className="text-xs font-semibold text-zinc-300">24시간 요약</span>
+        </div>
+        <Link
+          href="/user/alerts"
+          className="text-[10px] text-zinc-600 hover:text-cyan-400 transition-colors"
+        >
+          이력 전체 보기 →
+        </Link>
       </div>
 
       {/* 카운트 */}
-      <div className="flex gap-3">
-        <div className="flex-1 rounded-xl bg-emerald-500/8 border border-emerald-500/15 px-3 py-2.5 text-center">
-          <div className="text-lg font-bold text-emerald-400 tabular-nums">{pumps.length}</div>
-          <div className="text-[10px] text-zinc-500 mt-0.5">PUMP 감지</div>
+      <div className="flex gap-2">
+        <div className="flex-1 rounded-xl border border-emerald-500/15 bg-emerald-500/[0.06] px-3 py-3 text-center">
+          <div className="text-2xl font-bold text-emerald-400 tabular-nums">{pumps.length}</div>
+          <div className="text-[10px] text-zinc-500 mt-0.5">▲ PUMP</div>
         </div>
-        <div className="flex-1 rounded-xl bg-red-500/8 border border-red-500/15 px-3 py-2.5 text-center">
-          <div className="text-lg font-bold text-red-400 tabular-nums">{dumps.length}</div>
-          <div className="text-[10px] text-zinc-500 mt-0.5">DUMP 감지</div>
+        <div className="flex-1 rounded-xl border border-red-500/15 bg-red-500/[0.06] px-3 py-3 text-center">
+          <div className="text-2xl font-bold text-red-400 tabular-nums">{dumps.length}</div>
+          <div className="text-[10px] text-zinc-500 mt-0.5">▼ DUMP</div>
         </div>
-        <div className="flex-1 rounded-xl bg-white/[0.04] border border-white/8 px-3 py-2.5 text-center">
-          <div className="text-lg font-bold text-zinc-300 tabular-nums">{day.length}</div>
-          <div className="text-[10px] text-zinc-500 mt-0.5">총 이벤트</div>
+        <div className="flex-1 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-3 text-center">
+          <div className="text-2xl font-bold text-zinc-300 tabular-nums">{day.length}</div>
+          <div className="text-[10px] text-zinc-500 mt-0.5">총 감지</div>
         </div>
       </div>
 
@@ -551,26 +567,26 @@ function Scanner24hSummary({ events }: { events: Event[] }) {
       {(topPump.length > 0 || topDump.length > 0) && (
         <div className="grid grid-cols-2 gap-3">
           {topPump.length > 0 && (
-            <div>
-              <div className="text-[10px] font-semibold text-emerald-500 mb-1.5 uppercase tracking-wider">Top PUMP</div>
-              <div className="space-y-1">
+            <div className="rounded-xl border border-emerald-500/10 bg-emerald-500/[0.04] px-3 py-2.5">
+              <div className="text-[10px] font-semibold text-emerald-500 mb-2 uppercase tracking-wider">Top PUMP</div>
+              <div className="space-y-1.5">
                 {topPump.map(ev => (
-                  <div key={ev.id} className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-zinc-300">{baseCoin(ev.symbol)}</span>
-                    <span className="text-emerald-400 font-semibold tabular-nums">+{fmt(ev.changePct)}%</span>
+                  <div key={ev.id} className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-zinc-200">{baseCoin(ev.symbol)}</span>
+                    <span className="text-xs font-semibold text-emerald-400 tabular-nums">+{fmt(ev.changePct)}%</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
           {topDump.length > 0 && (
-            <div>
-              <div className="text-[10px] font-semibold text-red-500 mb-1.5 uppercase tracking-wider">Top DUMP</div>
-              <div className="space-y-1">
+            <div className="rounded-xl border border-red-500/10 bg-red-500/[0.04] px-3 py-2.5">
+              <div className="text-[10px] font-semibold text-red-500 mb-2 uppercase tracking-wider">Top DUMP</div>
+              <div className="space-y-1.5">
                 {topDump.map(ev => (
-                  <div key={ev.id} className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-zinc-300">{baseCoin(ev.symbol)}</span>
-                    <span className="text-red-400 font-semibold tabular-nums">{fmt(ev.changePct)}%</span>
+                  <div key={ev.id} className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-zinc-200">{baseCoin(ev.symbol)}</span>
+                    <span className="text-xs font-semibold text-red-400 tabular-nums">{fmt(ev.changePct)}%</span>
                   </div>
                 ))}
               </div>
@@ -642,7 +658,7 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   const pct = Math.min(50, Math.abs(w.score) / 2); // 0~50px (score -100~+100)
 
   return (
-    <div className="grid grid-cols-[10px_1fr_52px_56px_80px_36px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[10px_100px_56px_64px_1fr_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className={`h-2 w-2 rounded-full ${heat}`} />
       <span className="font-semibold text-sm text-zinc-100 truncate">
         {w.symbol.replace(QUOTE_RE, '')}
@@ -706,7 +722,7 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
     : 'bg-red-500/10 text-red-300';
 
   return (
-    <div className="grid grid-cols-[1fr_48px_72px_60px_36px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[100px_56px_1fr_72px_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className="font-bold text-sm text-zinc-100 truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
