@@ -422,7 +422,7 @@ export default function Home() {
                 <div className="flex justify-center">흐름</div>
                 <span className="text-right">거래 규모</span>
                 {/* 압력 점수 툴팁 */}
-                <div className="relative group flex justify-center cursor-help">
+                <div className="relative group flex justify-center sm:justify-end cursor-help">
                   <span className="text-center hidden sm:block">매수/매도 압력점수</span>
                   <span className="text-center sm:hidden">압력</span>
                   <div className="pointer-events-none absolute top-full right-0 mt-1 z-30 hidden group-hover:block w-52 rounded-xl bg-zinc-900 border border-white/10 p-3 text-[11px] shadow-2xl normal-case tracking-normal">
@@ -456,13 +456,13 @@ export default function Home() {
                 <span className="text-xs text-zinc-600">펀딩비 · 미결제약정 · 청산</span>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span>코인</span>
                 <span>신호 유형</span>
-                <span className="text-right">가격 반응</span>
+                <span className="hidden sm:block text-right">가격 반응</span>
                 <span className="text-right">지표값</span>
                 <span>시장 해석</span>
-                <span className="text-right">감지 시각</span>
+                <span className="text-right whitespace-nowrap">감지 시각</span>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[240px] overflow-y-auto">
                 {futuresLoading ? (
@@ -742,14 +742,14 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
   }
 
   return (
-    <div className="grid grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className="font-bold text-sm text-zinc-100 truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
       <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
         {eventLabel}
       </span>
-      <span className="text-xs tabular-nums text-right text-zinc-400">
+      <span className="hidden sm:block text-xs tabular-nums text-right text-zinc-400">
         {f.markPrice != null ? fmtPrice(f.markPrice) : '—'}
       </span>
       <span className={`text-xs font-bold tabular-nums text-right ${valueColor}`}>
