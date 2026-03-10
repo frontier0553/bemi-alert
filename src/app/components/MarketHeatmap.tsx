@@ -7,6 +7,7 @@ interface Coin {
   changePct: number;
   volume:    number;
   price:     number;
+  marketCap: number | null;
 }
 
 /* ── 색상 ─────────────────────────────────────────────────── */
@@ -18,38 +19,56 @@ function tileColor(pct: number): { bg: string; color: string } {
     if (a >= 5)  return { bg: '#065f46', color: '#6ee7b7' };
     if (a >= 3)  return { bg: '#064e3b', color: '#34d399' };
     if (a >= 1)  return { bg: '#022c22', color: '#6ee7b7' };
-    return         { bg: '#0a1f15', color: '#4ade80' };       // ~0%
+    return         { bg: '#0a1f15', color: '#4ade80' };
   } else {
     if (a >= 10) return { bg: '#dc2626', color: '#ffffff' };
     if (a >= 7)  return { bg: '#b91c1c', color: '#fee2e2' };
     if (a >= 5)  return { bg: '#991b1b', color: '#fca5a5' };
     if (a >= 3)  return { bg: '#7f1d1d', color: '#fca5a5' };
     if (a >= 1)  return { bg: '#3b0f0f', color: '#fca5a5' };
-    return         { bg: '#1a0a0a', color: '#f87171' };       // ~0%
+    return         { bg: '#1a0a0a', color: '#f87171' };
   }
 }
 
-/* ── 볼륨 순위별 타일 크기 ───────────────────────────────────
-   - rank  0~4  (top 5)  → 2열 × 높이 88px
-   - rank  5~19 (6~20위) → 1열 × 높이 72px
-   - rank 20~   (21위~)  → 1열 × 높이 54px
-──────────────────────────────────────────────────────────── */
-function tileSize(rank: number): { colSpan: number; height: number; nameSize: number; pctSize: number } {
-  if (rank < 5)  return { colSpan: 2, height: 88, nameSize: 14, pctSize: 13 };
-  if (rank < 20) return { colSpan: 1, height: 72, nameSize: 12, pctSize: 11 };
-  return           { colSpan: 1, height: 54, nameSize: 11, pctSize: 10 };
+/* ── 시총 기반 타일 크기 (로그 정규화) ──────────────────────
+   logRatio = (log(mc) - log(min)) / (log(max) - log(min))
+   ≈ 0 → 1 사이 값. 상위 코인(BTC, ETH 등)일수록 크게.
+   ────────────────────────────────────────────────────────── */
+function calcTileSize(
+  marketCap: number | null,
+  logMax: number,
+  logMin: number,
+  rank: number,
+): { colSpan: number; height: number; nameSize: number; pctSize: number } {
+  let ratio = 0;
+
+  if (marketCap && logMax > logMin) {
+    const logMc = Math.log(marketCap);
+    ratio = Math.max(0, Math.min(1, (logMc - logMin) / (logMax - logMin)));
+  } else {
+    // 시총 데이터 없으면 순위 기반 폴백
+    ratio = rank < 5 ? 0.9 : rank < 20 ? 0.55 : 0.2;
+  }
+
+  const colSpan  = ratio >= 0.62 ? 2 : 1;                              // 상위 6~8개 → 2열
+  const height   = Math.round(54 + ratio * 42);                        // 54~96px
+  const nameSize = colSpan === 2 ? 14 : ratio >= 0.45 ? 12 : 11;
+  const pctSize  = colSpan === 2 ? 13 : ratio >= 0.45 ? 11 : 10;
+
+  return { colSpan, height, nameSize, pctSize };
 }
 
-function fmtVol(v: number) {
-  if (v >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(1)}B`;
-  if (v >= 1_000_000)     return `$${(v / 1_000_000).toFixed(0)}M`;
-  return `$${(v / 1_000).toFixed(0)}K`;
+function fmtCap(v: number) {
+  if (v >= 1e12) return `$${(v / 1e12).toFixed(2)}T`;
+  if (v >= 1e9)  return `$${(v / 1e9).toFixed(1)}B`;
+  if (v >= 1e6)  return `$${(v / 1e6).toFixed(0)}M`;
+  return `$${(v / 1e3).toFixed(0)}K`;
 }
 
 /* ── 컴포넌트 ────────────────────────────────────────────── */
 export function MarketHeatmap() {
-  const [coins, setCoins]       = useState<Coin[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [coins, setCoins]         = useState<Coin[]>([]);
+  const [loading, setLoading]     = useState(true);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   const load = useCallback(async () => {
@@ -70,8 +89,14 @@ export function MarketHeatmap() {
     return () => clearInterval(t);
   }, [load]);
 
+  // 로그 정규화 기준값 사전 계산
+  const mcList = coins.map(c => c.marketCap).filter(Boolean) as number[];
+  const logMax = mcList.length ? Math.log(Math.max(...mcList)) : 0;
+  const logMin = mcList.length ? Math.log(Math.min(...mcList)) : 0;
+
   const up   = coins.filter(c => c.changePct >= 0).length;
   const down = coins.filter(c => c.changePct <  0).length;
+  const hasMc = mcList.length > 0;
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
@@ -79,7 +104,9 @@ export function MarketHeatmap() {
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <span className="text-sm font-semibold">🌐 전체 시황</span>
-          <span className="text-xs text-zinc-600">바이낸스 거래량 Top 60 · 24h 변동률</span>
+          <span className="text-xs text-zinc-600">
+            {hasMc ? '시총 Top 60 · 24h 변동률' : '바이낸스 Top 60 · 24h 변동률'}
+          </span>
           {!loading && (
             <div className="flex items-center gap-1.5 text-[11px]">
               <span className="text-emerald-400 font-semibold">▲ {up}</span>
@@ -89,7 +116,6 @@ export function MarketHeatmap() {
           )}
         </div>
         <div className="flex items-center gap-3">
-          {/* 범례 */}
           <div className="hidden sm:flex items-center gap-2.5 text-[11px] text-zinc-600">
             {[
               { bg: '#059669', label: '+10%+' },
@@ -122,13 +148,19 @@ export function MarketHeatmap() {
             style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))' }}
           >
             {coins.map((coin, rank) => {
-              const { bg, color }                        = tileColor(coin.changePct);
-              const { colSpan, height, nameSize, pctSize } = tileSize(rank);
+              const { bg, color }                          = tileColor(coin.changePct);
+              const { colSpan, height, nameSize, pctSize } = calcTileSize(coin.marketCap, logMax, logMin, rank);
+
+              const tooltip = [
+                coin.symbol,
+                `${coin.changePct >= 0 ? '+' : ''}${coin.changePct.toFixed(2)}%`,
+                coin.marketCap ? `시총 ${fmtCap(coin.marketCap)}` : '',
+              ].filter(Boolean).join('  ');
 
               return (
                 <div
                   key={coin.symbol}
-                  title={`${coin.symbol}  ${coin.changePct >= 0 ? '+' : ''}${coin.changePct.toFixed(2)}%  Vol ${fmtVol(coin.volume)}`}
+                  title={tooltip}
                   style={{
                     background: bg,
                     color,
@@ -143,15 +175,13 @@ export function MarketHeatmap() {
                   >
                     {coin.symbol}
                   </span>
-                  <span
-                    className="tabular-nums font-semibold"
-                    style={{ fontSize: pctSize }}
-                  >
+                  <span className="tabular-nums font-semibold" style={{ fontSize: pctSize }}>
                     {coin.changePct >= 0 ? '+' : ''}{coin.changePct.toFixed(2)}%
                   </span>
-                  {colSpan === 2 && (
+                  {/* 대형 타일에만 시총 표시 */}
+                  {colSpan === 2 && coin.marketCap && (
                     <span className="text-[10px] opacity-60 tabular-nums mt-0.5">
-                      {fmtVol(coin.volume)}
+                      {fmtCap(coin.marketCap)}
                     </span>
                   )}
                 </div>
