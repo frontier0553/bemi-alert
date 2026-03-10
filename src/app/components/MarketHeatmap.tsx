@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { CoinChartModal } from './CoinChartModal';
 
 interface Coin {
   symbol:    string;
@@ -70,6 +71,7 @@ export function MarketHeatmap() {
   const [coins, setCoins]         = useState<Coin[]>([]);
   const [loading, setLoading]     = useState(true);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [selected, setSelected]   = useState<Coin | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -99,6 +101,16 @@ export function MarketHeatmap() {
   const hasMc = mcList.length > 0;
 
   return (
+    <>
+    {selected && (
+      <CoinChartModal
+        symbol={selected.symbol}
+        changePct={selected.changePct}
+        price={selected.price}
+        marketCap={selected.marketCap}
+        onClose={() => setSelected(null)}
+      />
+    )}
     <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
       {/* 헤더 */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
@@ -145,7 +157,7 @@ export function MarketHeatmap() {
         ) : (
           <div
             className="grid gap-1"
-            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))' }}
+            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(52px, 12vw, 70px), 1fr))' }}
           >
             {coins.map((coin, rank) => {
               const { bg, color }                          = tileColor(coin.changePct);
@@ -161,13 +173,14 @@ export function MarketHeatmap() {
                 <div
                   key={coin.symbol}
                   title={tooltip}
+                  onClick={() => setSelected(coin)}
                   style={{
                     background: bg,
                     color,
                     gridColumn: `span ${colSpan}`,
                     minHeight:  `${height}px`,
                   }}
-                  className="rounded-lg flex flex-col items-center justify-center gap-0.5 cursor-default select-none transition-transform hover:scale-[1.03]"
+                  className="rounded-lg flex flex-col items-center justify-center gap-0.5 cursor-pointer select-none transition-all hover:scale-[1.04] hover:brightness-125 active:scale-[0.97]"
                 >
                   <span
                     className="font-bold leading-tight truncate px-1 text-center"
@@ -191,5 +204,6 @@ export function MarketHeatmap() {
         )}
       </div>
     </div>
+    </>
   );
 }

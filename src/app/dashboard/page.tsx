@@ -469,7 +469,7 @@ export default function Home() {
               {loading ? (
                 <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
               ) : scannerEvents.length === 0 ? (
-                <div className="py-10 text-center text-sm text-zinc-600">최근 1시간 내 감지 없음</div>
+                <Scanner24hSummary events={events} />
               ) : (
                 scannerEvents.map(ev => <ScannerRow key={ev.id} ev={ev} />)
               )}
@@ -603,6 +603,87 @@ export default function Home() {
         </div>
 
       </main>
+    </div>
+  );
+}
+
+/* ── 24h 요약 (신호 없을 때) ─────────────────────────── */
+function Scanner24hSummary({ events }: { events: Event[] }) {
+  const now  = Date.now();
+  const DAY  = 24 * 60 * 60 * 1000;
+  const day  = events.filter(ev => now - new Date(ev.detectedAt).getTime() < DAY);
+
+  if (day.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-10 text-center">
+        <span className="text-2xl">🔍</span>
+        <p className="text-sm text-zinc-600">최근 1시간 내 감지된 신호 없음</p>
+      </div>
+    );
+  }
+
+  const pumps = day.filter(e => e.type === 'PUMP');
+  const dumps = day.filter(e => e.type === 'DUMP');
+
+  // 변동폭 기준 Top 3
+  const topPump = [...pumps].sort((a, b) => b.changePct - a.changePct).slice(0, 3);
+  const topDump = [...dumps].sort((a, b) => a.changePct - b.changePct).slice(0, 3);
+
+  return (
+    <div className="px-4 py-5 space-y-4">
+      {/* 요약 헤더 */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-zinc-500">최근 1시간 감지 없음 ·</span>
+        <span className="text-xs font-semibold text-zinc-300">최근 24시간 요약</span>
+      </div>
+
+      {/* 카운트 */}
+      <div className="flex gap-3">
+        <div className="flex-1 rounded-xl bg-emerald-500/8 border border-emerald-500/15 px-3 py-2.5 text-center">
+          <div className="text-lg font-bold text-emerald-400 tabular-nums">{pumps.length}</div>
+          <div className="text-[10px] text-zinc-500 mt-0.5">PUMP 감지</div>
+        </div>
+        <div className="flex-1 rounded-xl bg-red-500/8 border border-red-500/15 px-3 py-2.5 text-center">
+          <div className="text-lg font-bold text-red-400 tabular-nums">{dumps.length}</div>
+          <div className="text-[10px] text-zinc-500 mt-0.5">DUMP 감지</div>
+        </div>
+        <div className="flex-1 rounded-xl bg-white/[0.04] border border-white/8 px-3 py-2.5 text-center">
+          <div className="text-lg font-bold text-zinc-300 tabular-nums">{day.length}</div>
+          <div className="text-[10px] text-zinc-500 mt-0.5">총 이벤트</div>
+        </div>
+      </div>
+
+      {/* Top movers */}
+      {(topPump.length > 0 || topDump.length > 0) && (
+        <div className="grid grid-cols-2 gap-3">
+          {topPump.length > 0 && (
+            <div>
+              <div className="text-[10px] font-semibold text-emerald-500 mb-1.5 uppercase tracking-wider">Top PUMP</div>
+              <div className="space-y-1">
+                {topPump.map(ev => (
+                  <div key={ev.id} className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-zinc-300">{baseCoin(ev.symbol)}</span>
+                    <span className="text-emerald-400 font-semibold tabular-nums">+{fmt(ev.changePct)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {topDump.length > 0 && (
+            <div>
+              <div className="text-[10px] font-semibold text-red-500 mb-1.5 uppercase tracking-wider">Top DUMP</div>
+              <div className="space-y-1">
+                {topDump.map(ev => (
+                  <div key={ev.id} className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-zinc-300">{baseCoin(ev.symbol)}</span>
+                    <span className="text-red-400 font-semibold tabular-nums">{fmt(ev.changePct)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
