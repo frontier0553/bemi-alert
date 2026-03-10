@@ -407,32 +407,29 @@ export default function Home() {
                   <span className="text-sm font-semibold">Whale Flow</span>
                   <span className="text-xs text-zinc-600">상위 30 코인</span>
                 </div>
-                {/* 압력지수 범례 */}
+                {/* 압력지수 점 범례 */}
                 <div className="flex items-center gap-3 text-[10px] text-zinc-600">
                   <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    매집 ≥+40
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.7)]" />
+                    강매집
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                    매도 ≤-40
+                    <span className="h-2 w-2 rounded-full bg-amber-400" />
+                    중립 &lt;±40
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                    중립
+                    <span className="h-2 w-2 rounded-full bg-red-400 shadow-[0_0_5px_rgba(248,113,113,0.7)]" />
+                    강매도
                   </span>
                 </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[10px_100px_56px_64px_1fr_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                <span />
-                <span>심볼</span>
+              <div className="grid grid-cols-[8px_120px_56px_64px_120px_44px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                <span title="점 색상 = 압력 강도 (초록≥+40 / 노랑 중립 / 빨강≤-40)" className="cursor-help">•</span>
+                <span>심볼 · 매수/매도</span>
                 <span>방향</span>
-                <span className="text-right">거래규모</span>
-                <span className="text-right">
-                  압력지수
-                  <span className="normal-case tracking-normal font-normal text-zinc-700 ml-0.5">(-100~+100)</span>
-                </span>
+                <span className="text-right">규모</span>
+                <span className="text-right">압력지수 <span className="normal-case tracking-normal font-normal text-zinc-700">-100~+100</span></span>
                 <span className="text-right">시각</span>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[300px] overflow-y-auto">
@@ -655,33 +652,46 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
     return `$${(v / 1_000).toFixed(0)}K`;
   }
 
-  const pct = Math.min(50, Math.abs(w.score) / 2); // 0~50px (score -100~+100)
+  // 압력 바: score -100~+100 → 각 방향 0~100% (중앙 기준)
+  const barPct = Math.min(100, Math.abs(w.score)); // %
 
   return (
-    <div className="grid grid-cols-[10px_100px_56px_64px_1fr_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-      <span className={`h-2 w-2 rounded-full ${heat}`} />
-      <span className="font-semibold text-sm text-zinc-100 truncate">
-        {w.symbol.replace(QUOTE_RE, '')}
-      </span>
+    <div className="grid grid-cols-[8px_120px_56px_64px_120px_44px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+      {/* 강도 점 */}
+      <span className={`h-2 w-2 rounded-full shrink-0 ${heat}`} />
+      {/* 심볼 + 매수/매도 건수 */}
+      <div className="flex flex-col min-w-0">
+        <span className="font-semibold text-sm text-zinc-100 truncate">
+          {w.symbol.replace(QUOTE_RE, '')}
+        </span>
+        <span className="text-[9px] text-zinc-600 tabular-nums">
+          B{w.whaleBuys} · S{w.whaleSells}
+        </span>
+      </div>
+      {/* 방향 */}
       <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
         {w.direction}
       </span>
+      {/* 거래규모 */}
       <span className="text-xs font-semibold tabular-nums text-right text-zinc-300">
         {fmtUsd(w.tradeSize)}
       </span>
-      {/* 압력지수: 미니 바 + 숫자 */}
-      <div className="flex items-center justify-end gap-1.5">
-        <div className="relative h-1 w-10 rounded-full bg-white/5 overflow-hidden">
+      {/* 압력지수: 바 + 숫자 */}
+      <div className="flex items-center justify-end gap-2">
+        <div className="relative h-1.5 w-14 rounded-full bg-white/5 overflow-hidden shrink-0">
           {w.score >= 0 ? (
-            <div className="absolute left-1/2 h-1 rounded-full bg-emerald-400" style={{ width: `${pct}%` }} />
+            <div className="absolute left-1/2 h-1.5 rounded-full bg-emerald-400 transition-all"
+              style={{ width: `${barPct / 2}%` }} />
           ) : (
-            <div className="absolute right-1/2 h-1 rounded-full bg-red-400" style={{ width: `${pct}%` }} />
+            <div className="absolute right-1/2 h-1.5 rounded-full bg-red-400 transition-all"
+              style={{ width: `${barPct / 2}%` }} />
           )}
         </div>
-        <span className={`text-xs font-bold tabular-nums w-7 text-right ${scoreColor}`}>
+        <span className={`text-xs font-bold tabular-nums w-8 text-right shrink-0 ${scoreColor}`}>
           {w.score > 0 ? '+' : ''}{w.score}
         </span>
       </div>
+      {/* 시각 */}
       <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
     </div>
   );
