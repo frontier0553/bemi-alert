@@ -456,13 +456,13 @@ export default function Home() {
                 <span className="text-xs text-zinc-600">펀딩비 · 미결제약정 · 청산</span>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                <span>코인</span>
-                <span>신호 유형</span>
-                <span className="hidden sm:block text-right">가격 반응</span>
-                <span className="text-right">지표값</span>
-                <span>시장 해석</span>
-                <span className="text-right whitespace-nowrap">감지 시각</span>
+              <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_90px_80px_90px_80px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                <div className="flex justify-center">코인</div>
+                <div className="flex justify-center">신호 유형</div>
+                <div className="hidden sm:flex justify-center">가격 반응</div>
+                <div className="flex justify-center">지표값</div>
+                <div className="flex justify-center">시장 해석</div>
+                <div className="flex justify-center whitespace-nowrap">감지 시각</div>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[240px] overflow-y-auto">
                 {futuresLoading ? (
@@ -742,23 +742,29 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
   }
 
   return (
-    <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-      <span className="font-bold text-sm text-zinc-100 truncate">
+    <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_90px_80px_90px_80px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+      <span className="font-bold text-sm text-zinc-100 text-center truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
-      <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
-        {eventLabel}
-      </span>
-      <span className="hidden sm:block text-xs tabular-nums text-right text-zinc-400">
-        {f.markPrice != null ? fmtPrice(f.markPrice) : '—'}
-      </span>
-      <span className={`text-xs font-bold tabular-nums text-right ${valueColor}`}>
+      <div className="flex justify-center">
+        <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
+          {eventLabel}
+        </span>
+      </div>
+      <div className="hidden sm:flex justify-center">
+        <span className="text-xs tabular-nums text-zinc-400">
+          {f.markPrice != null ? fmtPrice(f.markPrice) : '—'}
+        </span>
+      </div>
+      <span className={`text-xs font-bold tabular-nums text-center ${valueColor}`}>
         {valueStr}
       </span>
-      <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
-        {statusLabel}
-      </span>
-      <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
+      <div className="flex justify-center">
+        <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
+          {statusLabel}
+        </span>
+      </div>
+      <span className="text-[10px] text-zinc-600 tabular-nums text-center">{timeAgo(f.detectedAt)}</span>
     </div>
   );
 }
