@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js';
 import { MarketSummaryCards } from '../components/MarketSummaryCards';
 import { FiltersBar }         from '../components/FiltersBar';
 import { HistoryTable }       from '../components/HistoryTable';
+import { CryptoHeatmap }      from '../components/CryptoHeatmap';
 import type { WhaleEventRow } from '../components/WhalePanel';
 import { groupBySymbol, baseCoin, fmt, timeAgo } from '../components/utils';
 import type { FilterType, Event, Stats } from '../components/types';
@@ -350,6 +351,9 @@ export default function Home() {
           ? <MarketSummaryCards stats={stats} liveCount={liveEvents.length} />
           : <div className="h-24 rounded-2xl border border-white/5 bg-white/5 animate-pulse" />
         }
+
+        {/* ── 히트맵 ── */}
+        <CryptoHeatmap events={uniqueBySymbol} />
 
         {/* ── 2-Column: 신호 + 고래 ── */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[3fr_2fr]">
