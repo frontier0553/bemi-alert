@@ -38,6 +38,7 @@ export async function GET() {
     alertTypes:  userSettings?.alertTypes  ?? null,
     telegramLinked: !!subscriber,
     telegramUsername: subscriber?.username ?? null,
+    lang: subscriber?.lang ?? 'ko',
     globalParams,
   });
 }
@@ -52,11 +53,15 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 });
   }
 
-  let coinFilter: string | null, pumpPct: number | null, dumpPct: number | null, alertTypes: string | null;
+  let coinFilter: string | null, pumpPct: number | null, dumpPct: number | null, alertTypes: string | null, lang: string | null | undefined;
   try {
-    ({ coinFilter, pumpPct, dumpPct, alertTypes } = await req.json());
+    ({ coinFilter, pumpPct, dumpPct, alertTypes, lang } = await req.json());
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  if (lang != null && lang !== 'ko' && lang !== 'en') {
+    return NextResponse.json({ error: 'lang은 ko 또는 en 이어야 합니다' }, { status: 400 });
   }
 
   // alertTypes 유효성 검증
@@ -109,6 +114,14 @@ export async function PATCH(req: NextRequest) {
       alertTypes:  alertTypes  ?? null,
     },
   });
+
+  // Subscriber.lang 업데이트 (텔레그램 연동된 경우만)
+  if (lang != null) {
+    await prisma.subscriber.updateMany({
+      where: { userId: user.id },
+      data:  { lang },
+    });
+  }
 
   return NextResponse.json({ ok: true });
 }

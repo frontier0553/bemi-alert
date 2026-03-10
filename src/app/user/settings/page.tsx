@@ -20,6 +20,7 @@ interface UserSettingsData {
   alertTypes:        string | null;
   telegramLinked:    boolean;
   telegramUsername:  string | null;
+  lang:              string;
   globalParams:      Record<string, string>;
 }
 
@@ -31,6 +32,7 @@ export default function UserSettingsPage() {
   const [dumpPct, setDumpPct]     = useState('');
   // null = 전체 선택 (기본), 아니면 선택된 타입 배열
   const [alertTypes, setAlertTypes] = useState<string[]>(['PUMP', 'DUMP', 'WHALE', 'FUTURES']);
+  const [lang, setLang]           = useState<'ko' | 'en'>('ko');
   const [saved, setSaved]         = useState(false);
   const [linkCode, setLinkCode]   = useState<string | null>(null);
   const [linkExpiry, setLinkExpiry] = useState<string | null>(null);
@@ -54,6 +56,7 @@ export default function UserSettingsPage() {
         if (d.alertTypes) {
           try { setAlertTypes(JSON.parse(d.alertTypes)); } catch {}
         }
+        if (d.lang === 'en') setLang('en');
       })
       .catch(() => router.replace('/login'));
   }, [router]);
@@ -70,6 +73,7 @@ export default function UserSettingsPage() {
         pumpPct:     pumpPct ? parseFloat(pumpPct) : null,
         dumpPct:     dumpPct ? parseFloat(dumpPct) : null,
         alertTypes:  alertTypes.length === 4 ? null : JSON.stringify(alertTypes),
+        lang,
       }),
     });
     setSaved(true);
@@ -169,6 +173,39 @@ export default function UserSettingsPage() {
           </div>
           {alertTypes.length === 0 && (
             <p className="mt-3 text-xs text-amber-400">⚠️ 아무것도 선택하지 않으면 알림을 받지 않습니다.</p>
+          )}
+        </div>
+
+        {/* ── 알림 언어 ── */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+          <h2 className="mb-1 text-sm font-semibold text-zinc-200">알림 언어</h2>
+          <p className="mb-4 text-xs text-zinc-500">텔레그램으로 받는 알림 메시지의 언어를 선택하세요.</p>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setLang('ko')}
+              className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                lang === 'ko'
+                  ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-200'
+                  : 'border-white/10 bg-white/[0.03] text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              🇰🇷 한국어
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang('en')}
+              className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                lang === 'en'
+                  ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-200'
+                  : 'border-white/10 bg-white/[0.03] text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              🇺🇸 English
+            </button>
+          </div>
+          {!data.telegramLinked && (
+            <p className="mt-3 text-xs text-zinc-600">⚠️ 텔레그램 연동 후 적용됩니다.</p>
           )}
         </div>
 
