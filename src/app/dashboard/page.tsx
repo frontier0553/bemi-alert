@@ -2,16 +2,12 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Bell, Zap, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut, HelpCircle, ShieldCheck, ChevronDown, ChevronUp, ChevronsUpDown, History } from 'lucide-react';
+import { Bell, Zap, RefreshCw, Settings2, Waves, TrendingUp, LogIn, LogOut, HelpCircle, ShieldCheck, History } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { MarketSummaryCards } from '../components/MarketSummaryCards';
-import { FiltersBar }         from '../components/FiltersBar';
-import { HistoryTable }       from '../components/HistoryTable';
-import { CryptoHeatmap }      from '../components/CryptoHeatmap';
 import { MarketHeatmap }      from '../components/MarketHeatmap';
 import type { WhaleEventRow } from '../components/WhalePanel';
-import { groupBySymbol, baseCoin, fmt, timeAgo } from '../components/utils';
+import { baseCoin, fmt, timeAgo } from '../components/utils';
 import type { FilterType, Event, Stats } from '../components/types';
 
 const LIVE_WINDOW_MS    = 5 * 60 * 1000;
@@ -22,9 +18,6 @@ const QUOTE_RE = /(USDT|USDC|BUSD|FDUSD|TUSD)$/;
 export default function Home() {
   const [events, setEvents]               = useState<Event[]>([]);
   const [stats, setStats]                 = useState<Stats | null>(null);
-  const [filter, setFilter]               = useState<FilterType>('ALL');
-  const [search, setSearch]               = useState('');
-  const [groupBy, setGroupBy]             = useState(true);
   const [lastUpdated, setLastUpdated]     = useState<Date | null>(null);
   const [loading, setLoading]             = useState(true);
   const [countdown, setCountdown]         = useState(30);
@@ -40,10 +33,6 @@ export default function Home() {
   const [menuOpen, setMenuOpen]           = useState(false);
   const menuRef                           = useRef<HTMLDivElement>(null);
   const [telegramLinked, setTelegramLinked] = useState<boolean | null>(null);
-  const [whaleSortKey, setWhaleSortKey]   = useState<'symbol'|'direction'|'tradeSize'|'score'>('score');
-  const [whaleSortDir, setWhaleSortDir]   = useState<'asc'|'desc'>('desc');
-  const [futuresFilter, setFuturesFilter] = useState<'ALL'|'FUNDING'|'OI'>('ALL');
-  const [heatmapTab, setHeatmapTab]       = useState<'market'|'alert'>('market');
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -57,10 +46,7 @@ export default function Home() {
 
   const fetchData = useCallback(async () => {
     try {
-      const params = new URLSearchParams({ limit: '200' });
-      if (filter !== 'ALL') params.set('type', filter);
-      if (search.trim()) params.set('symbol', search.trim());
-      const res  = await fetch(`/api/events?${params}`);
+      const res  = await fetch('/api/events?limit=200');
       const data = await res.json();
       setEvents(data.events ?? []);
       setStats(data.stats ?? null);
@@ -68,7 +54,7 @@ export default function Home() {
       setCountdown(30);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  }, [filter, search]);
+  }, []);
 
   const fetchWhales = useCallback(async () => {
     try {
@@ -147,7 +133,6 @@ export default function Home() {
 
   const now        = Date.now();
   const liveEvents = events.filter(ev => now - new Date(ev.detectedAt).getTime() < LIVE_WINDOW_MS);
-  const grouped    = groupBySymbol(events);
 
   const recentEvents = events.filter(ev =>
     now - new Date(ev.detectedAt).getTime() < SCANNER_WINDOW_MS,
@@ -161,30 +146,6 @@ export default function Home() {
   const scannerEvents = uniqueBySymbol.filter(ev =>
     scannerFilter === 'ALL' ? true : ev.type === scannerFilter,
   );
-
-  function handleWhaleSort(key: typeof whaleSortKey) {
-    if (whaleSortKey === key) setWhaleSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    else { setWhaleSortKey(key); setWhaleSortDir(key === 'symbol' || key === 'direction' ? 'asc' : 'desc'); }
-  }
-  const sortedWhales = [...whales].sort((a, b) => {
-    let cmp = 0;
-    if (whaleSortKey === 'symbol')    cmp = a.symbol.localeCompare(b.symbol);
-    if (whaleSortKey === 'direction') cmp = a.direction.localeCompare(b.direction);
-    if (whaleSortKey === 'tradeSize') cmp = a.tradeSize - b.tradeSize;
-    if (whaleSortKey === 'score')     cmp = a.score - b.score;
-    return whaleSortDir === 'asc' ? cmp : -cmp;
-  });
-
-  function WhaleSortIcon({ col }: { col: typeof whaleSortKey }) {
-    if (col !== whaleSortKey) return <ChevronsUpDown className="inline h-3 w-3 ml-0.5 opacity-30" />;
-    return whaleSortDir === 'asc'
-      ? <ChevronUp className="inline h-3 w-3 ml-0.5 text-cyan-300" />
-      : <ChevronDown className="inline h-3 w-3 ml-0.5 text-cyan-300" />;
-  }
-
-  const filteredFutures = futuresFilter === 'ALL'
-    ? futures
-    : futures.filter(f => futuresFilter === 'OI' ? f.alertType !== 'FUNDING' : f.alertType === 'FUNDING');
 
   // 인증 확인 전 빈 화면
   if (!userChecked) return (
@@ -333,97 +294,58 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-[1400px] px-5 py-5 flex flex-col gap-5">
+      <main className="relative mx-auto max-w-[1400px] px-5 py-5 flex flex-col gap-4">
 
-        {/* ── KPI Cards ── */}
-        {stats
-          ? <MarketSummaryCards stats={stats} liveCount={liveEvents.length} />
-          : <div className="h-24 rounded-2xl border border-white/5 bg-white/5 animate-pulse" />
-        }
+        {/* ── KPI 칩 ── */}
+        <div className="flex flex-wrap items-center gap-2">
+          {stats ? (
+            <>
+              <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                ▲ {stats.todayPumps} PUMP
+              </span>
+              <span className="flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-300">
+                ▼ {stats.todayDumps} DUMP
+              </span>
+              {liveEvents.length > 0 ? (
+                <span className="flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  LIVE {liveEvents.length}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-zinc-500">
+                  IDLE
+                </span>
+              )}
+              <span className="text-xs text-zinc-600 tabular-nums">오늘 총 {stats.todayTotal}건 감지</span>
+            </>
+          ) : (
+            <div className="h-7 w-56 rounded-full bg-white/5 animate-pulse" />
+          )}
+        </div>
 
-        {/* ── 텔레그램 미연동 온보딩 카드 ── */}
+        {/* ── 텔레그램 미연동 배너 ── */}
         {telegramLinked === false && (
-          <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] p-5">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4">
-                {/* 아이콘 */}
-                <div className="shrink-0 flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 text-2xl">
-                  📱
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-zinc-100 mb-1">
-                    텔레그램으로 실시간 알림 받기
-                  </p>
-                  <p className="text-xs text-zinc-400 mb-3">
-                    신호 감지 즉시 텔레그램 메시지로 전달됩니다. 연동하지 않으면 대시보드에서만 확인 가능합니다.
-                  </p>
-                  {/* 2단계 안내 */}
-                  <div className="flex flex-col sm:flex-row gap-2 text-xs">
-                    <a
-                      href="https://t.me/bemialert_bot"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-cyan-300 hover:bg-cyan-400/20 transition-colors"
-                    >
-                      <Bell className="h-3.5 w-3.5 shrink-0" />
-                      <span><span className="font-bold">① </span>@bemialert_bot → /start 전송</span>
-                    </a>
-                    <Link
-                      href="/user/settings"
-                      className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-zinc-300 hover:bg-white/10 transition-colors"
-                    >
-                      <span className="h-3.5 w-3.5 shrink-0 flex items-center justify-center text-[10px] font-bold">②</span>
-                      <span>설정 페이지에서 링크 코드 입력</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <Link
-                href="/user/settings"
-                className="shrink-0 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-sm font-bold px-5 py-2.5 transition-colors"
-              >
-                지금 연동하기 →
-              </Link>
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.05] px-4 py-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Bell className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+              <span className="text-xs text-zinc-400 truncate">
+                텔레그램 미연동 — 신호 감지 시 알림을 받으려면 봇을 연결하세요
+              </span>
             </div>
+            <Link
+              href="/user/settings"
+              className="shrink-0 rounded-lg border border-cyan-400/25 bg-cyan-400/10 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-400/20 transition-colors"
+            >
+              연동하기 →
+            </Link>
           </div>
         )}
 
-        {/* ── 히트맵 (탭 전환) ── */}
-        <div>
-          {/* 탭 버튼 */}
-          <div className="flex gap-1 mb-0">
-            {([
-              { key: 'market', label: '🌐 전체 시황' },
-              { key: 'alert',  label: '📡 알림 종목' },
-            ] as const).map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setHeatmapTab(key)}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-colors ${
-                  heatmapTab === key
-                    ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/25'
-                    : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {/* 전체 시황: 항상 마운트해서 데이터 유지, hidden으로 토글 */}
-          <div className={heatmapTab === 'market' ? '' : 'hidden'}>
-            <MarketHeatmap />
-          </div>
-          <div className={heatmapTab === 'alert' ? '' : 'hidden'}>
-            <CryptoHeatmap events={uniqueBySymbol} />
-          </div>
-        </div>
-
-        {/* ── 2-Column: 신호 + 고래 ── */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[3fr_2fr]">
+        {/* ── 메인 2컬럼: 좌(신호) / 우(시황+고래+선물) ── */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr] lg:items-start">
 
           {/* ── Left: 실시간 신호 ── */}
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
-            {/* 헤더 + 탭 */}
             <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <div className="flex flex-col">
@@ -455,8 +377,6 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
-            {/* 컬럼 헤더 */}
             <div className="grid grid-cols-[80px_1fr_68px_56px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               <span>유형</span>
               <span>심볼</span>
@@ -464,8 +384,7 @@ export default function Home() {
               <span className="text-right">거래량</span>
               <span className="text-right">시각</span>
             </div>
-            {/* 목록 */}
-            <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
+            <div className="divide-y divide-white/[0.04] max-h-[520px] overflow-y-auto">
               {loading ? (
                 <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
               ) : scannerEvents.length === 0 ? (
@@ -476,131 +395,66 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ── Right: Whale Flow ── */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
-            <div className="flex items-center gap-2.5 border-b border-white/5 px-4 py-3">
-              <Waves className="h-4 w-4 text-cyan-300" />
-              <span className="text-sm font-semibold">Whale Flow</span>
-              <span className="text-xs text-zinc-600">상위 30 코인</span>
+          {/* ── Right: 사이드 패널 ── */}
+          <div className="flex flex-col gap-4">
+
+            {/* 전체 시황 히트맵 */}
+            <MarketHeatmap />
+
+            {/* Whale Flow Top 5 */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
+              <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
+                <Waves className="h-3.5 w-3.5 text-cyan-300" />
+                <span className="text-sm font-semibold">Whale Flow</span>
+                <span className="text-xs text-zinc-600">압력 Top 5</span>
+              </div>
+              <div className="divide-y divide-white/[0.04]">
+                {whalesLoading ? (
+                  <div className="py-6 text-center text-sm text-zinc-600">로딩 중...</div>
+                ) : whales.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-zinc-600">고래 활동 없음</div>
+                ) : (
+                  [...whales]
+                    .sort((a, b) => Math.abs(b.score) - Math.abs(a.score))
+                    .slice(0, 5)
+                    .map(w => <WhaleCompactRow key={w.id} w={w} />)
+                )}
+              </div>
             </div>
 
-            {/* 컬럼 헤더 — 데스크탑만 */}
-            <div className="hidden sm:grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <span />
-              <button onClick={() => handleWhaleSort('symbol')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
-                심볼<WhaleSortIcon col="symbol" />
-              </button>
-              <button onClick={() => handleWhaleSort('direction')} className="flex items-center gap-0.5 hover:text-zinc-200 transition-colors text-left">
-                방향<WhaleSortIcon col="direction" />
-              </button>
-              <button onClick={() => handleWhaleSort('tradeSize')} className="flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
-                거래규모<WhaleSortIcon col="tradeSize" />
-              </button>
-              <button onClick={() => handleWhaleSort('score')} className="group relative flex items-center justify-end gap-0.5 hover:text-zinc-200 transition-colors w-full">
-                압력지수<WhaleSortIcon col="score" />
-                <span className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0e1117] p-3 text-left text-[11px] font-normal normal-case tracking-normal text-zinc-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
-                  <span className="block font-semibold text-zinc-100 mb-1.5">고래 압력 지수 (-100 ~ +100)</span>
-                  <span className="block text-zinc-400 leading-relaxed">(매수건 × 2) − (매도건 × 2) + 거래량 스파이크</span>
-                  <span className="mt-2 block space-y-1">
-                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />+40 이상: 강한 매집</span>
-                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />−40 이하: 강한 매도</span>
-                    <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" />그 외: 중립</span>
-                  </span>
-                </span>
-              </button>
-              <span className="text-right">시각</span>
+            {/* 선물 신호 Top 5 */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
+              <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
+                <TrendingUp className="h-3.5 w-3.5 text-violet-400" />
+                <span className="text-sm font-semibold">선물 신호</span>
+                <span className="text-xs text-zinc-600">최신 5건</span>
+              </div>
+              <div className="divide-y divide-white/[0.04]">
+                {futuresLoading ? (
+                  <div className="py-6 text-center text-sm text-zinc-600">로딩 중...</div>
+                ) : futures.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
+                ) : (
+                  futures.slice(0, 5).map(f => <FuturesCompactRow key={f.id} f={f} />)
+                )}
+              </div>
             </div>
-            {/* 컬럼 헤더 — 모바일 */}
-            <div className="block sm:hidden grid grid-cols-[12px_72px_52px_1fr_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-              <span />
-              <span>심볼</span>
-              <span>방향</span>
-              <span className="text-right">압력</span>
-              <span className="text-right">시각</span>
-            </div>
-            <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
-              {whalesLoading ? (
-                <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
-              ) : whales.length === 0 ? (
-                <div className="py-10 text-center text-sm text-zinc-600">고래 활동 없음</div>
-              ) : (
-                sortedWhales.map(w => <WhaleRow key={w.id} w={w} />)
-              )}
-            </div>
+
           </div>
         </div>
 
-        {/* ── 선물 신호 (펀딩비 + OI) ── */}
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
-          <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-            <div className="flex items-center gap-2.5">
-              <TrendingUp className="h-4 w-4 text-violet-400" />
-              <span className="text-sm font-semibold">선물 신호</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {(['ALL', 'FUNDING', 'OI'] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setFuturesFilter(tab)}
-                  className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-                    futuresFilter === tab
-                      ? 'bg-violet-500/20 text-violet-300 border border-violet-500/25'
-                      : 'text-zinc-500 hover:text-zinc-300'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+        {/* ── 감지 이력 링크 배너 ── */}
+        <Link
+          href="/user/alerts"
+          className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 text-sm text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300 transition-colors group"
+        >
+          <div className="flex items-center gap-2.5">
+            <History className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+            <span>알림 이력 전체 보기</span>
+            <span className="hidden sm:inline text-xs text-zinc-700">— 최근 7일 감지 내역</span>
           </div>
-          {/* 컬럼 헤더 — 데스크탑만 */}
-          <div className="hidden sm:grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 border-b border-white/5 bg-black/20 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-400">
-            <span>심볼</span>
-            <span>이벤트</span>
-            <span className="text-right">비율</span>
-            <span>상태</span>
-            <span className="text-right">시간</span>
-          </div>
-          {/* 컬럼 헤더 — 모바일 */}
-          <div className="block sm:hidden grid grid-cols-[72px_60px_1fr_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-            <span>심볼</span>
-            <span>이벤트</span>
-            <span className="text-right">비율</span>
-            <span className="text-right">시각</span>
-          </div>
-          <div className="divide-y divide-white/[0.04] max-h-[280px] overflow-y-auto">
-            {futuresLoading ? (
-              <div className="py-10 text-center text-sm text-zinc-600">로딩 중...</div>
-            ) : filteredFutures.length === 0 ? (
-              <div className="py-10 text-center text-sm text-zinc-600">감지된 선물 신호 없음</div>
-            ) : (
-              filteredFutures.map(f => <FuturesRow key={f.id} f={f} />)
-            )}
-          </div>
-        </div>
-
-        {/* ── Full-width: 감지 내역 ── */}
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
-          <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-            <span className="text-sm font-semibold">📋 감지 내역</span>
-          </div>
-          <div className="px-4 py-3 border-b border-white/5">
-            <FiltersBar
-              filter={filter}   onFilter={setFilter}
-              search={search}   onSearch={setSearch}
-              groupBy={groupBy} onGroupBy={setGroupBy}
-            />
-          </div>
-          {loading ? (
-            <div className="py-16 text-center text-sm text-zinc-600">로딩 중...</div>
-          ) : events.length === 0 ? (
-            <div className="py-16 text-center text-sm text-zinc-600">
-              {search ? `"${search}" 결과 없음` : '감지된 이벤트가 없습니다'}
-            </div>
-          ) : (
-            <HistoryTable events={events} grouped={grouped} groupBy={groupBy} />
-          )}
-        </div>
+          <span className="text-zinc-600 group-hover:text-zinc-400 transition-colors text-base">→</span>
+        </Link>
 
       </main>
     </div>
@@ -723,16 +577,16 @@ function ScannerRow({ ev }: { ev: Event }) {
   );
 }
 
-/* ── Whale Row ──────────────────────────────────────── */
-function WhaleRow({ w }: { w: WhaleEventRow }) {
-  const isBuy    = w.direction === 'BUY';
-  const isMix    = w.direction === 'MIXED';
+/* ── Whale Compact Row ───────────────────────────────── */
+function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
+  const isBuy  = w.direction === 'BUY';
+  const isMix  = w.direction === 'MIXED';
   const absScore = Math.abs(w.score);
   const heat =
-    absScore >= 40 ? (isBuy ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]' : 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.7)]')
-    : 'bg-amber-400';
+    absScore >= 40
+      ? (isBuy ? 'bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.7)]' : 'bg-red-400 shadow-[0_0_5px_rgba(248,113,113,0.7)]')
+      : 'bg-amber-400';
   const scoreColor = w.score > 0 ? 'text-emerald-300' : w.score < 0 ? 'text-red-300' : 'text-zinc-400';
-  const barColor   = w.score > 0 ? 'bg-emerald-400' : w.score < 0 ? 'bg-red-400' : 'bg-amber-400';
   const dirBadge   = isBuy
     ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
     : isMix ? 'border-amber-500/25 bg-amber-500/10 text-amber-300'
@@ -744,63 +598,34 @@ function WhaleRow({ w }: { w: WhaleEventRow }) {
   }
 
   return (
-    <>
-      {/* 모바일 카드 */}
-      <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="grid grid-cols-[12px_72px_52px_1fr_44px] items-center gap-x-2">
-          <span className={`h-2 w-2 rounded-full ${heat}`} />
-          <span className="font-semibold text-sm text-zinc-100 truncate">{w.symbol.replace(QUOTE_RE, '')}</span>
-          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
-            {w.direction}
-          </span>
-          <span className={`text-sm font-bold tabular-nums text-right ${scoreColor}`}>
-            {w.score > 0 ? '+' : ''}{w.score}
-          </span>
-          <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(w.detectedAt)}</span>
-        </div>
-        <div className="mt-0.5 pl-5 text-xs text-zinc-500">
-          거래규모 {fmtUsd(w.tradeSize)}
-        </div>
-      </div>
-
-      {/* 데스크탑 테이블 행 */}
-      <div className="hidden sm:grid grid-cols-[16px_84px_72px_1fr_80px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <span className={`h-2 w-2 rounded-full ${heat}`} />
-        <span className="font-semibold text-sm text-zinc-100 truncate">
-          {w.symbol.replace(QUOTE_RE, '')}
-        </span>
-        <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
-          {w.direction}
-        </span>
-        <span className="text-sm font-semibold text-zinc-200 tabular-nums text-right">
-          {fmtUsd(w.tradeSize)}
-        </span>
-        <div className="flex flex-col items-end gap-1">
-          <span className={`text-sm font-bold tabular-nums leading-none ${scoreColor}`}>
-            {w.score > 0 ? '+' : ''}{w.score}
-          </span>
-          <div className="h-0.5 w-full rounded-full bg-white/5">
-            <div className={`h-0.5 rounded-full ${barColor}`} style={{ width: `${absScore}%` }} />
-          </div>
-        </div>
-        <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
-      </div>
-    </>
+    <div className="grid grid-cols-[10px_1fr_48px_44px_36px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+      <span className={`h-2 w-2 rounded-full ${heat}`} />
+      <span className="font-semibold text-sm text-zinc-100 truncate">
+        {w.symbol.replace(QUOTE_RE, '')}
+      </span>
+      <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${dirBadge}`}>
+        {w.direction}
+      </span>
+      <span className={`text-xs font-bold tabular-nums text-right ${scoreColor}`}>
+        {w.score > 0 ? '+' : ''}{w.score}
+      </span>
+      <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
+    </div>
   );
 }
 
-/* ── Futures Alert Row ───────────────────────────────── */
+/* ── Futures Compact Row ─────────────────────────────── */
 interface FuturesAlertRow {
   id:         string;
   symbol:     string;
-  alertType:  string;   // "FUNDING" | "OI_SURGE" | "OI_DROP"
+  alertType:  string;
   value:      number;
   markPrice?: number | null;
   note?:      string | null;
   detectedAt: string;
 }
 
-function FuturesRow({ f }: { f: FuturesAlertRow }) {
+function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
   const isFunding = f.alertType === 'FUNDING';
   const isOiSurge = f.alertType === 'OI_SURGE';
 
@@ -810,58 +635,25 @@ function FuturesRow({ f }: { f: FuturesAlertRow }) {
     ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
     : 'border-red-500/25 bg-red-500/10 text-red-300';
 
-  const eventLabel = isFunding ? 'FUNDING' : 'OI';
-
-  const valueStr = isFunding
+  const eventLabel = isFunding ? 'FUND' : 'OI';
+  const valueStr   = isFunding
     ? `${f.value > 0 ? '+' : ''}${f.value.toFixed(4)}%`
     : `${f.value > 0 ? '+' : ''}${f.value.toFixed(2)}%`;
   const valueColor = f.value > 0 ? 'text-emerald-300' : 'text-red-300';
 
-  const statusLabel = isFunding
-    ? (f.value > 0 ? 'Long Hot' : 'Short Hot')
-    : (isOiSurge ? 'OI Rising' : 'OI Falling');
-  const statusStyle = (isFunding ? f.value > 0 : isOiSurge)
-    ? 'bg-emerald-500/10 text-emerald-300'
-    : 'bg-red-500/10 text-red-300';
-
   return (
-    <>
-      {/* 모바일 카드 */}
-      <div className="block sm:hidden px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <div className="grid grid-cols-[72px_60px_1fr_44px] items-center gap-x-2">
-          <span className="font-bold text-sm text-zinc-100 truncate">
-            {f.symbol.replace(QUOTE_RE, '')}
-          </span>
-          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
-            {eventLabel}
-          </span>
-          <span className={`text-sm font-bold tabular-nums text-right ${valueColor}`}>{valueStr}</span>
-          <span className="text-xs text-zinc-600 tabular-nums">{timeAgo(f.detectedAt)}</span>
-        </div>
-        <div className="mt-0.5">
-          <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
-            {statusLabel}
-          </span>
-        </div>
-      </div>
-
-      {/* 데스크탑 테이블 행 */}
-      <div className="hidden sm:grid grid-cols-[88px_84px_90px_100px_52px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
-        <span className="font-bold text-sm text-zinc-100 truncate">
-          {f.symbol.replace(QUOTE_RE, '')}
-        </span>
-        <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
-          {eventLabel}
-        </span>
-        <span className={`text-sm font-bold tabular-nums text-right ${valueColor}`}>
-          {valueStr}
-        </span>
-        <span className={`w-fit rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusStyle}`}>
-          {statusLabel}
-        </span>
-        <span className="text-xs text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
-      </div>
-    </>
+    <div className="grid grid-cols-[1fr_40px_72px_36px] items-center gap-x-3 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+      <span className="font-bold text-sm text-zinc-100 truncate">
+        {f.symbol.replace(QUOTE_RE, '')}
+      </span>
+      <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
+        {eventLabel}
+      </span>
+      <span className={`text-xs font-bold tabular-nums text-right ${valueColor}`}>
+        {valueStr}
+      </span>
+      <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(f.detectedAt)}</span>
+    </div>
   );
 }
 
