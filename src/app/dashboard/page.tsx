@@ -456,10 +456,11 @@ export default function Home() {
                 <span className="text-xs text-zinc-600">펀딩비 · 미결제약정 · 청산</span>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[100px_80px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span>코인</span>
                 <span>신호 유형</span>
-                <span className="text-right">비율(%)</span>
+                <span className="text-right">가격 반응</span>
+                <span className="text-right">지표값</span>
                 <span>시장 해석</span>
                 <span className="text-right">감지 시각</span>
               </div>
@@ -734,13 +735,22 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
     ? 'bg-emerald-500/10 text-emerald-300'
     : 'bg-red-500/10 text-red-300';
 
+  function fmtPrice(p: number) {
+    if (p >= 1000) return `$${p.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    if (p >= 1)    return `$${p.toFixed(2)}`;
+    return `$${p.toFixed(4)}`;
+  }
+
   return (
-    <div className="grid grid-cols-[100px_80px_1fr_72px_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[80px_80px_80px_1fr_72px_44px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className="font-bold text-sm text-zinc-100 truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
       <span className={`w-fit rounded-md px-1.5 py-0.5 text-[10px] font-bold border ${eventStyle}`}>
         {eventLabel}
+      </span>
+      <span className="text-xs tabular-nums text-right text-zinc-400">
+        {f.markPrice != null ? fmtPrice(f.markPrice) : '—'}
       </span>
       <span className={`text-xs font-bold tabular-nums text-right ${valueColor}`}>
         {valueStr}
