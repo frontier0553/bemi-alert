@@ -453,15 +453,15 @@ export default function Home() {
               <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
                 <TrendingUp className="h-3.5 w-3.5 text-violet-400" />
                 <span className="text-sm font-semibold">선물 신호</span>
-                <span className="text-xs text-zinc-600">펀딩비 이상 · OI 급변</span>
+                <span className="text-xs text-zinc-600">펀딩비 · 미결제약정 · 청산</span>
               </div>
               {/* 컬럼 헤더 */}
               <div className="grid grid-cols-[100px_56px_1fr_72px_44px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                <span>심볼</span>
-                <span>이벤트</span>
-                <span className="text-right">비율</span>
-                <span>상태</span>
-                <span className="text-right">시각</span>
+                <span>코인</span>
+                <span>신호 유형</span>
+                <span className="text-right">지표값</span>
+                <span>시장 해석</span>
+                <span className="text-right">감지 시각</span>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[240px] overflow-y-auto">
                 {futuresLoading ? (
@@ -720,15 +720,16 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
     ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-300'
     : 'border-red-500/25 bg-red-500/10 text-red-300';
 
-  const eventLabel = isFunding ? 'FUND' : 'OI';
+  const isLiq = f.alertType === 'LIQUIDATION';
+  const eventLabel = isFunding ? '펀딩비' : isLiq ? '청산 급증' : '미결제약정';
   const valueStr   = isFunding
     ? `${f.value > 0 ? '+' : ''}${f.value.toFixed(4)}%`
     : `${f.value > 0 ? '+' : ''}${f.value.toFixed(2)}%`;
   const valueColor = f.value > 0 ? 'text-emerald-300' : 'text-red-300';
 
   const statusLabel = isFunding
-    ? (f.value > 0 ? 'Long Hot' : 'Short Hot')
-    : (isOiSurge ? 'OI Rising' : 'OI Falling');
+    ? (f.value > 0 ? '롱 과열' : '숏 과열')
+    : (isOiSurge ? '약정 급증' : '약정 감소');
   const statusStyle = (isFunding ? f.value > 0 : isOiSurge)
     ? 'bg-emerald-500/10 text-emerald-300'
     : 'bg-red-500/10 text-red-300';
