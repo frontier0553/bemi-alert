@@ -424,11 +424,11 @@ export default function Home() {
                 </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[8px_80px_36px_36px_52px_60px_116px_48px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                <span title="점 색상 = 강도 (초록: 매수 우세 / 노랑: 중립 / 빨강: 매도 우세)" className="cursor-help">•</span>
+              <div className="grid grid-cols-[auto_1fr_40px_40px_56px_72px_130px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                <span title="점 색상 = 강도 (초록: 매수 우세 / 노랑: 중립 / 빨강: 매도 우세)" className="cursor-help">강도</span>
                 <span>코인</span>
-                <span className="text-emerald-600/80 text-center">매수</span>
-                <span className="text-red-600/80 text-center">매도</span>
+                <span className="text-center">매수</span>
+                <span className="text-center">매도</span>
                 <span>흐름</span>
                 <span className="text-right">거래 규모</span>
                 <span className="text-right">매수/매도 강도</span>
@@ -658,7 +658,7 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   const barPct = Math.min(100, Math.abs(w.score)); // %
 
   return (
-    <div className="grid grid-cols-[8px_80px_36px_36px_52px_60px_116px_48px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[auto_1fr_40px_40px_56px_72px_130px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       {/* 강도 점 */}
       <span className={`h-2 w-2 rounded-full shrink-0 ${heat}`} />
       {/* 코인 */}
