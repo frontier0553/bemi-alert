@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- 배경 -->
-  <rect width="32" height="32" rx="8" fill="#06080d"/>
-  <!-- 번개 -->
-  <path d="M18 3L7 18h8l-1 11 14-16h-9l2-10z" fill="#22d3ee" opacity="0.15"/>
-  <path d="M18 3L7 18h8l-1 11 14-16h-9l2-10z" fill="none" stroke="#22d3ee" stroke-width="1.2" stroke-linejoin="round"/>
-  <!-- 번개 내부 채우기 (밝은 버전) -->
-  <path d="M17.5 4.5L8 17.5h7.5l-1 9.5 12.5-14.5h-8.5l2-8z" fill="#22d3ee" opacity="0.85"/>
-</svg>
