@@ -9,6 +9,7 @@ import { MarketSummaryCards } from '../components/MarketSummaryCards';
 import { FiltersBar }         from '../components/FiltersBar';
 import { HistoryTable }       from '../components/HistoryTable';
 import { CryptoHeatmap }      from '../components/CryptoHeatmap';
+import { MarketHeatmap }      from '../components/MarketHeatmap';
 import type { WhaleEventRow } from '../components/WhalePanel';
 import { groupBySymbol, baseCoin, fmt, timeAgo } from '../components/utils';
 import type { FilterType, Event, Stats } from '../components/types';
@@ -42,6 +43,7 @@ export default function Home() {
   const [whaleSortKey, setWhaleSortKey]   = useState<'symbol'|'direction'|'tradeSize'|'score'>('score');
   const [whaleSortDir, setWhaleSortDir]   = useState<'asc'|'desc'>('desc');
   const [futuresFilter, setFuturesFilter] = useState<'ALL'|'FUNDING'|'OI'>('ALL');
+  const [heatmapTab, setHeatmapTab]       = useState<'market'|'alert'>('market');
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -352,8 +354,35 @@ export default function Home() {
           : <div className="h-24 rounded-2xl border border-white/5 bg-white/5 animate-pulse" />
         }
 
-        {/* ── 히트맵 ── */}
-        <CryptoHeatmap events={uniqueBySymbol} />
+        {/* ── 히트맵 (탭 전환) ── */}
+        <div>
+          {/* 탭 버튼 */}
+          <div className="flex gap-1 mb-0">
+            {([
+              { key: 'market', label: '🌐 전체 시황' },
+              { key: 'alert',  label: '📡 알림 종목' },
+            ] as const).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setHeatmapTab(key)}
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-colors ${
+                  heatmapTab === key
+                    ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/25'
+                    : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* 전체 시황: 항상 마운트해서 데이터 유지, hidden으로 토글 */}
+          <div className={heatmapTab === 'market' ? '' : 'hidden'}>
+            <MarketHeatmap />
+          </div>
+          <div className={heatmapTab === 'alert' ? '' : 'hidden'}>
+            <CryptoHeatmap events={uniqueBySymbol} />
+          </div>
+        </div>
 
         {/* ── 2-Column: 신호 + 고래 ── */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[3fr_2fr]">
