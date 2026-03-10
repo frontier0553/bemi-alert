@@ -13,8 +13,9 @@ import { checkCooldown, updateCooldown } from './cooldown';
 import { sendTelegramAlertToSubscribers } from './telegram';
 import { prisma } from '../lib/prisma';
 
-const SCAN_TOP_N_DEFAULT = 100;
-const BATCH_SIZE         = 20;
+const SCAN_TOP_N_DEFAULT  = 50;   // 상위 50개만 (유동성 높은 코인 집중)
+const BATCH_SIZE          = 20;
+const MAX_PUMP_MOVE_PCT   = 8.0;  // PUMP: 이미 8% 이상 이동 시 추격 위험 → 스킵
 
 // ── Settings ─────────────────────────────────────────────────
 
@@ -46,7 +47,8 @@ async function processSymbol(
 
   // ── PUMP 감지 ──────────────────────────────────────────
   const pumpResult = evaluatePump(metrics, DEFAULT_THRESHOLDS);
-  if (pumpResult && applyFakePumpFilters(metrics, ticker, klines)) {
+  // 이미 8% 이상 이동했으면 고점 추격 위험 → 스킵
+  if (pumpResult && pumpResult.maxMove < MAX_PUMP_MOVE_PCT && applyFakePumpFilters(metrics, ticker, klines)) {
     const allowed = await checkCooldown(symbol, pumpResult.maxMove, 'PUMP');
     if (allowed) {
       await prisma.signal.create({
