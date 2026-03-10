@@ -232,6 +232,7 @@ export default async function LandingPage() {
           </div>
           <div className="flex items-center gap-4 text-xs text-zinc-600">
             <Link href="/feed"    className="hover:text-zinc-400 transition-colors">실시간 피드</Link>
+            <Link href="/blog"    className="hover:text-zinc-400 transition-colors">블로그</Link>
             <Link href="/privacy" className="hover:text-zinc-400 transition-colors">개인정보처리방침</Link>
             <Link href="/terms"   className="hover:text-zinc-400 transition-colors">이용약관</Link>
           </div>

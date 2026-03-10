@@ -21,10 +21,19 @@ const securityHeaders = [
   },
 ];
 
+const BLOG_URL = 'https://frontier0553-nxiyd.wordpress.com';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
+  },
+  async redirects() {
+    return [
+      // bemialert.com/blog → WordPress 블로그
+      { source: '/blog', destination: BLOG_URL, permanent: false },
+      { source: '/blog/:path*', destination: `${BLOG_URL}/:path*`, permanent: false },
+    ];
   },
 };
 
