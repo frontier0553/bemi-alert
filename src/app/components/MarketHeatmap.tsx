@@ -157,11 +157,18 @@ export function MarketHeatmap() {
         ) : (
           <div
             className="grid gap-1"
-            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(52px, 12vw, 70px), 1fr))' }}
+            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(52px, 12vw, 70px), 1fr))' }}
           >
             {coins.map((coin, rank) => {
               const { bg, color }                          = tileColor(coin.changePct);
               const { colSpan, height, nameSize, pctSize } = calcTileSize(coin.marketCap, logMax, logMin, rank);
+
+              // 긴 심볼명 폰트 크기 축소 (6자 이상)
+              const effectiveNameSize = coin.symbol.length > 7
+                ? Math.max(8, nameSize - 3)
+                : coin.symbol.length > 5
+                ? Math.max(9, nameSize - 1)
+                : nameSize;
 
               const tooltip = [
                 coin.symbol,
@@ -180,11 +187,11 @@ export function MarketHeatmap() {
                     gridColumn: `span ${colSpan}`,
                     minHeight:  `${height}px`,
                   }}
-                  className="rounded-lg flex flex-col items-center justify-center gap-0.5 cursor-pointer select-none transition-all hover:scale-[1.04] hover:brightness-125 active:scale-[0.97]"
+                  className="rounded-lg flex flex-col items-center justify-center gap-0.5 cursor-pointer select-none transition-all hover:scale-[1.04] hover:brightness-125 active:scale-[0.97] overflow-hidden"
                 >
                   <span
-                    className="font-bold leading-tight truncate px-1 text-center"
-                    style={{ fontSize: nameSize }}
+                    className="font-bold leading-tight w-full text-center px-0.5"
+                    style={{ fontSize: effectiveNameSize, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                   >
                     {coin.symbol}
                   </span>
