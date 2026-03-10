@@ -72,9 +72,21 @@ export function computeMetrics(klines: Kline[]): PumpMetrics | null {
 }
 
 /**
+ * 거래량 배율에 따라 가격 임계값을 낮춤 (거래량 선행 감지).
+ * volRatio 6x+ → 임계값 55% (3%→1.65%), 4x+ → 75% (3%→2.25%), 이하 → 100% 유지.
+ * 거래량이 먼저 급증할 때 가격이 덜 오른 시점에 조기 감지.
+ */
+function volLeadFactor(volRatio: number): number {
+  if (volRatio >= 6) return 0.55;
+  if (volRatio >= 4) return 0.75;
+  return 1.0;
+}
+
+/**
  * Evaluate whether metrics cross the pump threshold.
  * Rules:
  *   (r3 >= r3Min OR r5 >= r5Min) AND volRatio >= volRatioMin
+ *   Price thresholds are dynamically lowered when volRatio is high (volume-led detection).
  */
 export function evaluatePump(
   metrics: PumpMetrics,
@@ -82,7 +94,11 @@ export function evaluatePump(
 ): PumpResult | null {
   const { r3, r5, volRatio } = metrics;
 
-  const priceTrigger = r3 >= thresholds.r3Min || r5 >= thresholds.r5Min;
+  const factor = volLeadFactor(volRatio);
+  const dynamicR3Min = thresholds.r3Min * factor;
+  const dynamicR5Min = thresholds.r5Min * factor;
+
+  const priceTrigger = r3 >= dynamicR3Min || r5 >= dynamicR5Min;
   if (!priceTrigger || volRatio < thresholds.volRatioMin) return null;
 
   // Prefer the 3m window if it triggers; use 5m otherwise
@@ -97,6 +113,7 @@ export function evaluatePump(
  * Evaluate whether metrics cross the dump threshold.
  * Rules:
  *   (r3 <= -r3Min OR r5 <= -r5Min) AND volRatio >= volRatioMin
+ *   Price thresholds are dynamically lowered when volRatio is high (volume-led detection).
  */
 export function evaluateDump(
   metrics: PumpMetrics,
@@ -104,7 +121,11 @@ export function evaluateDump(
 ): PumpResult | null {
   const { r3, r5, volRatio } = metrics;
 
-  const priceTrigger = r3 <= -thresholds.r3Min || r5 <= -thresholds.r5Min;
+  const factor = volLeadFactor(volRatio);
+  const dynamicR3Min = thresholds.r3Min * factor;
+  const dynamicR5Min = thresholds.r5Min * factor;
+
+  const priceTrigger = r3 <= -dynamicR3Min || r5 <= -dynamicR5Min;
   if (!priceTrigger || volRatio < thresholds.volRatioMin) return null;
 
   const changeWindow: '3m' | '5m' = r3 <= -thresholds.r3Min ? '3m' : '5m';
