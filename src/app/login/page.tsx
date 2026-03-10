@@ -43,31 +43,38 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      const endpoint =
+        mode === 'reset'  ? '/api/auth/reset'  :
+        mode === 'signup' ? '/api/auth/signup' :
+                            '/api/auth/signin';
+
+      const body =
+        mode === 'reset'
+          ? { email }
+          : { email, password };
+
+      const res  = await fetch(endpoint, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error ?? '오류가 발생했습니다.');
+
       if (mode === 'reset') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        });
-        if (error) throw error;
         setSuccess('비밀번호 재설정 이메일을 발송했습니다. 받은편지함을 확인해주세요.');
       } else if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-        });
-        if (error) throw error;
         setSuccess('가입 확인 이메일을 발송했습니다. 받은편지함에서 링크를 클릭해 가입을 완료하세요.');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
         window.location.href = '/dashboard';
       }
     } catch (err: any) {
       const msg: string = err?.message ?? '';
-      if (msg.includes('Invalid login credentials'))  setError('이메일 또는 비밀번호가 올바르지 않습니다.');
-      else if (msg.includes('Email not confirmed'))   setError('이메일 인증이 필요합니다. 받은편지함을 확인해주세요.');
+      if (msg.includes('Invalid login credentials'))    setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      else if (msg.includes('Email not confirmed'))     setError('이메일 인증이 필요합니다. 받은편지함을 확인해주세요.');
       else if (msg.includes('User already registered')) setError('이미 가입된 이메일입니다. 로그인해주세요.');
-      else if (msg.includes('Password should be'))    setError('비밀번호는 6자 이상이어야 합니다.');
+      else if (msg.includes('Password should be'))      setError('비밀번호는 6자 이상이어야 합니다.');
       else setError(msg || '오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);
