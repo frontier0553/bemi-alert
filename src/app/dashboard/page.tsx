@@ -422,11 +422,30 @@ export default function Home() {
               </div>
               {/* 컬럼 헤더 */}
               <div className="grid grid-cols-[auto_1fr_56px_62px_40px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                <span title="점 색상 = 강도 (초록: 매수 우세 / 노랑: 중립 / 빨강: 매도 우세)" className="cursor-help text-center">강도</span>
+                {/* 점 색상 툴팁 */}
+                <div className="relative group flex justify-center cursor-help">
+                  <span className="text-center">강도</span>
+                  <div className="pointer-events-none absolute bottom-full left-0 mb-2 z-30 hidden group-hover:block w-44 rounded-xl bg-zinc-900 border border-white/10 p-3 text-[11px] shadow-2xl">
+                    <p className="mb-2 font-semibold text-zinc-200">점 색상 = 압력 강도</p>
+                    <p className="flex items-center gap-1.5 text-emerald-400"><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />매수 우세</p>
+                    <p className="flex items-center gap-1.5 mt-1 text-amber-400"><span className="h-2 w-2 rounded-full bg-amber-400" />중립</p>
+                    <p className="flex items-center gap-1.5 mt-1 text-red-400"><span className="h-2 w-2 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />매도 우세</p>
+                  </div>
+                </div>
                 <span>코인</span>
                 <span className="text-center">흐름</span>
                 <span className="text-right">거래 규모</span>
-                <span className="text-right">강도</span>
+                {/* 압력 점수 툴팁 */}
+                <div className="relative group flex justify-end cursor-help">
+                  <span className="text-right">강도</span>
+                  <div className="pointer-events-none absolute bottom-full right-0 mb-2 z-30 hidden group-hover:block w-52 rounded-xl bg-zinc-900 border border-white/10 p-3 text-[11px] shadow-2xl">
+                    <p className="mb-2 font-semibold text-zinc-200">매수/매도 압력 점수</p>
+                    <p className="text-zinc-400 mb-2">-100 (강매도) ~ +100 (강매수)</p>
+                    <p className="text-emerald-400">+40 이상 — 강한 매수 압력</p>
+                    <p className="mt-1 text-zinc-500">-39 ~ +39 — 중립</p>
+                    <p className="mt-1 text-red-400">-40 이하 — 강한 매도 압력</p>
+                  </div>
+                </div>
                 <span className="hidden sm:block text-right">감지 시각</span>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[300px] overflow-y-auto">
