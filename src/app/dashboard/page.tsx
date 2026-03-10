@@ -419,7 +419,7 @@ export default function Home() {
                   </div>
                 </div>
                 <span>코인</span>
-                <span className="w-full text-center block">흐름</span>
+                <div className="flex justify-center">흐름</div>
                 <span className="text-right">거래 규모</span>
                 {/* 압력 점수 툴팁 */}
                 <div className="relative group flex justify-center cursor-help">
