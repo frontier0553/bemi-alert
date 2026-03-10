@@ -401,27 +401,13 @@ export default function Home() {
 
             {/* Whale Flow */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.04]">
-              <div className="flex flex-wrap items-center justify-between gap-y-2 border-b border-white/5 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Waves className="h-3.5 w-3.5 text-cyan-300" />
-                  <span className="text-sm font-semibold">Whale Flow</span>
-                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-medium text-zinc-500">TOP 30</span>
-                </div>
-                {/* 강도 범례 */}
-                <div className="flex items-center gap-1.5 text-[10px] font-medium">
-                  <span className="flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />매수
-                  </span>
-                  <span className="flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />중립
-                  </span>
-                  <span className="flex items-center gap-1 rounded-md bg-red-500/10 px-2 py-0.5 text-red-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />매도
-                  </span>
-                </div>
+              <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3">
+                <Waves className="h-3.5 w-3.5 text-cyan-300" />
+                <span className="text-sm font-semibold">Whale Flow</span>
+                <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-medium text-zinc-500">TOP 30</span>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[auto_1fr_40px_60px_40px_44px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[20px_1fr_40px_60px_40px_44px] sm:grid-cols-[20px_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 {/* 점 색상 툴팁 */}
                 <div className="relative group flex justify-center cursor-help">
                   <span className="text-center">강도</span>
@@ -433,7 +419,7 @@ export default function Home() {
                   </div>
                 </div>
                 <span>코인</span>
-                <span className="text-center">흐름</span>
+                <span className="w-full text-center block">흐름</span>
                 <span className="text-right">거래 규모</span>
                 {/* 압력 점수 툴팁 */}
                 <div className="relative group flex justify-center cursor-help">
@@ -673,7 +659,7 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   const barPct = Math.min(100, Math.abs(w.score)); // %
 
   return (
-    <div className="grid grid-cols-[auto_1fr_40px_60px_40px_44px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[20px_1fr_40px_60px_40px_44px] sm:grid-cols-[20px_1fr_60px_72px_164px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       {/* 강도 점 — 중앙 */}
       <div className="flex justify-center">
         <span className={`h-2 w-2 rounded-full shrink-0 ${heat}`} />
