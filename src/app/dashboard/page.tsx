@@ -401,36 +401,33 @@ export default function Home() {
 
             {/* Whale Flow */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden">
-              <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-y-2 border-b border-white/5 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Waves className="h-3.5 w-3.5 text-cyan-300" />
                   <span className="text-sm font-semibold">Whale Flow</span>
-                  <span className="text-xs text-zinc-600">상위 30 코인</span>
+                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-medium text-zinc-500">TOP 30</span>
                 </div>
-                {/* 점 범례 */}
-                <div className="flex items-center gap-3 text-[10px] text-zinc-600">
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.7)]" />
-                    매수 우세
+                {/* 강도 범례 */}
+                <div className="flex items-center gap-1.5 text-[10px] font-medium">
+                  <span className="flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]" />매수
                   </span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-amber-400" />
-                    중립
+                  <span className="flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />중립
                   </span>
-                  <span className="flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-red-400 shadow-[0_0_5px_rgba(248,113,113,0.7)]" />
-                    매도 우세
+                  <span className="flex items-center gap-1 rounded-md bg-red-500/10 px-2 py-0.5 text-red-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_4px_rgba(248,113,113,0.8)]" />매도
                   </span>
                 </div>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[auto_1fr_56px_62px_40px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <span title="점 색상 = 강도 (초록: 매수 우세 / 노랑: 중립 / 빨강: 매도 우세)" className="cursor-help text-center">강도</span>
                 <span>코인</span>
                 <span className="text-center">흐름</span>
                 <span className="text-right">거래 규모</span>
-                <span className="text-right">매수/매도 강도</span>
-                <span className="text-right">감지 시각</span>
+                <span className="text-right">강도</span>
+                <span className="hidden sm:block text-right">감지 시각</span>
               </div>
               <div className="divide-y divide-white/[0.04] max-h-[300px] overflow-y-auto">
                 {whalesLoading ? (
@@ -656,7 +653,7 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
   const barPct = Math.min(100, Math.abs(w.score)); // %
 
   return (
-    <div className="grid grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[auto_1fr_56px_62px_40px] sm:grid-cols-[auto_1fr_60px_72px_164px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       {/* 강도 점 — 중앙 */}
       <div className="flex justify-center">
         <span className={`h-2 w-2 rounded-full shrink-0 ${heat}`} />
@@ -675,9 +672,9 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
       <span className="text-xs font-semibold tabular-nums text-right text-zinc-300">
         {fmtUsd(w.tradeSize)}
       </span>
-      {/* 매수/매도 강도: 바(두 배) + 숫자 — 우측 */}
+      {/* 강도: 모바일=숫자만 / 데스크탑=바+숫자 */}
       <div className="flex items-center justify-end gap-2">
-        <div className="relative h-1.5 w-28 rounded-full bg-white/5 overflow-hidden shrink-0">
+        <div className="hidden sm:block relative h-1.5 w-28 rounded-full bg-white/5 overflow-hidden shrink-0">
           {w.score >= 0 ? (
             <div className="absolute left-1/2 h-1.5 rounded-full bg-emerald-400 transition-all"
               style={{ width: `${barPct / 2}%` }} />
@@ -690,8 +687,8 @@ function WhaleCompactRow({ w }: { w: WhaleEventRow }) {
           {w.score > 0 ? '+' : ''}{w.score}
         </span>
       </div>
-      {/* 감지 시각 — 우측 */}
-      <span className="text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
+      {/* 감지 시각 — 데스크탑만 */}
+      <span className="hidden sm:block text-[10px] text-zinc-600 tabular-nums text-right">{timeAgo(w.detectedAt)}</span>
     </div>
   );
 }
