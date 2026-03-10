@@ -198,23 +198,6 @@ export default function Home() {
     <div className="min-h-screen bg-[#06080d] text-zinc-100">
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.05),transparent_25%)]" />
 
-      {/* ── 텔레그램 미연동 배너 ── */}
-      {telegramLinked === false && (
-        <div className="relative z-40 border-b border-cyan-400/15 bg-cyan-400/5 px-5 py-2.5">
-          <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs text-zinc-300">
-              <Bell className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
-              <span>텔레그램 연동 시 신호 감지 즉시 알림을 받을 수 있습니다.</span>
-            </div>
-            <Link
-              href="/user/settings"
-              className="shrink-0 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-semibold px-3 py-1.5 transition-colors"
-            >
-              지금 연동하기
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* ── Header ── */}
       <header className="relative z-50 border-b border-white/5 bg-black/40 backdrop-blur-xl">
@@ -248,15 +231,15 @@ export default function Home() {
               <RefreshCw className="h-3.5 w-3.5" />
             </button>
 
-            {/* 텔레그램 — 아이콘만 */}
+            {/* 텔레그램 알림 버튼 */}
             <a
               href="https://t.me/bemialert_bot"
               target="_blank"
               rel="noopener noreferrer"
-              title="텔레그램 알림 봇"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-400/25 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/15 transition-colors"
+              className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-400/20 transition-colors"
             >
               <Bell className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">텔레그램 알림</span>
             </a>
 
             {/* 로그인 상태 */}
@@ -353,6 +336,53 @@ export default function Home() {
           ? <MarketSummaryCards stats={stats} liveCount={liveEvents.length} />
           : <div className="h-24 rounded-2xl border border-white/5 bg-white/5 animate-pulse" />
         }
+
+        {/* ── 텔레그램 미연동 온보딩 카드 ── */}
+        {telegramLinked === false && (
+          <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] p-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                {/* 아이콘 */}
+                <div className="shrink-0 flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 text-2xl">
+                  📱
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-100 mb-1">
+                    텔레그램으로 실시간 알림 받기
+                  </p>
+                  <p className="text-xs text-zinc-400 mb-3">
+                    신호 감지 즉시 텔레그램 메시지로 전달됩니다. 연동하지 않으면 대시보드에서만 확인 가능합니다.
+                  </p>
+                  {/* 2단계 안내 */}
+                  <div className="flex flex-col sm:flex-row gap-2 text-xs">
+                    <a
+                      href="https://t.me/bemialert_bot"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-cyan-300 hover:bg-cyan-400/20 transition-colors"
+                    >
+                      <Bell className="h-3.5 w-3.5 shrink-0" />
+                      <span><span className="font-bold">① </span>@bemialert_bot → /start 전송</span>
+                    </a>
+                    <Link
+                      href="/user/settings"
+                      className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-zinc-300 hover:bg-white/10 transition-colors"
+                    >
+                      <span className="h-3.5 w-3.5 shrink-0 flex items-center justify-center text-[10px] font-bold">②</span>
+                      <span>설정 페이지에서 링크 코드 입력</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+              <Link
+                href="/user/settings"
+                className="shrink-0 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-sm font-bold px-5 py-2.5 transition-colors"
+              >
+                지금 연동하기 →
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* ── 히트맵 (탭 전환) ── */}
         <div>
