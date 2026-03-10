@@ -456,7 +456,7 @@ export default function Home() {
                 <span className="text-xs text-zinc-600">펀딩비 · 미결제약정 · 청산</span>
               </div>
               {/* 컬럼 헤더 */}
-              <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_90px_80px_90px_80px_56px] items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-6 items-center gap-x-2 border-b border-white/5 bg-black/20 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 <div className="flex justify-center">코인</div>
                 <div className="flex justify-center">신호 유형</div>
                 <div className="hidden sm:flex justify-center">가격 반응</div>
@@ -742,7 +742,7 @@ function FuturesCompactRow({ f }: { f: FuturesAlertRow }) {
   }
 
   return (
-    <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-[80px_90px_80px_90px_80px_56px] items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="grid grid-cols-[52px_76px_1fr_64px_36px] sm:grid-cols-6 items-center gap-x-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors">
       <span className="font-bold text-sm text-zinc-100 text-center truncate">
         {f.symbol.replace(QUOTE_RE, '')}
       </span>
