@@ -30,6 +30,14 @@ export default async function LandingPage() {
             <span className="text-base font-bold tracking-tight">Bemi Alert</span>
           </div>
           <div className="flex items-center gap-2">
+            <a
+              href="https://blog.bemialert.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              블로그
+            </a>
             <Link
               href="/login"
               className="px-4 py-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
